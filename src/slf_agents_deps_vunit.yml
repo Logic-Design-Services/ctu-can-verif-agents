@@ -1,0 +1,17 @@
+library: ctu_can_agents
+
+source_list:
+    ###############################################################################################
+    # Contexts
+    ###############################################################################################
+    - file: contexts/ieee_context.vhd
+    - file: contexts/agents_deps_context.vhd
+
+    ###############################################################################################
+    # Packages
+    ###############################################################################################
+    - file: pkg/tb_prot_types_pkg.vhd
+    - file: pkg/tb_report_pkg_vunit.vhd      # CAREFUL tb_report_pkg_vunit is different!
+    - file: pkg/tb_communication_pkg.vhd
+    - file: pkg/tb_random_pkg.vhd
+    - file: pkg/tb_pli_conversion_pkg.vhd
