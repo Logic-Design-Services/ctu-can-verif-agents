@@ -68,11 +68,7 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Memory bus agent. Configurable over Vunit Communication library.
---
---    More on Vunit and its communication library can be found at:
----     https://vunit.github.io/documentation.html
---      https://vunit.github.io/com/user_guide.html
+--    Memory bus agent.
 --
 --    Memory bus agent executes accesses on simple RAM-like interface. It
 --    contains FIFO which buffers the accesses. Following types of accesses are

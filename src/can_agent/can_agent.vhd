@@ -68,11 +68,7 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    CAN Bus agent. Configurable over Vunit Communication library.
---
---    More on Vunit and its communication library can be found at:
----     https://vunit.github.io/documentation.html
---      https://vunit.github.io/com/user_guide.html
+--    CAN Bus agent.
 --
 --    CAN Bus agent is connected to can_tx and can_rx signals of DUT. It drives
 --    can_rx via driver and it monitors_can_tx via monitor.

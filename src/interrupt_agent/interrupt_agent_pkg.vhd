@@ -68,7 +68,7 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Package with API for Reset generator agent.
+--    Package with API for Interrupt agent.
 --
 --------------------------------------------------------------------------------
 -- Revision History:
