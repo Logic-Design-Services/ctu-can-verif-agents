@@ -100,12 +100,12 @@ package reset_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure reset_agent_info_m(
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
     procedure reset_agent_debug_m(
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
@@ -122,7 +122,7 @@ package reset_agent_pkg is
     ---------------------------------------------------------------------------
     procedure rst_agent_assert(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -132,7 +132,7 @@ package reset_agent_pkg is
     ---------------------------------------------------------------------------
     procedure rst_agent_deassert(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -143,8 +143,8 @@ package reset_agent_pkg is
     ---------------------------------------------------------------------------
     procedure rst_agent_polarity_set(
         signal      channel     : inout t_com_channel;
-        constant    polarity    : in    std_logic;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    polarity    : in    std_logic
     );
 
     ---------------------------------------------------------------------------
@@ -155,8 +155,8 @@ package reset_agent_pkg is
     ---------------------------------------------------------------------------
     procedure rst_agent_polarity_get(
         signal      channel     : inout t_com_channel;
-        variable    polarity    : out   std_logic;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    polarity    : out   std_logic
     );
 
 
@@ -184,7 +184,7 @@ package body reset_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure reset_agent_info_m(
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is
     begin
@@ -192,7 +192,7 @@ package body reset_agent_pkg is
     end procedure;
 
     procedure reset_agent_debug_m(
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     )  is
     begin
@@ -207,7 +207,7 @@ package body reset_agent_pkg is
 
     procedure rst_agent_assert(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         reset_agent_info_m(id, "Asserting reset");
@@ -218,7 +218,7 @@ package body reset_agent_pkg is
 
     procedure rst_agent_deassert(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         reset_agent_info_m(id, "De-Asserting reset");
@@ -229,8 +229,8 @@ package body reset_agent_pkg is
 
     procedure rst_agent_polarity_set(
         signal      channel     : inout t_com_channel;
-        constant    polarity    : in    std_logic;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    polarity    : in    std_logic
     ) is
     begin
         reset_agent_info_m(id, "Setting reset polarity to: " & std_logic'image(polarity));
@@ -241,8 +241,8 @@ package body reset_agent_pkg is
 
     procedure rst_agent_polarity_get(
         signal      channel     : inout t_com_channel;
-        variable    polarity    : out   std_logic;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    polarity    : out   std_logic
     ) is
     begin
         reset_agent_info_m(id, "Getting reset polarity");

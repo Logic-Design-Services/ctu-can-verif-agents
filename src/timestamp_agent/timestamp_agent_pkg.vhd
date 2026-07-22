@@ -96,12 +96,12 @@ package timestamp_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure timestamp_agent_info_m(
-        constant    id          : in    natural := C_TIMESTAMP_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
     procedure timestamp_agent_debug_m(
-        constant    id          : in    natural := C_TIMESTAMP_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
@@ -118,7 +118,7 @@ package timestamp_agent_pkg is
     ---------------------------------------------------------------------------
     procedure timestamp_agent_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -128,7 +128,7 @@ package timestamp_agent_pkg is
     ---------------------------------------------------------------------------
     procedure timestamp_agent_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -139,8 +139,8 @@ package timestamp_agent_pkg is
     ---------------------------------------------------------------------------
     procedure timestamp_agent_set_step(
         signal      channel     : inout t_com_channel;
-        constant    step        : in    natural;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    step        : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -151,8 +151,8 @@ package timestamp_agent_pkg is
     ---------------------------------------------------------------------------
     procedure timestamp_agent_set_prescaler(
         signal      channel     : inout t_com_channel;
-        constant    prescaler   : in    natural;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    prescaler   : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -163,8 +163,8 @@ package timestamp_agent_pkg is
     ---------------------------------------------------------------------------
     procedure timestamp_agent_timestamp_preset(
         signal      channel     : inout t_com_channel;
-        constant    timestamp   : in    std_logic_vector(63 downto 0);
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    timestamp   : in    std_logic_vector(63 downto 0)
     );
 
 
@@ -176,8 +176,8 @@ package timestamp_agent_pkg is
     ---------------------------------------------------------------------------
     procedure timestamp_agent_get_timestamp(
         signal      channel     : inout t_com_channel;
-        variable    timestamp   : out   std_logic_vector(63 downto 0);
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    timestamp   : out   std_logic_vector(63 downto 0)
     );
 
     ---------------------------------------------------------------------------
@@ -207,7 +207,7 @@ package body timestamp_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure timestamp_agent_info_m(
-        constant    id          : in    natural := C_TIMESTAMP_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is
     begin
@@ -215,7 +215,7 @@ package body timestamp_agent_pkg is
     end procedure;
 
     procedure timestamp_agent_debug_m(
-        constant    id          : in    natural := C_TIMESTAMP_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     )  is
     begin
@@ -230,7 +230,7 @@ package body timestamp_agent_pkg is
 
     procedure timestamp_agent_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         timestamp_agent_info_m(id, "Starting");
@@ -241,7 +241,7 @@ package body timestamp_agent_pkg is
 
     procedure timestamp_agent_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         timestamp_agent_info_m(id, "Stopping");
@@ -252,8 +252,8 @@ package body timestamp_agent_pkg is
 
     procedure timestamp_agent_set_step(
         signal      channel     : inout t_com_channel;
-        constant    step        : in    natural;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    step        : in    natural
     ) is
     begin
         timestamp_agent_info_m(id, "Setting step");
@@ -265,8 +265,8 @@ package body timestamp_agent_pkg is
 
     procedure timestamp_agent_set_prescaler(
         signal      channel     : inout t_com_channel;
-        constant    prescaler   : in    natural;
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    prescaler   : in    natural
     ) is
     begin
         timestamp_agent_info_m(id, "Setting Prescaler");
@@ -278,8 +278,8 @@ package body timestamp_agent_pkg is
 
     procedure timestamp_agent_timestamp_preset(
         signal      channel     : inout t_com_channel;
-        constant    timestamp   : in    std_logic_vector(63 downto 0);
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    timestamp   : in    std_logic_vector(63 downto 0)
     ) is
     begin
         timestamp_agent_info_m(id, "Presetting timestamp");
@@ -290,8 +290,8 @@ package body timestamp_agent_pkg is
 
     procedure timestamp_agent_get_timestamp(
         signal      channel     : inout t_com_channel;
-        variable    timestamp   : out   std_logic_vector(63 downto 0);
-        constant    id          : in    natural := C_RESET_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    timestamp   : out   std_logic_vector(63 downto 0)
     ) is
         variable tmp : std_logic_vector(127 downto 0);
     begin

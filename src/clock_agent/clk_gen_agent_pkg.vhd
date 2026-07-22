@@ -101,12 +101,12 @@ package clk_gen_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure clk_agent_info_m(
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
     procedure clk_agent_debug_m(
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
@@ -123,8 +123,8 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_gen_agent_start(
         signal      channel     : inout t_com_channel;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -134,8 +134,8 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_gen_agent_stop(
         signal      channel     : inout t_com_channel;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -146,9 +146,9 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_agent_set_period(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    period      : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -159,9 +159,9 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_agent_get_period(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         variable    period      : out   time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -172,9 +172,9 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_agent_set_jitter(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    jitter      : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -185,9 +185,9 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_agent_get_jitter(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         variable    jitter      : out   time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -198,9 +198,9 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_agent_set_duty(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    duty        : in    integer range 0 to 100;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -211,9 +211,9 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_agent_get_duty(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         variable    duty        : out   integer range 0 to 100;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -229,8 +229,8 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     procedure clk_agent_wait_cycle(
         signal      channel     : inout t_com_channel;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    msg         : in    string
     );
 
 
@@ -264,14 +264,14 @@ package body clk_gen_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure clk_agent_info_m(
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is begin
         info_m(CLK_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
     end procedure;
 
     procedure clk_agent_debug_m(
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is begin
         debug_m(CLK_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
@@ -285,8 +285,8 @@ package body clk_gen_agent_pkg is
 
     procedure clk_gen_agent_start(
         signal      channel     : inout t_com_channel;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Starting clock generator agent!");
@@ -297,8 +297,8 @@ package body clk_gen_agent_pkg is
 
     procedure clk_gen_agent_stop(
         signal      channel     : inout t_com_channel;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Stopping clock generator agent!");
@@ -309,9 +309,9 @@ package body clk_gen_agent_pkg is
 
     procedure clk_agent_set_period(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    period      : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Setting clock agent period to: " & time'image(period));
@@ -323,9 +323,9 @@ package body clk_gen_agent_pkg is
 
     procedure clk_agent_get_period(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         variable    period      : out   time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Getting clock agent period");
@@ -337,9 +337,9 @@ package body clk_gen_agent_pkg is
 
     procedure clk_agent_set_jitter(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    jitter      : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Setting clock agent jitter to: " & time'image(jitter));
@@ -351,9 +351,9 @@ package body clk_gen_agent_pkg is
 
     procedure clk_agent_get_jitter(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         variable    jitter      : out   time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Getting clock agent jitter");
@@ -365,9 +365,9 @@ package body clk_gen_agent_pkg is
 
     procedure clk_agent_set_duty(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    duty        : in    integer range 0 to 100;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Setting clock agent duty cycle to: " & integer'image(duty));
@@ -379,9 +379,9 @@ package body clk_gen_agent_pkg is
 
     procedure clk_agent_get_duty(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         variable    duty        : out   integer range 0 to 100;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_info_m(id, "Getting clock agent duty cycle");
@@ -393,8 +393,8 @@ package body clk_gen_agent_pkg is
 
     procedure clk_agent_wait_cycle(
         signal      channel     : inout t_com_channel;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CLOCK_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    msg         : in    string
     ) is
     begin
         clk_agent_debug_m(id, "Waiting one clock cycle");

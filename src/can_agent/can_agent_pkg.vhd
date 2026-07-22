@@ -179,11 +179,11 @@ package can_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure can_agent_info_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
     procedure can_agent_debug_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
@@ -194,7 +194,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -205,7 +205,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -216,7 +216,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_flush(
          signal     channel     : inout t_com_channel;
-         constant   id          : in    natural := C_CAN_AGENT_DEF_ID
+         constant   id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -227,8 +227,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_get_progress(
         signal      channel     : inout t_com_channel;
-        variable    progress    : out   boolean;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    progress    : out   boolean
     );
 
     ---------------------------------------------------------------------------
@@ -239,8 +239,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_get_driven_val(
         signal      channel     : inout t_com_channel;
-        variable    driven_val  : out   std_logic;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    driven_val  : out   std_logic
     );
 
     ---------------------------------------------------------------------------
@@ -251,8 +251,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_push_item(
         signal      channel     : inout t_com_channel;
-        variable    item        : in    t_can_driver_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    item        : in    t_can_driver_entry
     );
 
     ---------------------------------------------------------------------------
@@ -263,7 +263,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_wait_finish(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -274,8 +274,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_set_wait_timeout(
         signal      channel     : inout t_com_channel;
-        variable    timeout     : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    timeout     : in    time
     );
 
     ---------------------------------------------------------------------------
@@ -287,9 +287,9 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    time        : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    time        : in    time
     );
 
     ---------------------------------------------------------------------------
@@ -303,10 +303,10 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    time        : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -319,8 +319,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_drive_single_item(
         signal      channel     : inout t_com_channel;
-        variable    item        : in    t_can_driver_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    item        : in    t_can_driver_entry
     );
 
     ---------------------------------------------------------------------------
@@ -331,7 +331,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_drive_all_items(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -344,8 +344,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_set_wait_for_monitor(
         signal      channel         : inout t_com_channel;
-        constant    wait_for_mon    : in    boolean;
-        constant    id              : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id              : in    natural;
+        constant    wait_for_mon    : in    boolean
     );
 
     ---------------------------------------------------------------------------
@@ -359,9 +359,9 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_drive_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    time        : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    time        : in    time
     );
 
     ---------------------------------------------------------------------------
@@ -377,10 +377,10 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_driver_drive_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    time        : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -390,7 +390,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -400,7 +400,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -411,7 +411,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_flush(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     --------------------------------------------------------------------------
@@ -427,8 +427,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_get_state(
         signal      channel     : inout t_com_channel;
-        variable    state       : out   t_can_monitor_state;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    state       : out   t_can_monitor_state
     );
 
     --------------------------------------------------------------------------
@@ -439,8 +439,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_get_monitored_val(
         signal      channel        : inout t_com_channel;
-        variable    monitored_val  : out   std_logic;
-        constant    id             : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id             : in    natural;
+        variable    monitored_val  : out   std_logic
     );
 
     --------------------------------------------------------------------------
@@ -451,8 +451,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_push_item(
         signal      channel     : inout t_com_channel;
-        constant    item        : in    t_can_monitor_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    item        : in    t_can_monitor_entry
     );
 
     --------------------------------------------------------------------------
@@ -463,8 +463,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_set_wait_timeout(
         signal      channel     : inout t_com_channel;
-        constant    timeout     : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    timeout     : in    time
     );
 
     --------------------------------------------------------------------------
@@ -475,7 +475,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_wait_finish(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     --------------------------------------------------------------------------
@@ -489,8 +489,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_single_item(
         signal      channel     : inout t_com_channel;
-        constant    item        : in    t_can_monitor_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    item        : in    t_can_monitor_entry
     );
 
     --------------------------------------------------------------------------
@@ -502,7 +502,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_all_items(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     --------------------------------------------------------------------------
@@ -521,8 +521,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_set_trigger(
         signal      channel     : inout t_com_channel;
-        constant    trigger     : in    t_can_monitor_trigger;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    trigger     : in    t_can_monitor_trigger
     );
 
     --------------------------------------------------------------------------
@@ -533,8 +533,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_get_trigger(
         signal      channel     : inout t_com_channel;
-        variable    trigger     : out   t_can_monitor_trigger;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    trigger     : out   t_can_monitor_trigger
     );
 
     --------------------------------------------------------------------------
@@ -548,8 +548,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_set_sample_rate(
         signal      channel     : inout t_com_channel;
-        constant    sample_rate : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    sample_rate : in    time
     );
 
     --------------------------------------------------------------------------
@@ -560,8 +560,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_get_sample_rate(
         signal      channel     : inout t_com_channel;
-        variable    sample_rate : out   time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    sample_rate : out   time
     );
 
     --------------------------------------------------------------------------
@@ -573,9 +573,9 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    mon_time    : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    mon_time    : in    time
     );
 
     --------------------------------------------------------------------------
@@ -589,10 +589,10 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    mon_time    : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -606,9 +606,9 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_monitor_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    mon_time    : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    mon_time    : in    time
     );
 
     ---------------------------------------------------------------------------
@@ -623,10 +623,10 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_monitor_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    mon_time    : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
@@ -638,7 +638,7 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_check_result(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
 
@@ -654,8 +654,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_monitor_set_input_delay(
         signal      channel     : inout t_com_channel;
-        constant    input_delay : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    input_delay : in    time
     );
 
 
@@ -669,8 +669,8 @@ package can_agent_pkg is
     ---------------------------------------------------------------------------
     procedure can_agent_configure_tx_to_rx_feedback(
         signal      channel     : inout t_com_channel;
-        constant    enable      : in    boolean;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    enable      : in    boolean
     );
 
     ---------------------------------------------------------------------------
@@ -729,14 +729,14 @@ package body can_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure can_agent_info_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is begin
         info_m(CAN_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
     end procedure;
 
     procedure can_agent_debug_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is begin
         debug_m(CAN_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
@@ -751,7 +751,7 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Starting driver");
@@ -762,7 +762,7 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Stopping driver");
@@ -773,7 +773,7 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_flush(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Flushing driver FIFO");
@@ -784,8 +784,8 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_get_progress(
         signal      channel     : inout t_com_channel;
-        variable    progress    : out   boolean;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    progress    : out   boolean
     ) is
     begin
         can_agent_info_m(id, "Getting driver progress");
@@ -798,8 +798,8 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_get_driven_val(
         signal      channel     : inout t_com_channel;
-        variable    driven_val  : out   std_logic;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    driven_val  : out   std_logic
     ) is
     begin
         can_agent_info_m(id, "Getting driven value");
@@ -811,8 +811,8 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_push_item(
         signal      channel     : inout t_com_channel;
-        variable    item        : in    t_can_driver_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    item        : in    t_can_driver_entry
     ) is
     begin
         -- Debug also upon start since pushing single frame generates
@@ -835,8 +835,8 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_set_wait_timeout(
         signal      channel     : inout t_com_channel;
-        variable    timeout     : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    timeout     : in    time
     ) is
     begin
         -- Debug also upon start since pushing single frame generates
@@ -850,7 +850,7 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_wait_finish(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Waiting for driver to finish");
@@ -861,25 +861,25 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    time        : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    time        : in    time
     ) is
         variable item           : t_can_driver_entry;
     begin
         item.value := value;
         item.print_msg := false;
         item.drive_time := time;
-        can_agent_driver_push_item(channel, item, id);
+        can_agent_driver_push_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_driver_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    time        : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
         variable item           : t_can_driver_entry;
     begin
@@ -888,14 +888,14 @@ package body can_agent_pkg is
         item.drive_time := time;
         item.msg := (OTHERS => ' ');
         item.msg(1 to msg'length) := msg;
-        can_agent_driver_push_item(channel, item, id);
+        can_agent_driver_push_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_driver_drive_single_item(
         signal      channel     : inout t_com_channel;
-        variable    item        : in    t_can_driver_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    item        : in    t_can_driver_entry
     ) is
     begin
         can_agent_info_m(id, "Driving single item");
@@ -914,7 +914,7 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_drive_all_items(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Driving all items in driver FIFO");
@@ -924,8 +924,8 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_set_wait_for_monitor(
         signal      channel         : inout t_com_channel;
-        constant    wait_for_mon    : in    boolean;
-        constant    id              : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id              : in    natural;
+        constant    wait_for_mon    : in    boolean
     ) is
     begin
         can_agent_info_m(id, "Setting driver wait for monitor to: " &
@@ -940,25 +940,25 @@ package body can_agent_pkg is
 
     procedure can_agent_driver_drive_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    time        : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    time        : in    time
     ) is
         variable item                   : t_can_driver_entry;
     begin
         item.value := value;
         item.drive_time := time;
         item.print_msg := false;
-        can_agent_driver_drive_single_item(channel, item, id);
+        can_agent_driver_drive_single_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_driver_drive_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    time        : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
         variable item                   : t_can_driver_entry;
     begin
@@ -967,13 +967,13 @@ package body can_agent_pkg is
         item.print_msg := true;
         item.msg := (OTHERS => ' ');
         item.msg(1 to msg'length) := msg;
-        can_agent_driver_drive_single_item(channel, item, id);
+        can_agent_driver_drive_single_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_monitor_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Starting monitor");
@@ -984,7 +984,7 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Stopping monitor");
@@ -995,7 +995,7 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_flush(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Flushing monitor FIFO");
@@ -1006,8 +1006,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_get_state(
         signal      channel     : inout t_com_channel;
-        variable    state       : out   t_can_monitor_state;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    state       : out   t_can_monitor_state
     ) is
         variable rec_int : integer;
     begin
@@ -1022,8 +1022,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_get_monitored_val(
         signal      channel         : inout t_com_channel;
-        variable    monitored_val   : out   std_logic;
-        constant    id              : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id              : in    natural;
+        variable    monitored_val   : out   std_logic
     ) is
     begin
         can_agent_info_m(id, "Getting monitored value");
@@ -1036,8 +1036,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_push_item(
         signal      channel     : inout t_com_channel;
-        constant    item        : in    t_can_monitor_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    item        : in    t_can_monitor_entry
     ) is
     begin
         can_agent_debug_m(id, "Pushing item to monitor FIFO (" &
@@ -1060,8 +1060,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_set_wait_timeout(
         signal      channel     : inout t_com_channel;
-        constant    timeout     : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    timeout     : in    time
     ) is
     begin
         can_agent_info_m(id, "Setting wait timeout");
@@ -1073,7 +1073,7 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_wait_finish(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     )is
     begin
         can_agent_info_m(id, "Waiting for monitor finish");
@@ -1084,8 +1084,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_single_item(
         signal      channel     : inout t_com_channel;
-        constant    item        : in    t_can_monitor_entry;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    item        : in    t_can_monitor_entry
     ) is
     begin
         can_agent_debug_m(id, "Monitoring single item");
@@ -1106,7 +1106,7 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_all_items(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     )is
     begin
         can_agent_info_m(id, "Waiting till all items will be monitored");
@@ -1117,8 +1117,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_set_trigger(
         signal      channel     : inout t_com_channel;
-        constant    trigger     : in    t_can_monitor_trigger;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    trigger     : in    t_can_monitor_trigger
     ) is
     begin
         can_agent_info_m(id, "Setting monitor trigger to: " &
@@ -1131,8 +1131,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_get_trigger(
         signal      channel     : inout t_com_channel;
-        variable    trigger     : out   t_can_monitor_trigger;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    trigger     : out   t_can_monitor_trigger
     ) is
         variable rec_int : integer;
     begin
@@ -1147,8 +1147,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_set_sample_rate(
         signal      channel     : inout t_com_channel;
-        constant    sample_rate : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    sample_rate : in    time
     ) is
     begin
         can_agent_info_m(id, "Setting monitor sample rate to: " &
@@ -1161,8 +1161,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_get_sample_rate(
         signal      channel     : inout t_com_channel;
-        variable    sample_rate : out   time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    sample_rate : out   time
     ) is
     begin
         can_agent_info_m(id, "Getting monitor sample rate.");
@@ -1175,25 +1175,25 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    mon_time    : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    mon_time    : in    time
     ) is
         variable item                   : t_can_monitor_entry;
     begin
         item.value := value;
         item.monitor_time := mon_time;
         item.print_msg := false;
-        can_agent_monitor_push_item(channel, item, id);
+        can_agent_monitor_push_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_monitor_push_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    mon_time    : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     ) is
         variable item                   : t_can_monitor_entry;
     begin
@@ -1202,31 +1202,31 @@ package body can_agent_pkg is
         item.print_msg := true;
         item.msg := (OTHERS => ' ');
         item.msg(1 to msg'length) := msg;
-        can_agent_monitor_push_item(channel, item, id);
+        can_agent_monitor_push_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_monitor_monitor_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
-        constant    mon_time    : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    mon_time    : in    time
     ) is
         variable item                   : t_can_monitor_entry;
     begin
         item.value := value;
         item.monitor_time := mon_time;
         item.print_msg := false;
-        can_agent_monitor_single_item(channel, item, id);
+        can_agent_monitor_single_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_monitor_monitor_value(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
         constant    value       : in    std_logic;
         constant    mon_time    : in    time;
-        constant    msg         : in    string;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    msg         : in    string
     )is
         variable item                   : t_can_monitor_entry;
     begin
@@ -1235,13 +1235,13 @@ package body can_agent_pkg is
         item.print_msg := true;
         item.msg := (OTHERS => ' ');
         item.msg(1 to msg'length) := msg;
-        can_agent_monitor_single_item(channel, item, id);
+        can_agent_monitor_single_item(channel, id, item);
     end procedure;
 
 
     procedure can_agent_monitor_check_result(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         can_agent_info_m(id, "Checking monitor result!");
@@ -1252,8 +1252,8 @@ package body can_agent_pkg is
 
     procedure can_agent_monitor_set_input_delay(
         signal      channel     : inout t_com_channel;
-        constant    input_delay : in    time;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    input_delay : in    time
     ) is
     begin
         can_agent_info_m(id, "Settting input delay");
@@ -1265,8 +1265,8 @@ package body can_agent_pkg is
 
     procedure can_agent_configure_tx_to_rx_feedback(
         signal      channel     : inout t_com_channel;
-        constant    enable      : in    boolean;
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    enable      : in    boolean
     ) is
     begin
         can_agent_info_m(id, "Configuring can_tx to can_rx feedback!");

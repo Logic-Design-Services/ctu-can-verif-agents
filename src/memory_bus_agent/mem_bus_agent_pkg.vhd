@@ -108,12 +108,12 @@ package mem_bus_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_info_m(
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
     procedure mem_bus_agent_debug_m(
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
@@ -138,7 +138,7 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -148,7 +148,7 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -166,10 +166,10 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_write_non_blocking(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
                     write_data  : in    std_logic_vector(31 downto 0);
-                    byte_enable : in    std_logic_vector(3 downto 0);
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    byte_enable : in    std_logic_vector(3 downto 0)
     );
 
     ---------------------------------------------------------------------------
@@ -184,10 +184,10 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_write_blocking(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
                     write_data  : in    std_logic_vector(31 downto 0);
-                    byte_enable : in    std_logic_vector(3 downto 0);
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    byte_enable : in    std_logic_vector(3 downto 0)
     );
 
     ---------------------------------------------------------------------------
@@ -201,7 +201,7 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_x_mode_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -211,7 +211,7 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_x_mode_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -222,8 +222,8 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_set_x_mode_setup(
         signal      channel     : inout t_com_channel;
-                    setup       : in    time;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    setup       : in    time
     );
 
     ---------------------------------------------------------------------------
@@ -234,8 +234,8 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_set_x_mode_hold(
         signal      channel     : inout t_com_channel;
-                    hold        : in    time;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    hold        : in    time
     );
 
 
@@ -248,8 +248,8 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_set_output_delay(
         signal      channel     : inout t_com_channel;
-                    out_delay   : in    time;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    out_delay   : in    time
     );
 
 
@@ -260,7 +260,7 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_wait_done(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -274,10 +274,10 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_read(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
         variable    read_data   : inout std_logic_vector(31 downto 0);
-                    byte_enable : in    std_logic_vector(3 downto 0);
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    byte_enable : in    std_logic_vector(3 downto 0)
     );
 
     ---------------------------------------------------------------------------
@@ -315,10 +315,10 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_write(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
                     write_data  : in    std_logic_vector;
-                    blocking    : in    boolean := true;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    blocking    : in    boolean := true
     );
 
     ---------------------------------------------------------------------------
@@ -355,10 +355,10 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_read(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
         variable    read_data   : inout std_logic_vector;
-        constant    stat_burst  : in    boolean := false;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    stat_burst  : in    boolean := false
     );
 
 
@@ -371,8 +371,8 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_set_slave_index(
         signal      channel     : inout t_com_channel;
-                    node        : in    natural;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    node        : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -383,7 +383,7 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_enable_transaction_reporting(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -394,7 +394,7 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_disable_transaction_reporting(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -435,7 +435,7 @@ package body mem_bus_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure mem_bus_agent_info_m(
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is
     begin
@@ -443,7 +443,7 @@ package body mem_bus_agent_pkg is
     end procedure;
 
     procedure mem_bus_agent_debug_m(
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     )  is
     begin
@@ -458,7 +458,7 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         mem_bus_agent_info_m(id, "Starting");
@@ -469,7 +469,7 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         mem_bus_agent_info_m(id, "Stopping");
@@ -480,10 +480,10 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_write_non_blocking(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
                     write_data  : in    std_logic_vector(31 downto 0);
-                    byte_enable : in    std_logic_vector(3 downto 0);
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    byte_enable : in    std_logic_vector(3 downto 0)
     )  is
     begin
         mem_bus_agent_debug_m(id, "Posting non-blocking write, Address: 0x" &
@@ -501,10 +501,10 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_write_blocking(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
                     write_data  : in    std_logic_vector(31 downto 0);
-                    byte_enable : in    std_logic_vector(3 downto 0);
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    byte_enable : in    std_logic_vector(3 downto 0)
     )  is
     begin
         --mem_bus_agent_debug_m(id, "Blocking write, Address: 0x" &
@@ -521,10 +521,10 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_read(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
         variable    read_data   : inout std_logic_vector(31 downto 0);
-                    byte_enable : in    std_logic_vector(3 downto 0);
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    byte_enable : in    std_logic_vector(3 downto 0)
     ) is
         variable tmp : std_logic_vector(127 downto 0);
     begin
@@ -544,7 +544,7 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_x_mode_start(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         mem_bus_agent_info_m(id, "Enabling X mode");
@@ -555,7 +555,7 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_x_mode_stop(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         mem_bus_agent_info_m(id, "Disabling X mode");
@@ -566,8 +566,8 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_set_x_mode_setup(
         signal      channel     : inout t_com_channel;
-                    setup       : in    time;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    setup       : in    time
     ) is
     begin
         mem_bus_agent_info_m(id, "Setting X mode setup to: " & time'image(setup));
@@ -579,8 +579,8 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_set_x_mode_hold(
         signal      channel     : inout t_com_channel;
-                    hold        : in    time;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    hold        : in    time
     ) is
     begin
         mem_bus_agent_info_m(id, "Setting X mode hold to: " & time'image(hold));
@@ -592,8 +592,8 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_set_output_delay(
         signal      channel     : inout t_com_channel;
-                    out_delay   : in    time;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    out_delay   : in    time
     ) is
     begin
         mem_bus_agent_info_m(id, "Setting data out output delay " & time'image(out_delay));
@@ -605,7 +605,7 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_wait_done(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         mem_bus_agent_info_m(id, "Waiting till all accesses are executed");
@@ -616,8 +616,8 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_set_slave_index(
         signal      channel     : inout t_com_channel;
-                    node        : in    natural;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural;
+                    node        : in    natural
     ) is
     begin
         com_channel_data.set_param(node);
@@ -771,10 +771,10 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_write(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
                     write_data  : in    std_logic_vector;
-                    blocking    : in    boolean := true;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+                    blocking    : in    boolean := true
     ) is
         variable addr_aligned   :       integer;
         variable addr_loop      :       integer;
@@ -790,9 +790,9 @@ package body mem_bus_agent_pkg is
             addr_aligned := address - (address mod 4);
             convert_be_and_write_data(address, write_data, be, data_32);
             if (blocking) then
-                mem_bus_agent_write_blocking(channel, addr_aligned, data_32, be);
+                mem_bus_agent_write_blocking(channel, id, addr_aligned, data_32, be);
             else
-                mem_bus_agent_write_non_blocking(channel, addr_aligned, data_32, be);
+                mem_bus_agent_write_non_blocking(channel, id, addr_aligned, data_32, be);
             end if;
         else
             loop_count := write_data'length / 32;
@@ -803,9 +803,9 @@ package body mem_bus_agent_pkg is
             for i in 0 to loop_count-1 loop
                 data_32 := write_data(i*32+31 downto i*32);
                 if (blocking) then
-                    mem_bus_agent_write_blocking(channel, addr_loop, data_32, be);
+                    mem_bus_agent_write_blocking(channel, id, addr_loop, data_32, be);
                 else
-                    mem_bus_agent_write_non_blocking(channel, addr_loop, data_32, be);
+                    mem_bus_agent_write_non_blocking(channel, id, addr_loop, data_32, be);
                 end if;
                 addr_loop := addr_loop + 4;
             end loop;
@@ -815,10 +815,10 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_read(
         signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
                     address     : in    integer;
         variable    read_data   : inout std_logic_vector;
-        constant    stat_burst  : in    boolean := false;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    stat_burst  : in    boolean := false
     ) is
         variable addr_aligned   :       integer;
         variable addr_loop      :       integer;
@@ -833,7 +833,7 @@ package body mem_bus_agent_pkg is
         if (read_data'length = 8 or read_data'length = 16 or read_data'length = 32) then
             addr_aligned := address - (address mod 4);
             convert_be(address, read_data, be);
-            mem_bus_agent_read(channel, addr_aligned, data_32, be);
+            mem_bus_agent_read(channel, id, addr_aligned, data_32, be);
             convert_read_data(address, read_data'length, data_32, read_data);
         else
             loop_count := read_data'length / 32;
@@ -842,7 +842,7 @@ package body mem_bus_agent_pkg is
             be := x"F";
 
             for i in 0 to loop_count-1 loop
-                mem_bus_agent_read(channel, addr_loop, data_32, be);
+                mem_bus_agent_read(channel, id, addr_loop, data_32, be);
                 read_data(i*32+31 downto i*32) := data_32;
                 if (stat_burst = false) then
                     addr_loop := addr_loop + 4;
@@ -853,7 +853,7 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_enable_transaction_reporting(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         mem_bus_agent_debug_m(id, "Enabling transaction reporting");
@@ -864,7 +864,7 @@ package body mem_bus_agent_pkg is
 
     procedure mem_bus_agent_disable_transaction_reporting(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_MEM_BUS_AGENT_DEF_ID
+        constant    id          : in    natural
     ) is
     begin
         mem_bus_agent_debug_m(id, "Disabling transaction reporting");

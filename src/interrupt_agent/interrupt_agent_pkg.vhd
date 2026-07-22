@@ -98,12 +98,12 @@ package interrupt_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure interrupt_agent_info_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
     procedure interrupt_agent_debug_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     );
 
@@ -121,8 +121,8 @@ package interrupt_agent_pkg is
     ---------------------------------------------------------------------------
     procedure interrupt_agent_polarity_set(
         signal      channel     : inout t_com_channel;
-        constant    polarity    : in    std_logic;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    polarity    : in    std_logic
     );
 
     ---------------------------------------------------------------------------
@@ -133,8 +133,8 @@ package interrupt_agent_pkg is
     ---------------------------------------------------------------------------
     procedure interrupt_agent_polarity_get(
         signal      channel     : inout t_com_channel;
-        variable    polarity    : out   std_logic;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    polarity    : out   std_logic
     );
 
     ---------------------------------------------------------------------------
@@ -144,7 +144,7 @@ package interrupt_agent_pkg is
     ---------------------------------------------------------------------------
     procedure interrupt_agent_check_asserted(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -154,7 +154,7 @@ package interrupt_agent_pkg is
     ---------------------------------------------------------------------------
     procedure interrupt_agent_check_not_asserted(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -181,7 +181,7 @@ package body interrupt_agent_pkg is
     -- Message print helpers
     ---------------------------------------------------------------------------
     procedure interrupt_agent_info_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     ) is
     begin
@@ -189,7 +189,7 @@ package body interrupt_agent_pkg is
     end procedure;
 
     procedure interrupt_agent_debug_m(
-        constant    id          : in    natural := C_CAN_AGENT_DEF_ID;
+        constant    id          : in    natural;
         constant    msg         : in    string
     )  is
     begin
@@ -204,8 +204,8 @@ package body interrupt_agent_pkg is
 
     procedure interrupt_agent_polarity_set(
         signal      channel     : inout t_com_channel;
-        constant    polarity    : in    std_logic;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural;
+        constant    polarity    : in    std_logic
     ) is
     begin
         interrupt_agent_info_m(id,  "Setting polarity");
@@ -217,8 +217,8 @@ package body interrupt_agent_pkg is
 
     procedure interrupt_agent_polarity_get(
         signal      channel     : inout t_com_channel;
-        variable    polarity    : out   std_logic;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural;
+        variable    polarity    : out   std_logic
     )is
     begin
         interrupt_agent_info_m(id,  "Getting polarity");
@@ -230,7 +230,7 @@ package body interrupt_agent_pkg is
 
     procedure interrupt_agent_check_asserted(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural
     )is
     begin
         interrupt_agent_info_m(id,  "Checking asserted");
@@ -241,7 +241,7 @@ package body interrupt_agent_pkg is
 
     procedure interrupt_agent_check_not_asserted(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural := C_INTERRUPT_AGENT_DEF_ID
+        constant    id          : in    natural
     )is
     begin
         interrupt_agent_info_m(id,  "Checking not asserted");
