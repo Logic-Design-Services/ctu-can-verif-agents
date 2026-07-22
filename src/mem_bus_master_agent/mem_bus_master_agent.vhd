@@ -68,9 +68,9 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Memory bus agent.
+--    Memory bus master agent.
 --
---    Memory bus agent executes accesses on simple RAM-like interface. It
+--    Memory bus master agent executes accesses on simple RAM-like interface. It
 --    contains FIFO which buffers the accesses. Following types of accesses are
 --    supported:
 --      1. Non-blocking write access
@@ -81,36 +81,36 @@
 --    them at once, because read always has to return value, therefore its
 --    transaction must elapse.
 --
---    Memory bus agent supports two modes:
+--    Memory bus master agent supports two modes:
 --      normal mode
 --      X-mode
 --    In X-mode control signals are driven to X everywhere apart from setup +
 --    hold within rising edge of clock and read data are sampled with data
 --    output delay.
 --
---    Memory Bus agent can be started or stopped via Vunit Communication Library.
---    When Memory Bus agent is started, it executes transactions from its
+--    When Memory Bus master agent is started, it executes transactions from its
 --    internal FIFO. When it is stopped, transcations are buffered in FIFO and
---    executed once Memory bus agent is started.
+--    executed once Memory bus master agent is started.
 --
 --------------------------------------------------------------------------------
 -- Revision History:
 --    19.1.2020   Created file
 --    04.2.2021   Adjusted to work without Vunits COM library.
 --    20.7.2026   Added G_COM_ID.
+--    22.7.2026   Rename to Memory bus master agent.
 --------------------------------------------------------------------------------
 
 library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 context ctu_can_agents.agents_deps_context;
 
-use ctu_can_agents.mem_bus_agent_pkg.all;
+use ctu_can_agents.mem_bus_master_agent_pkg.all;
 
-entity mem_bus_agent is
+entity mem_bus_master_agent is
     generic(
         G_ACCESS_FIFO_DEPTH     : natural := 32;
         G_NUM_SLAVES            : natural := 2;
-        G_COM_ID                : natural := C_MEM_BUS_AGENT_DEF_ID
+        G_COM_ID                : natural
     );
     port (
         -- Clock
@@ -127,7 +127,7 @@ entity mem_bus_agent is
     );
 end entity;
 
-architecture tb of mem_bus_agent is
+architecture tb of mem_bus_master_agent is
 
     type t_mem_bus_access_array is array (0 to G_ACCESS_FIFO_DEPTH - 1)
         of t_mem_bus_access_item;
@@ -139,7 +139,7 @@ architecture tb of mem_bus_agent is
     --------------------------------------------------------------------------
     -- Configuration parameters
     ---------------------------------------------------------------------------
-    signal mem_bus_agent_ena    :   boolean := false;
+    signal agent_ena            :   boolean := false;
     signal is_x_mode            :   boolean := true;
 
     -- Only single setup for all input signals
@@ -156,7 +156,7 @@ architecture tb of mem_bus_agent is
     signal scs_i                :   std_logic := '0';
 
     -- By default, transactions go to first slave (DUT). This is used in compliance
-    -- tests which only talk to DUT node via Memory bus agent.
+    -- tests which only talk to DUT node via Memory bus master agent.
     signal slave_index          :   natural := 0;
 
     signal last_clk_re          :   time := 0 ns;
@@ -182,13 +182,13 @@ begin
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
-        when MEM_BUS_AGNT_CMD_START =>
-            mem_bus_agent_ena <= true;
-        when MEM_BUS_AGNT_CMD_STOP =>
-            mem_bus_agent_ena <= false;
+        when MEM_BUS_MASTER_AGNT_CMD_START =>
+            agent_ena <= true;
+        when MEM_BUS_MASTER_AGNT_CMD_STOP =>
+            agent_ena <= false;
 
         -- For non-blocking writes only post to FIFO, don't wait!
-        when MEM_BUS_AGNT_CMD_WRITE_NON_BLOCKING =>
+        when MEM_BUS_MASTER_AGNT_CMD_WRITE_NON_BLOCKING =>
             transaction.write := true;
             transaction.address := com_channel_data.get_param;
             tmp := com_channel_data.get_param;
@@ -201,7 +201,7 @@ begin
 
         -- For blocking writes wait until FIFO is emptied. This will wait also if
         -- previous non-blocking transactions were pushed!
-        when MEM_BUS_AGNT_CMD_WRITE_BLOCKING =>
+        when MEM_BUS_MASTER_AGNT_CMD_WRITE_BLOCKING =>
             transaction.write := true;
             transaction.address := com_channel_data.get_param;
             tmp := com_channel_data.get_param;
@@ -216,7 +216,7 @@ begin
             wait until (fifo_wp = fifo_rp);
 
         -- Reads are always blocking
-        when MEM_BUS_AGNT_CMD_READ =>
+        when MEM_BUS_MASTER_AGNT_CMD_READ =>
             transaction.write := false;
             tmp_int := com_channel_data.get_param;
             transaction.address := com_channel_data.get_param;
@@ -232,34 +232,34 @@ begin
             --info_m("Read data when pushing response: " & to_hstring(read_data_i));
             com_channel_data.set_param(read_data_i);
 
-        when MEM_BUS_AGNT_CMD_X_MODE_START =>
+        when MEM_BUS_MASTER_AGNT_CMD_X_MODE_START =>
             is_x_mode <= true;
 
-        when MEM_BUS_AGNT_CMD_X_MODE_STOP =>
+        when MEM_BUS_MASTER_AGNT_CMD_X_MODE_STOP =>
             is_x_mode <= false;
 
-        when MEM_BUS_AGNT_CMD_SET_X_MODE_SETUP =>
+        when MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_SETUP =>
             x_mode_setup <= com_channel_data.get_param;
 
-        when MEM_BUS_AGNT_CMD_SET_X_MODE_HOLD =>
+        when MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_HOLD =>
             x_mode_hold <= com_channel_data.get_param;
 
-        when MEM_BUS_AGNT_CMD_SET_OUTPUT_DELAY =>
+        when MEM_BUS_MASTER_AGNT_CMD_SET_OUTPUT_DELAY =>
             data_out_delay <= com_channel_data.get_param;
 
-        when MEM_BUS_AGNT_CMD_WAIT_DONE =>
+        when MEM_BUS_MASTER_AGNT_CMD_WAIT_DONE =>
             if (fifo_wp /= fifo_rp) then
                 wait until fifo_wp = fifo_rp;
             end if;
 
-        when MEM_BUS_AGNT_CMD_SET_SLAVE_INDEX =>
+        when MEM_BUS_MASTER_AGNT_CMD_SET_SLAVE_INDEX =>
             slave_index <= com_channel_data.get_param;
             wait for 0 ns;
 
-        when MEM_BUS_AGNT_CMD_ENABLE_TRANS_REPORT =>
+        when MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT =>
             trans_report_en <= true;
 
-        when MEM_BUS_AGNT_CMD_DISABLE_TRANS_REPORT =>
+        when MEM_BUS_MASTER_AGNT_CMD_DISABLE_TRANS_REPORT =>
             trans_report_en <= false;
 
         when others =>
@@ -299,7 +299,7 @@ begin
             end if;
 
             if (trans_report_en) then
-                info_m(MEM_BUS_AGENT_TAG & "Write to:  " & node_str &
+                info_m(MEM_BUS_MASTER_AGENT_TAG & "Write to:  " & node_str &
                     "Address: 0x" & to_hstring(std_logic_vector(to_unsigned(curr_access.address, 32))) &
                     ", Write Data: 0x" & to_hstring(curr_access.write_data) &
                     ", Be: " & to_hstring(curr_access.byte_enable)
@@ -320,7 +320,7 @@ begin
             end if;
 
             if (trans_report_en) then
-                info_m(MEM_BUS_AGENT_TAG & "Read from: " & node_str &
+                info_m(MEM_BUS_MASTER_AGENT_TAG & "Read from: " & node_str &
                     "Address: 0x" & to_hstring(std_logic_vector(to_unsigned(curr_access.address, 32))) &
                     ", Read Data: 0x" & to_hstring(curr_access.read_data) &
                     ", Be: " & to_hstring(curr_access.byte_enable)
@@ -416,9 +416,9 @@ begin
         end procedure;
 
     begin
-        if (mem_bus_agent_ena) then
+        if (agent_ena) then
             while (true) loop
-                if (not mem_bus_agent_ena) then
+                if (not agent_ena) then
                     exit;
                 end if;
 
@@ -440,11 +440,11 @@ begin
                     fifo_rp <= (fifo_rp + 1) mod G_ACCESS_FIFO_DEPTH;
                     wait for 0 ns;
                 else
-                    wait until fifo_rp /= fifo_wp or mem_bus_agent_ena=false;
+                    wait until fifo_rp /= fifo_wp or agent_ena=false;
                 end if;
             end loop;
         else
-            wait until mem_bus_agent_ena;
+            wait until agent_ena;
         end if;
     end process;
 

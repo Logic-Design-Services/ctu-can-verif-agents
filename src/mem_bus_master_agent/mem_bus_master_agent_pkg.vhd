@@ -68,29 +68,30 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Package with API for Memory bus agent.
+--    Package with API for Memory bus master agent.
 --
 --------------------------------------------------------------------------------
 -- Revision History:
 --    19.1.2020   Created file
 --    04.2.2021   Adjusted to work without Vunits COM library.
 --    20.7.2026   Added configurable ID.
+--    22.7.2026   Rename to Memory bus master agent.
 --------------------------------------------------------------------------------
 
 library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 context ctu_can_agents.agents_deps_context;
 
-package mem_bus_agent_pkg is
+package mem_bus_master_agent_pkg is
 
     ---------------------------------------------------------------------------
-    -- Memory bus agent component
+    -- Memory bus master agent component
     ---------------------------------------------------------------------------
-    component mem_bus_agent is
+    component mem_bus_master_agent is
     generic(
         G_ACCESS_FIFO_DEPTH     : natural := 32;
         G_NUM_SLAVES            : natural := 2;
-        G_COM_ID                : natural := C_MEM_BUS_AGENT_DEF_ID
+        G_COM_ID                : natural
     );
     port (
         clk             : in    std_logic;
@@ -107,19 +108,19 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
     -- Message print helpers
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_info_m(
+    procedure mem_bus_master_agent_info_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     );
 
-    procedure mem_bus_agent_debug_m(
+    procedure mem_bus_master_agent_debug_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     );
 
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    -- Memory bus agent API
+    -- Memory bus master agent API
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
 
@@ -136,7 +137,7 @@ package mem_bus_agent_pkg is
     --
     -- @param channel   Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_start(
+    procedure mem_bus_master_agent_start(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
@@ -146,13 +147,13 @@ package mem_bus_agent_pkg is
     --
     -- @param channel   Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_stop(
+    procedure mem_bus_master_agent_stop(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
-    -- Push write transaction to Memory bus agent FIFO. Function returns
+    -- Push write transaction to Memory bus master agent FIFO. Function returns
     -- immediately after transaction is inserted and does not wait until
     -- transaction is executed.
     --
@@ -164,7 +165,7 @@ package mem_bus_agent_pkg is
     -- @param write_data    Data to write
     -- @param byte_enable   Byte enable value.
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_write_non_blocking(
+    procedure mem_bus_master_agent_write_non_blocking(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -173,8 +174,8 @@ package mem_bus_agent_pkg is
     );
 
     ---------------------------------------------------------------------------
-    -- Push write transaction to Memory bus agent FIFO and wait till this
-    -- memory transaction is executed. Memory bus agent must be enabled before
+    -- Push write transaction to Memory bus master agent FIFO and wait till this
+    -- memory transaction is executed. Memory bus master agent must be enabled before
     -- calling this function.
     --
     -- @param channel   Channel on which to send the request
@@ -182,7 +183,7 @@ package mem_bus_agent_pkg is
     -- @param write_data    Data to write
     -- @param byte_enable   Byte enable signals.
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_write_blocking(
+    procedure mem_bus_master_agent_write_blocking(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -191,7 +192,7 @@ package mem_bus_agent_pkg is
     );
 
     ---------------------------------------------------------------------------
-    -- Start X-mode in Memory bus agent. In X-mode, setup, hold and data out
+    -- Start X-mode in Memory bus master agent. In X-mode, setup, hold and data out
     -- delay parameters are considered and signals of memory transaction are
     -- driven to X everywhere apart from "Setup + hold" window. Also, read
     -- data on memory bus are sampled with "data out" delay from point where
@@ -199,40 +200,40 @@ package mem_bus_agent_pkg is
     --
     -- @param channel   Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_x_mode_start(
+    procedure mem_bus_master_agent_x_mode_start(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
-    -- Stop X-mode in Memory bus agent.
+    -- Stop X-mode in Memory bus master agent.
     --
     -- @param channel   Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_x_mode_stop(
+    procedure mem_bus_master_agent_x_mode_stop(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
-    -- Configure Setup time for X-mode of Memory bus agent.
+    -- Configure Setup time for X-mode of Memory bus master agent.
     --
     -- @param channel       Channel on which to send the request
     -- @param setup         Setup time to be configured.
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_set_x_mode_setup(
+    procedure mem_bus_master_agent_set_x_mode_setup(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     setup       : in    time
     );
 
     ---------------------------------------------------------------------------
-    -- Configure Hold time for X-mode of Memory bus agent.
+    -- Configure Hold time for X-mode of Memory bus master agent.
     --
     -- @param channel       Channel on which to send the request
     -- @param hold          Hold time to be configured.
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_set_x_mode_hold(
+    procedure mem_bus_master_agent_set_x_mode_hold(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     hold        : in    time
@@ -246,7 +247,7 @@ package mem_bus_agent_pkg is
     -- @param channel       Channel on which to send the request
     -- @param out_delay     Output delay to use for sampling.
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_set_output_delay(
+    procedure mem_bus_master_agent_set_output_delay(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     out_delay   : in    time
@@ -258,13 +259,13 @@ package mem_bus_agent_pkg is
     --
     -- @param channel       Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_wait_done(
+    procedure mem_bus_master_agent_wait_done(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
-    -- Execute read transaction by Memory bus agent. This function returns
+    -- Execute read transaction by Memory bus master agent. This function returns
     -- after read transaction was executed.
     --
     -- @param channel       Channel on which to send the request
@@ -272,7 +273,7 @@ package mem_bus_agent_pkg is
     -- @param read_data     Variable in which output data will be read.
     -- @param byte_enable   Byte enable value.
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_read(
+    procedure mem_bus_master_agent_read(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -281,7 +282,7 @@ package mem_bus_agent_pkg is
     );
 
     ---------------------------------------------------------------------------
-    -- Insert Write transaction to Memory bus agent FIFO.
+    -- Insert Write transaction to Memory bus master agent FIFO.
     --
     -- This function is "wrapper" and provides higher level abstraction for
     -- memory bus access.
@@ -313,7 +314,7 @@ package mem_bus_agent_pkg is
     --                      was executed (blocking write), false if function
     --                      shall return immediately (non-blocking write).
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_write(
+    procedure mem_bus_master_agent_write(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -322,7 +323,7 @@ package mem_bus_agent_pkg is
     );
 
     ---------------------------------------------------------------------------
-    -- Insert Read transaction to Memory bus agent FIFO.
+    -- Insert Read transaction to Memory bus master agent FIFO.
     --
     -- This function is "wrapper" and provides higher level abstraction for
     -- memory bus access.
@@ -353,7 +354,7 @@ package mem_bus_agent_pkg is
     -- @param stat_burst    If true, address is not incremented during burst
     --                      accesses. Usefull for readout of FIFOs
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_read(
+    procedure mem_bus_master_agent_read(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -369,7 +370,7 @@ package mem_bus_agent_pkg is
     -- @param channel       Channel on which to send the request
     --
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_set_slave_index(
+    procedure mem_bus_master_agent_set_slave_index(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     node        : in    natural
@@ -381,7 +382,7 @@ package mem_bus_agent_pkg is
     -- @param channel       Channel on which to send the request
     --
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_enable_transaction_reporting(
+    procedure mem_bus_master_agent_enable_transaction_reporting(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
@@ -392,7 +393,7 @@ package mem_bus_agent_pkg is
     -- @param channel       Channel on which to send the request
     --
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_disable_transaction_reporting(
+    procedure mem_bus_master_agent_disable_transaction_reporting(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
@@ -404,81 +405,81 @@ package mem_bus_agent_pkg is
     ---------------------------------------------------------------------------
 
     -- Supported commands for clock agent (sent as message types)
-    constant MEM_BUS_AGNT_CMD_START                 : integer := 0;
-    constant MEM_BUS_AGNT_CMD_STOP                  : integer := 1;
-    constant MEM_BUS_AGNT_CMD_WRITE_NON_BLOCKING    : integer := 2;
-    constant MEM_BUS_AGNT_CMD_WRITE_BLOCKING        : integer := 3;
-    constant MEM_BUS_AGNT_CMD_READ                  : integer := 4;
+    constant MEM_BUS_MASTER_AGNT_CMD_START                 : integer := 0;
+    constant MEM_BUS_MASTER_AGNT_CMD_STOP                  : integer := 1;
+    constant MEM_BUS_MASTER_AGNT_CMD_WRITE_NON_BLOCKING    : integer := 2;
+    constant MEM_BUS_MASTER_AGNT_CMD_WRITE_BLOCKING        : integer := 3;
+    constant MEM_BUS_MASTER_AGNT_CMD_READ                  : integer := 4;
 
-    constant MEM_BUS_AGNT_CMD_X_MODE_START          : integer := 5;
-    constant MEM_BUS_AGNT_CMD_X_MODE_STOP           : integer := 6;
-    constant MEM_BUS_AGNT_CMD_SET_X_MODE_SETUP      : integer := 7;
-    constant MEM_BUS_AGNT_CMD_SET_X_MODE_HOLD       : integer := 8;
+    constant MEM_BUS_MASTER_AGNT_CMD_X_MODE_START          : integer := 5;
+    constant MEM_BUS_MASTER_AGNT_CMD_X_MODE_STOP           : integer := 6;
+    constant MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_SETUP      : integer := 7;
+    constant MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_HOLD       : integer := 8;
 
-    constant MEM_BUS_AGNT_CMD_SET_OUTPUT_DELAY      : integer := 10;
-    constant MEM_BUS_AGNT_CMD_WAIT_DONE             : integer := 11;
+    constant MEM_BUS_MASTER_AGNT_CMD_SET_OUTPUT_DELAY      : integer := 10;
+    constant MEM_BUS_MASTER_AGNT_CMD_WAIT_DONE             : integer := 11;
 
-    constant MEM_BUS_AGNT_CMD_SET_SLAVE_INDEX       : integer := 12;
+    constant MEM_BUS_MASTER_AGNT_CMD_SET_SLAVE_INDEX       : integer := 12;
 
-    constant MEM_BUS_AGNT_CMD_ENABLE_TRANS_REPORT   : integer := 13;
-    constant MEM_BUS_AGNT_CMD_DISABLE_TRANS_REPORT  : integer := 14;
+    constant MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT   : integer := 13;
+    constant MEM_BUS_MASTER_AGNT_CMD_DISABLE_TRANS_REPORT  : integer := 14;
 
     -- Tag for messages
-    constant MEM_BUS_AGENT_TAG : string := "Memory Bus Agent: ";
+    constant MEM_BUS_MASTER_AGENT_TAG : string := "Memory Bus Master Agent: ";
 
 end package;
 
 
-package body mem_bus_agent_pkg is
+package body mem_bus_master_agent_pkg is
 
     ---------------------------------------------------------------------------
     -- Message print helpers
     ---------------------------------------------------------------------------
-    procedure mem_bus_agent_info_m(
+    procedure mem_bus_master_agent_info_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     ) is
     begin
-        info_m(MEM_BUS_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
+        info_m(MEM_BUS_MASTER_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
     end procedure;
 
-    procedure mem_bus_agent_debug_m(
+    procedure mem_bus_master_agent_debug_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     )  is
     begin
-        debug_m(MEM_BUS_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
+        debug_m(MEM_BUS_MASTER_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
     end procedure;
 
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    -- Memory bus agent API
+    -- Memory bus master agent API
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
 
-    procedure mem_bus_agent_start(
+    procedure mem_bus_master_agent_start(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        mem_bus_agent_info_m(id, "Starting");
-        send(channel, id, MEM_BUS_AGNT_CMD_START);
-        mem_bus_agent_debug_m(id, "Started");
+        mem_bus_master_agent_info_m(id, "Starting");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_START);
+        mem_bus_master_agent_debug_m(id, "Started");
     end procedure;
 
 
-    procedure mem_bus_agent_stop(
+    procedure mem_bus_master_agent_stop(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        mem_bus_agent_info_m(id, "Stopping");
-        send(channel, id, MEM_BUS_AGNT_CMD_STOP);
-        mem_bus_agent_debug_m(id, "Stopped");
+        mem_bus_master_agent_info_m(id, "Stopping");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_STOP);
+        mem_bus_master_agent_debug_m(id, "Stopped");
     end procedure;
 
 
-    procedure mem_bus_agent_write_non_blocking(
+    procedure mem_bus_master_agent_write_non_blocking(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -486,20 +487,20 @@ package body mem_bus_agent_pkg is
                     byte_enable : in    std_logic_vector(3 downto 0)
     )  is
     begin
-        mem_bus_agent_debug_m(id, "Posting non-blocking write, Address: 0x" &
+        mem_bus_master_agent_debug_m(id, "Posting non-blocking write, Address: 0x" &
                to_hstring(std_logic_vector(to_unsigned(address, 16))) &
                 " " & to_hstring(write_data));
 
         -- Pack the transaction to parameter vector
         com_channel_data.set_param(address);
         com_channel_data.set_param(write_data & byte_enable);
-        send(channel, id, MEM_BUS_AGNT_CMD_WRITE_NON_BLOCKING);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WRITE_NON_BLOCKING);
 
-        mem_bus_agent_debug_m(id, "Mem bus agent non-blocking write posted");
+        mem_bus_master_agent_debug_m(id, "Mem bus agent non-blocking write posted");
     end procedure;
 
 
-    procedure mem_bus_agent_write_blocking(
+    procedure mem_bus_master_agent_write_blocking(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -507,19 +508,19 @@ package body mem_bus_agent_pkg is
                     byte_enable : in    std_logic_vector(3 downto 0)
     )  is
     begin
-        --mem_bus_agent_debug_m(id, "Blocking write, Address: 0x" &
+        --mem_bus_master_agent_debug_m(id, "Blocking write, Address: 0x" &
         --        to_hstring(std_logic_vector(to_unsigned(address, 16))) &
         --        " " & to_hstring(write_data));
 
         com_channel_data.set_param(address);
         com_channel_data.set_param(write_data & byte_enable);
-        send(channel, id, MEM_BUS_AGNT_CMD_WRITE_BLOCKING);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WRITE_BLOCKING);
 
-        --mem_bus_agent_debug_m(id, "Blocking write succesfull");
+        --mem_bus_master_agent_debug_m(id, "Blocking write succesfull");
     end procedure;
 
 
-    procedure mem_bus_agent_read(
+    procedure mem_bus_master_agent_read(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -528,100 +529,100 @@ package body mem_bus_agent_pkg is
     ) is
         variable tmp : std_logic_vector(127 downto 0);
     begin
-        --mem_bus_agent_info_m(id, "Read, Address: 0x" &
+        --mem_bus_master_agent_info_m(id, "Read, Address: 0x" &
         --       to_hstring(std_logic_vector(to_unsigned(address, 16))));
 
         com_channel_data.set_param(address);
         com_channel_data.set_param(byte_enable);
-        send(channel, id, MEM_BUS_AGNT_CMD_READ);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_READ);
 
         tmp := com_channel_data.get_param;
         read_data := tmp(31 downto 0);
         wait for 0 ns;
-        --mem_bus_agent_info_m(id, "Read done, read data: 0x" & to_hstring(read_data));
+        --mem_bus_master_agent_info_m(id, "Read done, read data: 0x" & to_hstring(read_data));
     end procedure;
 
 
-    procedure mem_bus_agent_x_mode_start(
+    procedure mem_bus_master_agent_x_mode_start(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        mem_bus_agent_info_m(id, "Enabling X mode");
-        send(channel, id, MEM_BUS_AGNT_CMD_X_MODE_START);
-        mem_bus_agent_debug_m(id, "X mode enabled");
+        mem_bus_master_agent_info_m(id, "Enabling X mode");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_X_MODE_START);
+        mem_bus_master_agent_debug_m(id, "X mode enabled");
     end procedure;
 
 
-    procedure mem_bus_agent_x_mode_stop(
+    procedure mem_bus_master_agent_x_mode_stop(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        mem_bus_agent_info_m(id, "Disabling X mode");
-        send(channel, id, MEM_BUS_AGNT_CMD_X_MODE_STOP);
-        mem_bus_agent_debug_m(id, "X mode disabled");
+        mem_bus_master_agent_info_m(id, "Disabling X mode");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_X_MODE_STOP);
+        mem_bus_master_agent_debug_m(id, "X mode disabled");
     end procedure;
 
 
-    procedure mem_bus_agent_set_x_mode_setup(
+    procedure mem_bus_master_agent_set_x_mode_setup(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     setup       : in    time
     ) is
     begin
-        mem_bus_agent_info_m(id, "Setting X mode setup to: " & time'image(setup));
+        mem_bus_master_agent_info_m(id, "Setting X mode setup to: " & time'image(setup));
         com_channel_data.set_param(setup);
-        send(channel, id, MEM_BUS_AGNT_CMD_SET_X_MODE_SETUP);
-        mem_bus_agent_debug_m(id, "X mode setup configured");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_SETUP);
+        mem_bus_master_agent_debug_m(id, "X mode setup configured");
     end procedure;
 
 
-    procedure mem_bus_agent_set_x_mode_hold(
+    procedure mem_bus_master_agent_set_x_mode_hold(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     hold        : in    time
     ) is
     begin
-        mem_bus_agent_info_m(id, "Setting X mode hold to: " & time'image(hold));
+        mem_bus_master_agent_info_m(id, "Setting X mode hold to: " & time'image(hold));
         com_channel_data.set_param(hold);
-        send(channel, id, MEM_BUS_AGNT_CMD_SET_X_MODE_HOLD);
-        mem_bus_agent_debug_m(id, "X mode hold configured");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_HOLD);
+        mem_bus_master_agent_debug_m(id, "X mode hold configured");
     end procedure;
 
 
-    procedure mem_bus_agent_set_output_delay(
+    procedure mem_bus_master_agent_set_output_delay(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     out_delay   : in    time
     ) is
     begin
-        mem_bus_agent_info_m(id, "Setting data out output delay " & time'image(out_delay));
+        mem_bus_master_agent_info_m(id, "Setting data out output delay " & time'image(out_delay));
         com_channel_data.set_param(out_delay);
-        send(channel, id, MEM_BUS_AGNT_CMD_SET_OUTPUT_DELAY);
-        mem_bus_agent_debug_m(id, "data out output delay set");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_OUTPUT_DELAY);
+        mem_bus_master_agent_debug_m(id, "data out output delay set");
     end procedure;
 
 
-    procedure mem_bus_agent_wait_done(
+    procedure mem_bus_master_agent_wait_done(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        mem_bus_agent_info_m(id, "Waiting till all accesses are executed");
-        send(channel, id, MEM_BUS_AGNT_CMD_WAIT_DONE);
-        mem_bus_agent_info_m(id, "All accesses are executed!");
+        mem_bus_master_agent_info_m(id, "Waiting till all accesses are executed");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WAIT_DONE);
+        mem_bus_master_agent_info_m(id, "All accesses are executed!");
     end procedure;
 
 
-    procedure mem_bus_agent_set_slave_index(
+    procedure mem_bus_master_agent_set_slave_index(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     node        : in    natural
     ) is
     begin
         com_channel_data.set_param(node);
-        send(channel, id, MEM_BUS_AGNT_CMD_SET_SLAVE_INDEX);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_SLAVE_INDEX);
     end procedure;
 
 
@@ -769,7 +770,7 @@ package body mem_bus_agent_pkg is
         end case;
     end;
 
-    procedure mem_bus_agent_write(
+    procedure mem_bus_master_agent_write(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -790,9 +791,9 @@ package body mem_bus_agent_pkg is
             addr_aligned := address - (address mod 4);
             convert_be_and_write_data(address, write_data, be, data_32);
             if (blocking) then
-                mem_bus_agent_write_blocking(channel, id, addr_aligned, data_32, be);
+                mem_bus_master_agent_write_blocking(channel, id, addr_aligned, data_32, be);
             else
-                mem_bus_agent_write_non_blocking(channel, id, addr_aligned, data_32, be);
+                mem_bus_master_agent_write_non_blocking(channel, id, addr_aligned, data_32, be);
             end if;
         else
             loop_count := write_data'length / 32;
@@ -803,9 +804,9 @@ package body mem_bus_agent_pkg is
             for i in 0 to loop_count-1 loop
                 data_32 := write_data(i*32+31 downto i*32);
                 if (blocking) then
-                    mem_bus_agent_write_blocking(channel, id, addr_loop, data_32, be);
+                    mem_bus_master_agent_write_blocking(channel, id, addr_loop, data_32, be);
                 else
-                    mem_bus_agent_write_non_blocking(channel, id, addr_loop, data_32, be);
+                    mem_bus_master_agent_write_non_blocking(channel, id, addr_loop, data_32, be);
                 end if;
                 addr_loop := addr_loop + 4;
             end loop;
@@ -813,7 +814,7 @@ package body mem_bus_agent_pkg is
     end procedure;
 
 
-    procedure mem_bus_agent_read(
+    procedure mem_bus_master_agent_read(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     address     : in    integer;
@@ -833,7 +834,7 @@ package body mem_bus_agent_pkg is
         if (read_data'length = 8 or read_data'length = 16 or read_data'length = 32) then
             addr_aligned := address - (address mod 4);
             convert_be(address, read_data, be);
-            mem_bus_agent_read(channel, id, addr_aligned, data_32, be);
+            mem_bus_master_agent_read(channel, id, addr_aligned, data_32, be);
             convert_read_data(address, read_data'length, data_32, read_data);
         else
             loop_count := read_data'length / 32;
@@ -842,7 +843,7 @@ package body mem_bus_agent_pkg is
             be := x"F";
 
             for i in 0 to loop_count-1 loop
-                mem_bus_agent_read(channel, id, addr_loop, data_32, be);
+                mem_bus_master_agent_read(channel, id, addr_loop, data_32, be);
                 read_data(i*32+31 downto i*32) := data_32;
                 if (stat_burst = false) then
                     addr_loop := addr_loop + 4;
@@ -851,25 +852,25 @@ package body mem_bus_agent_pkg is
         end if;
     end procedure;
 
-    procedure mem_bus_agent_enable_transaction_reporting(
+    procedure mem_bus_master_agent_enable_transaction_reporting(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        mem_bus_agent_debug_m(id, "Enabling transaction reporting");
-        send(channel, id, MEM_BUS_AGNT_CMD_ENABLE_TRANS_REPORT);
-        mem_bus_agent_debug_m(id, "Transaction reporting enabled");
+        mem_bus_master_agent_debug_m(id, "Enabling transaction reporting");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT);
+        mem_bus_master_agent_debug_m(id, "Transaction reporting enabled");
     end procedure;
 
 
-    procedure mem_bus_agent_disable_transaction_reporting(
+    procedure mem_bus_master_agent_disable_transaction_reporting(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        mem_bus_agent_debug_m(id, "Disabling transaction reporting");
-        send(channel, id, MEM_BUS_AGNT_CMD_DISABLE_TRANS_REPORT);
-        mem_bus_agent_debug_m(id, "Transaction reporting disabled");
+        mem_bus_master_agent_debug_m(id, "Disabling transaction reporting");
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_DISABLE_TRANS_REPORT);
+        mem_bus_master_agent_debug_m(id, "Transaction reporting disabled");
     end procedure;
 
 end package body;

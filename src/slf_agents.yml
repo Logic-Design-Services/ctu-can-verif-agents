@@ -8,7 +8,7 @@ source_list:
     - file: clock_agent/clk_gen_agent_pkg.vhd
     - file: interrupt_agent/interrupt_agent_pkg.vhd
     - file: timestamp_agent/timestamp_agent_pkg.vhd
-    - file: memory_bus_agent/mem_bus_agent_pkg.vhd
+    - file: mem_bus_master_agent/mem_bus_master_agent_pkg.vhd
     - file: reset_agent/reset_agent_pkg.vhd
     - file: can_agent/can_agent_pkg.vhd
     - file: dio_agent/dio_agent_pkg.vhd
@@ -19,7 +19,7 @@ source_list:
     - file: clock_agent/clk_gen_agent.vhd
     - file: interrupt_agent/interrupt_agent.vhd
     - file: timestamp_agent/timestamp_agent.vhd
-    - file: memory_bus_agent/mem_bus_agent.vhd
+    - file: mem_bus_master_agent/mem_bus_master_agent.vhd
     - file: reset_agent/reset_agent.vhd
     - file: can_agent/can_agent.vhd
     - file: dio_agent/dio_agent.vhd
