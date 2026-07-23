@@ -9,6 +9,8 @@ source_list:
     - file: interrupt_agent/interrupt_agent_pkg.vhd
     - file: timestamp_agent/timestamp_agent_pkg.vhd
     - file: mem_bus_master_agent/mem_bus_master_agent_pkg.vhd
+    - file: mem_bus_slave_agent/mem_bus_slave_agent_pkg.vhd
+    - file: mem_model/mem_model_pkg.vhd
     - file: reset_agent/reset_agent_pkg.vhd
     - file: can_agent/can_agent_pkg.vhd
     - file: dio_agent/dio_agent_pkg.vhd
@@ -20,6 +22,8 @@ source_list:
     - file: interrupt_agent/interrupt_agent.vhd
     - file: timestamp_agent/timestamp_agent.vhd
     - file: mem_bus_master_agent/mem_bus_master_agent.vhd
+    - file: mem_bus_slave_agent/mem_bus_slave_agent.vhd
+    - file: mem_model/mem_model.vhd
     - file: reset_agent/reset_agent.vhd
     - file: can_agent/can_agent.vhd
     - file: dio_agent/dio_agent.vhd
