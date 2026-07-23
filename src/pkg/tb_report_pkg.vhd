@@ -73,14 +73,13 @@
 --------------------------------------------------------------------------------
 -- Revision History:
 --    28.2.2021   Created file
---    20.7.2026   Removed dependency on CTU CAN FD VIP, use "error_ocurred"
---                flag instead.
 --------------------------------------------------------------------------------
 
 library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-use ctu_can_agents.tb_prot_types_pkg.all;
+use ctu_can_agents.tb_types_pkg.all;
+use ctu_can_agents.tb_shared_vars_pkg.all;
 
 package tb_report_pkg is
 
@@ -92,15 +91,14 @@ package tb_report_pkg is
     );
 
     signal global_verbosity         : t_log_verbosity := verbosity_info;
-    shared variable error_ocurred   : t_prot_boolean;
 
     procedure set_log_verbosity(
         constant value                : in  t_log_verbosity;
-        signal verbosity            : out t_log_verbosity
+        signal   verbosity            : out t_log_verbosity
     );
 
     procedure debug_m(
-                 msg         : in string
+        msg         : in string
     );
 
     procedure info_m(
@@ -108,21 +106,21 @@ package tb_report_pkg is
     );
 
     procedure warning_m(
-                 msg         : in string
+        msg         : in string
     );
 
     procedure error_m(
-                 msg         : in string
+        msg         : in string
     );
 
     procedure check_m(
-                 cond        : in boolean;
-                 msg         : in string
+        cond        : in boolean;
+        msg         : in string
     );
 
     procedure check_false_m(
-                 cond        : in boolean;
-                 msg         : in string
+        cond        : in boolean;
+        msg         : in string
     );
 
 end package;
@@ -132,7 +130,7 @@ package body tb_report_pkg is
 
     procedure set_log_verbosity(
         constant value                : in  t_log_verbosity;
-        signal verbosity            : out t_log_verbosity
+        signal   verbosity            : out t_log_verbosity
     ) is
     begin
         verbosity <= value;
@@ -150,7 +148,7 @@ package body tb_report_pkg is
     end procedure;
 
     procedure warning_m(
-                 msg         : in string
+        msg         : in string
     ) is
     begin
         if (global_verbosity = verbosity_debug or
@@ -162,7 +160,7 @@ package body tb_report_pkg is
     end procedure;
 
     procedure error_m(
-                 msg         : in string
+        msg         : in string
     ) is
     begin
         if ((global_verbosity = verbosity_debug or
@@ -170,13 +168,13 @@ package body tb_report_pkg is
             global_verbosity = verbosity_warning or
             global_verbosity = verbosity_error))
         then
-            error_ocurred.set(true);
+            ctu_vip_test_result.set_result(false);
             report "ERROR: " & msg severity error;
         end if;
     end procedure;
 
     procedure debug_m(
-                 msg         : in string
+        msg         : in string
     ) is
     begin
         if (global_verbosity = verbosity_debug) then
@@ -185,8 +183,8 @@ package body tb_report_pkg is
     end procedure;
 
     procedure check_m(
-                 cond        : in boolean;
-                 msg         : in string
+        cond        : in boolean;
+        msg         : in string
     ) is
     begin
         if (cond) then
@@ -195,14 +193,14 @@ package body tb_report_pkg is
                 report "PASS: " & msg;
             end if;
         else
-            error_ocurred.set(true);
+            ctu_vip_test_result.set_result(false);
             report "FAIL: " & msg severity error;
         end if;
     end procedure;
 
     procedure check_false_m(
-                 cond        : in boolean;
-                 msg         : in string
+        cond        : in boolean;
+        msg         : in string
     ) is
     begin
         if (not cond) then
@@ -211,7 +209,7 @@ package body tb_report_pkg is
                 report "PASS: " & msg;
             end if;
         else
-            error_ocurred.set(true);
+            ctu_vip_test_result.set_result(false);
             report "FAIL: " & msg severity error;
         end if;
     end procedure;

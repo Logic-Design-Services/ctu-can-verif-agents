@@ -163,6 +163,7 @@ begin
     begin
         wait until rising_edge(clk);
 
+        -- TODO: Implement responses from memory model here!
         if (scs = '1') then
 
         end if;

@@ -78,6 +78,7 @@ library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
 use ctu_can_agents.tb_report_pkg.all;
+use ctu_can_agents.tb_types_pkg.all;
 
 package tb_helpers_pkg is
 
@@ -383,6 +384,5 @@ package body tb_helpers_pkg is
             error_m("Unknown access size: " & integer'image(size));
         end case;
     end;
-
 
 end package body;
