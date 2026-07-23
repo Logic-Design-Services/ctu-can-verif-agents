@@ -81,7 +81,7 @@ Library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
 use ctu_can_agents.tb_report_pkg.all;
-use ctu_can_agents.tb_prot_types_pkg.all;
+use ctu_can_agents.tb_types_pkg.all;
 
 package tb_communication_pkg is
 

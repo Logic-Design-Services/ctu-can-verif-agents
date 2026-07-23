@@ -68,7 +68,7 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Package with common protected types
+--    Package with common types
 --
 --------------------------------------------------------------------------------
 -- Revision History:
@@ -78,7 +78,7 @@
 Library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-package tb_prot_types_pkg is
+package tb_types_pkg is
 
     -----------------------------------------------------------------------
     -- Communication channel data
@@ -103,30 +103,53 @@ package tb_prot_types_pkg is
         impure function get_reply_code return natural;
 
         procedure set_param(param : in  std_logic_vector);
-        procedure set_param(param : in  std_logic);
+        procedure set_param_2(param : in  std_logic_vector);
+        procedure set_param_3(param : in  std_logic_vector);
+
+        procedure set_param(param  : in  std_logic);
+        procedure set_param_2(param : in  std_logic);
+        procedure set_param_3(param : in  std_logic);
+
         procedure set_param(param : in  time);
-        procedure set_param2(param : in  time);
+        procedure set_param_2(param : in  time);
+        procedure set_param_3(param : in  time);
+
         procedure set_param(param : in  integer);
+        procedure set_param_2(param : in  integer);
+        procedure set_param_3(param : in  integer);
+
         procedure set_param(param : in  boolean);
+        procedure set_param_2(param : in  boolean);
+        procedure set_param_3(param : in  boolean);
+
         procedure set_param(param : in  string);
+        procedure set_param_2(param : in  string);
+        procedure set_param_3(param : in  string);
 
-        impure function get_param return std_logic;
-        impure function get_param return std_logic_vector;
-        impure function get_param return time;
-        impure function get_param2 return time;
-        impure function get_param return integer;
-        impure function get_param return boolean;
-        impure function get_param return string;
+        impure function get_param   return std_logic;
+        impure function get_param_2 return std_logic;
+        impure function get_param_3 return std_logic;
 
-    end protected;
+        impure function get_param   return std_logic_vector;
+        impure function get_param_2 return std_logic_vector;
+        impure function get_param_3 return std_logic_vector;
 
-    -----------------------------------------------------------------------
-    -- Result of test
-    -----------------------------------------------------------------------
-    type t_ctu_test_result is protected
-        procedure set_result(result : boolean);
-        impure function get_result return boolean;
-        impure function get_result return std_logic;
+        impure function get_param   return time;
+        impure function get_param_2 return time;
+        impure function get_param_3 return time;
+
+        impure function get_param   return integer;
+        impure function get_param_2 return integer;
+        impure function get_param_3 return integer;
+
+        impure function get_param   return boolean;
+        impure function get_param_2 return boolean;
+        impure function get_param_3 return boolean;
+
+        impure function get_param   return string;
+        impure function get_param_2 return string;
+        impure function get_param_3 return string;
+
     end protected;
 
     -----------------------------------------------------------------------
@@ -137,24 +160,56 @@ package tb_prot_types_pkg is
         impure function get return boolean;
     end protected;
 
+    -----------------------------------------------------------------------
+    -- Memory bus transfer
+    -----------------------------------------------------------------------
+    type t_mem_bus_transfer is record
+        write                       :   boolean;
+        address                     :   integer;
+        byte_enable                 :   std_logic_vector(3 downto 0);
+        write_data                  :   std_logic_vector(31 downto 0);
+        read_data                   :   std_logic_vector(31 downto 0);
+        wait_request_cycles         :   natural;
+        read_data_valid_cycles      :   natural;
+    end record;
+
 end package;
 
 
-package body tb_prot_types_pkg is
+package body tb_types_pkg is
 
+    -----------------------------------------------------------------------
+    -- Communication channel data
+    -----------------------------------------------------------------------
     type t_com_channel_data is protected body
         variable dest_i             : natural;
         variable msg_code_i         : integer;
 
         variable reply_code_i       : integer;
 
-        variable par_logic_vect     : std_logic_vector(127 downto 0);
+        variable par_logic_vect     : std_logic_vector(255 downto 0);
+        variable par_logic_vect_2   : std_logic_vector(255 downto 0);
+        variable par_logic_vect_3   : std_logic_vector(255 downto 0);
+
         variable par_logic          : std_logic;
+        variable par_logic_2        : std_logic;
+        variable par_logic_3        : std_logic;
+
         variable par_time           : time;
         variable par_time_2         : time;
+        variable par_time_3         : time;
+
         variable par_int            : integer;
+        variable par_int_2          : integer;
+        variable par_int_3          : integer;
+
         variable par_bool           : boolean;
+        variable par_bool_2         : boolean;
+        variable par_bool_3         : boolean;
+
         variable par_string         : string(1 to 100);
+        variable par_string_2       : string(1 to 100);
+        variable par_string_3       : string(1 to 100);
 
         procedure set_dest_and_msg_code(
             dest        : in natural;
@@ -198,20 +253,46 @@ package body tb_prot_types_pkg is
             par_logic := param;
         end procedure;
 
+        procedure set_param_2(
+            param       : in  std_logic
+        ) is
+        begin
+            par_logic_2 := param;
+        end procedure;
+
+        procedure set_param_3(
+            param       : in  std_logic
+        ) is
+        begin
+            par_logic_3 := param;
+        end procedure;
 
         procedure set_param(
             param       : in  std_logic_vector
         ) is
         begin
-            if (param'length <= 128) then
-                par_logic_vect(param'length - 1 downto 0) := param;
-            else
-                -- Remove to avoid circular dependency
-                --warning_m(COM_PKG_TAG & " Truncating passed parameter!!");
-                par_logic_vect := param(127 downto 0);
-            end if;
+            assert (param'length <= par_logic_vect'length);
+            par_logic_vect := (others => '0');
+            par_logic_vect(param'length - 1 downto 0) := param;
         end procedure;
 
+        procedure set_param_2(
+            param       : in  std_logic_vector
+        ) is
+        begin
+            assert (param'length <= par_logic_vect_2'length);
+            par_logic_vect_2 := (others => '0');
+            par_logic_vect_2(param'length - 1 downto 0) := param;
+        end procedure;
+
+        procedure set_param_3(
+            param       : in  std_logic_vector
+        ) is
+        begin
+            assert (param'length <= par_logic_vect_3'length);
+            par_logic_vect_3 := (others => '0');
+            par_logic_vect_3(param'length - 1 downto 0) := param;
+        end procedure;
 
         procedure set_param(
             param       : in  time
@@ -220,14 +301,19 @@ package body tb_prot_types_pkg is
             par_time := param;
         end procedure;
 
-
-        procedure set_param2(
+        procedure set_param_2(
             param       : in  time
         ) is
         begin
             par_time_2 := param;
         end procedure;
 
+        procedure set_param_3(
+            param       : in  time
+        ) is
+        begin
+            par_time_3 := param;
+        end procedure;
 
         procedure set_param(
             param       : in  integer
@@ -236,20 +322,63 @@ package body tb_prot_types_pkg is
             par_int := param;
         end procedure;
 
+        procedure set_param_2(
+            param       : in  integer
+        ) is
+        begin
+            par_int_2 := param;
+        end procedure;
+
+        procedure set_param_3(
+            param       : in  integer
+        ) is
+        begin
+            par_int_3 := param;
+        end procedure;
 
         procedure set_param(
-            param : in  boolean
+            param       : in  boolean
         ) is
         begin
             par_bool := param;
         end procedure;
 
+        procedure set_param_2(
+            param       : in  boolean
+        ) is
+        begin
+            par_bool_2 := param;
+        end procedure;
+
+        procedure set_param_3(
+            param       : in  boolean
+        ) is
+        begin
+            par_bool_3 := param;
+        end procedure;
 
         procedure set_param(
             param : in  string
         ) is
         begin
+            assert (param'length <= par_string'length);
             par_string := param;
+        end procedure;
+
+        procedure set_param_2(
+            param : in  string
+        ) is
+        begin
+            assert (param'length <= par_string_2'length);
+            par_string_2 := param;
+        end procedure;
+
+        procedure set_param_3(
+            param : in  string
+        ) is
+        begin
+            assert (param'length <= par_string_3'length);
+            par_string_3 := param;
         end procedure;
 
 
@@ -259,6 +388,17 @@ package body tb_prot_types_pkg is
             return par_logic;
         end function;
 
+        impure function get_param_2 return std_logic
+        is
+        begin
+            return par_logic_2;
+        end function;
+
+        impure function get_param_3 return std_logic
+        is
+        begin
+            return par_logic_3;
+        end function;
 
         impure function get_param return std_logic_vector
         is
@@ -266,6 +406,17 @@ package body tb_prot_types_pkg is
             return par_logic_vect;
         end function;
 
+        impure function get_param_2 return std_logic_vector
+        is
+        begin
+            return par_logic_vect_2;
+        end function;
+
+        impure function get_param_3 return std_logic_vector
+        is
+        begin
+            return par_logic_vect_3;
+        end function;
 
         impure function get_param return time
         is
@@ -273,18 +424,34 @@ package body tb_prot_types_pkg is
             return par_time;
         end function;
 
-
-        impure function get_param2 return time
+        impure function get_param_2 return time
         is
         begin
             return par_time_2;
         end function;
 
+        impure function get_param_3 return time
+        is
+        begin
+            return par_time_3;
+        end function;
 
         impure function get_param return integer
         is
         begin
             return par_int;
+        end function;
+
+        impure function get_param_2 return integer
+        is
+        begin
+            return par_int_2;
+        end function;
+
+        impure function get_param_3 return integer
+        is
+        begin
+            return par_int_3;
         end function;
 
         impure function get_param return string
@@ -293,40 +460,41 @@ package body tb_prot_types_pkg is
             return par_string;
         end function;
 
+        impure function get_param_2 return string
+        is
+        begin
+            return par_string_2;
+        end function;
+
+        impure function get_param_3 return string
+        is
+        begin
+            return par_string_3;
+        end function;
+
         impure function get_param return boolean
         is
         begin
             return par_bool;
         end function;
 
-    end protected body;
-
-
-    type t_ctu_test_result is protected body
-
-        variable result_i : boolean;
-
-        procedure set_result(result : boolean) is
+        impure function get_param_2 return boolean
+        is
         begin
-            result_i := result;
-        end procedure;
-
-        impure function get_result return boolean is
-        begin
-            return result_i;
+            return par_bool_2;
         end function;
 
-        impure function get_result return std_logic is
+        impure function get_param_3 return boolean
+        is
         begin
-            if result_i then
-                return '1';
-            else
-                return '0';
-            end if;
+            return par_bool_3;
         end function;
 
     end protected body;
 
+    -----------------------------------------------------------------------
+    -- Protected variant of boolean
+    -----------------------------------------------------------------------
     type t_prot_boolean is protected body
         variable val : boolean;
 

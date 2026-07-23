@@ -1051,7 +1051,7 @@ package body can_agent_pkg is
             com_channel_data.set_param(item.msg);
         end if;
 
-        com_channel_data.set_param2(item.sample_rate);
+        com_channel_data.set_param_2(item.sample_rate);
 
         send(channel, id, CAN_AGNT_CMD_MONITOR_PUSH_ITEM);
         can_agent_debug_m(id, " Monitor item pushed");
@@ -1096,7 +1096,7 @@ package body can_agent_pkg is
         if (item.print_msg) then
             com_channel_data.set_param(item.msg);
         end if;
-        com_channel_data.set_param2(item.sample_rate);
+        com_channel_data.set_param_2(item.sample_rate);
 
         send(channel, id, CAN_AGNT_CMD_MONITOR_MONITOR_SINGLE_ITEM);
 

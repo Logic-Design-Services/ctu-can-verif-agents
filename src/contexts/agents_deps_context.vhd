@@ -82,8 +82,8 @@ context agents_deps_context is
     library ctu_can_agents;
     use ctu_can_agents.tb_report_pkg.all;
     use ctu_can_agents.tb_random_pkg.all;
-    use ctu_can_agents.tb_prot_types_pkg.all;
+    use ctu_can_agents.tb_types_pkg.all;
     use ctu_can_agents.tb_communication_pkg.all;
-    use ctu_can_agents.tb_pli_conversion_pkg.all;
+    use ctu_can_agents.tb_helpers_pkg.all;
 
 end context;

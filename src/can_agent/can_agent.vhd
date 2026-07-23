@@ -398,7 +398,7 @@ begin
             else
                 push_mon_item.msg := (OTHERS => ' ');
             end if;
-            push_mon_item.sample_rate := com_channel_data.get_param2;
+            push_mon_item.sample_rate := com_channel_data.get_param_2;
 
             monitor_fifo_push;
 
@@ -423,7 +423,7 @@ begin
             else
                 push_mon_item.msg := (OTHERS => ' ');
             end if;
-            push_mon_item.sample_rate := com_channel_data.get_param2;
+            push_mon_item.sample_rate := com_channel_data.get_param_2;
 
             if (monitor_wp /= monitor_rp) then
                 warning_m(CAN_AGENT_TAG &

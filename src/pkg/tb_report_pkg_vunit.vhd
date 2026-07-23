@@ -80,7 +80,7 @@
 Library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-use ctu_can_agents.tb_prot_types_pkg.all;
+use ctu_can_agents.tb_types_pkg.all;
 
 -- Only place where Vunit is used. All functions are wrapped so that TB can run
 -- also without Vunit!

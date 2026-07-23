@@ -10,8 +10,8 @@ source_list:
     ###############################################################################################
     # Packages
     ###############################################################################################
-    - file: pkg/tb_prot_types_pkg.vhd
+    - file: pkg/tb_types_pkg.vhd
     - file: pkg/tb_report_pkg_vunit.vhd      # CAREFUL tb_report_pkg_vunit is different!
     - file: pkg/tb_communication_pkg.vhd
     - file: pkg/tb_random_pkg.vhd
-    - file: pkg/tb_pli_conversion_pkg.vhd
+    - file: pkg/tb_helpers_pkg.vhd

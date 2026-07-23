@@ -129,39 +129,39 @@ end entity;
 
 architecture tb of mem_bus_master_agent is
 
-    type t_mem_bus_access_array is array (0 to G_ACCESS_FIFO_DEPTH - 1)
-        of t_mem_bus_access_item;
+    type t_mem_bus_transfer_array is array (0 to G_ACCESS_FIFO_DEPTH - 1)
+        of t_mem_bus_transfer;
 
-    signal mem_bus_access_fifo  :   t_mem_bus_access_array;
-    signal fifo_wp              :   integer := 0;
-    signal fifo_rp              :   integer := 0;
+    signal mem_bus_transfer_fifo    :   t_mem_bus_transfer_array;
+    signal fifo_wp                  :   integer := 0;
+    signal fifo_rp                  :   integer := 0;
 
     --------------------------------------------------------------------------
     -- Configuration parameters
     ---------------------------------------------------------------------------
-    signal agent_ena            :   boolean := false;
-    signal is_x_mode            :   boolean := true;
+    signal agent_ena                :   boolean := false;
+    signal is_x_mode                :   boolean := true;
 
     -- Only single setup for all input signals
-    signal x_mode_setup         :   time := 2 ns;
-    signal x_mode_hold          :   time := 1 ns;
+    signal x_mode_setup             :   time := 2 ns;
+    signal x_mode_hold              :   time := 1 ns;
 
     -- Output signal is output data only!
-    signal data_out_delay       :   time := 3 ns;
+    signal data_out_delay           :   time := 3 ns;
 
-    signal period               :   time := 10 ns;
+    signal period                   :   time := 10 ns;
 
-    signal read_data_i          :   std_logic_vector(31 downto 0);
+    signal read_data_i              :   std_logic_vector(31 downto 0);
 
-    signal scs_i                :   std_logic := '0';
+    signal scs_i                    :   std_logic := '0';
 
     -- By default, transactions go to first slave (DUT). This is used in compliance
     -- tests which only talk to DUT node via Memory bus master agent.
-    signal slave_index          :   natural := 0;
+    signal slave_index              :   natural := 0;
 
-    signal last_clk_re          :   time := 0 ns;
+    signal last_clk_re              :   time := 0 ns;
 
-    signal trans_report_en      :   boolean := true;
+    signal trans_report_en          :   boolean := true;
 
 begin
 
@@ -171,7 +171,7 @@ begin
     p_receiver : process
         variable cmd            : integer;
         variable reply_code     : integer;
-        variable transaction    : t_mem_bus_access_item;
+        variable transaction    : t_mem_bus_transfer;
         variable tmp            : std_logic_vector(127 downto 0);
         variable tmp_int        : integer;
     begin
@@ -195,7 +195,7 @@ begin
             transaction.byte_enable := tmp(3 DOWNTO 0);
             transaction.write_data := tmp(35 DOWNTO 4);
 
-            mem_bus_access_fifo(fifo_wp) <= transaction;
+            mem_bus_transfer_fifo(fifo_wp) <= transaction;
             wait for 0 ns;
             fifo_wp <= (fifo_wp + 1) mod G_ACCESS_FIFO_DEPTH;
 
@@ -208,7 +208,7 @@ begin
             transaction.byte_enable := tmp(3 DOWNTO 0);
             transaction.write_data := tmp(35 DOWNTO 4);
 
-            mem_bus_access_fifo(fifo_wp) <= transaction;
+            mem_bus_transfer_fifo(fifo_wp) <= transaction;
             wait for 0 ns;
             fifo_wp <= (fifo_wp + 1) mod G_ACCESS_FIFO_DEPTH;
             wait for 0 ns;
@@ -223,7 +223,7 @@ begin
             tmp := com_channel_data.get_param;
             transaction.byte_enable := tmp(3 DOWNTO 0);
 
-            mem_bus_access_fifo(fifo_wp) <= transaction;
+            mem_bus_transfer_fifo(fifo_wp) <= transaction;
             wait for 0 ns;
             fifo_wp <= (fifo_wp + 1) mod G_ACCESS_FIFO_DEPTH;
             wait for 0 ns;
@@ -285,10 +285,10 @@ begin
     -- Memory bus access process
     ---------------------------------------------------------------------------
     p_mem_bus_access : process
-        variable curr_access   : t_mem_bus_access_item;
+        variable curr_access   : t_mem_bus_transfer;
 
         procedure print_write_access(
-            variable mem_access    : inout t_mem_bus_access_item
+            variable mem_access    : inout t_mem_bus_transfer
         ) is
             variable node_str  : string(1 to 10);
         begin
@@ -309,7 +309,7 @@ begin
 
 
         procedure print_read_access(
-            variable mem_access    : inout t_mem_bus_access_item
+            variable mem_access    : inout t_mem_bus_transfer
         ) is
             variable node_str  : string(1 to 10);
         begin
@@ -331,7 +331,7 @@ begin
 
 
         procedure drive_access(
-            variable mem_access    : inout t_mem_bus_access_item;
+            variable mem_access    : inout t_mem_bus_transfer;
             signal   read_data_in  : out   std_logic_vector(31 downto 0)
         ) is
             variable post_re_time, post_re_time_2   : time;
@@ -424,7 +424,7 @@ begin
 
                 -- There is something in FIFO -> do memory access
                 if (fifo_rp /= fifo_wp) then
-                    curr_access := mem_bus_access_fifo(fifo_rp);
+                    curr_access := mem_bus_transfer_fifo(fifo_rp);
 
                     if (curr_access.write) then
                         print_write_access(curr_access);

@@ -124,14 +124,6 @@ package mem_bus_master_agent_pkg is
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
 
-    type t_mem_bus_access_item is record
-        write           :   boolean;
-        address         :   natural range 0 to 2 ** 16 - 1;
-        byte_enable     :   std_logic_vector(3 downto 0);
-        write_data      :   std_logic_vector(31 downto 0);
-        read_data       :   std_logic_vector(31 downto 0);
-    end record;
-
     ---------------------------------------------------------------------------
     -- Start memory bus agent.
     --
@@ -404,7 +396,7 @@ package mem_bus_master_agent_pkg is
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
 
-    -- Supported commands for clock agent (sent as message types)
+    -- Supported commands for memory bus master agent (sent as message types)
     constant MEM_BUS_MASTER_AGNT_CMD_START                 : integer := 0;
     constant MEM_BUS_MASTER_AGNT_CMD_STOP                  : integer := 1;
     constant MEM_BUS_MASTER_AGNT_CMD_WRITE_NON_BLOCKING    : integer := 2;
@@ -625,151 +617,6 @@ package body mem_bus_master_agent_pkg is
         send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_SLAVE_INDEX);
     end procedure;
 
-
-    ---------------------------------------------------------------------------
-    -- 8, 16 and 32 bits accesses are supported. Also bursts of multiples of
-    -- 32 bits. Unaligned accesses are not supported (e.g. writing 4 byte buffer
-    -- to address 0x2).
-    ---------------------------------------------------------------------------
-    function check_access_size(
-        address     : in    integer;
-        size        : in    natural
-    ) return boolean is
-    begin
-        if ((size /= 8) and (size /= 16) and ((size mod 32) /= 0)) then
-            return false;
-        end if;
-
-        -- Half-word unaligned access
-        if ((size = 16) and ((address mod 2) /= 0)) then
-            return false;
-        end if;
-
-        -- Word unaligned access
-        if ((size mod 32) = 0) and ((address mod 4) /= 0) then
-            return false;
-        end if;
-
-        return true;
-    end function;
-
-
-    procedure convert_be_and_write_data(
-                 address     : in    natural;
-                 data_in     : in    std_logic_vector;
-        variable be          : out   std_logic_vector(3 downto 0);
-        variable write_data  : out   std_logic_vector(31 downto 0)
-    ) is
-    begin
-        write_data := (OTHERS => '0');
-        case data_in'length is
-        when 8 =>
-            case (address mod 4) is
-            when 0 =>
-                be := "0001";
-                write_data(7 downto 0) := data_in;
-            when 1 =>
-                be := "0010";
-                write_data(15 downto 8) := data_in;
-            when 2 =>
-                be := "0100";
-                write_data(23 downto 16) := data_in;
-            when 3 =>
-                be := "1000";
-                write_data(31 downto 24) := data_in;
-            when others =>
-                error_m("Unreachable code -> Simulator bug?");
-            end case;
-        when 16 =>
-            case (address mod 4) is
-            when 0 =>
-                be := "0011";
-                write_data(15 downto 0) := data_in;
-            when 2 =>
-                be := "1100";
-                write_data(31 downto 16) := data_in;
-            when others =>
-                error_m("Unsupported 16 bit write at addr: " & to_string(address));
-            end case;
-        when others =>
-            be := "1111";
-            write_data(31 downto 0) := data_in;
-        end case;
-    end procedure;
-
-
-    procedure convert_be(
-                 address     : in    natural;
-                 data_in     : in    std_logic_vector;
-        variable be          : out   std_logic_vector(3 downto 0)
-    )is
-    begin
-
-        case data_in'length is
-        when 8 =>
-            case (address mod 4) is
-            when 0 =>
-                be := "0001";
-            when 1 =>
-                be := "0010";
-            when 2 =>
-                be := "0100";
-            when 3 =>
-                be := "1000";
-            when others =>
-                error_m("Unreachable code -> Simulator bug?");
-            end case;
-        when 16 =>
-            case (address mod 4) is
-            when 0 =>
-                be := "0011";
-            when 2 =>
-                be := "1100";
-            when others =>
-                error_m("16 bit access must be half-word aligned!");
-            end case;
-        when others =>
-            be := "1111";
-        end case;
-    end procedure;
-
-    procedure convert_read_data(
-                 address             : in    natural;
-                 size                : in    natural;
-                 data_in             : in    std_logic_vector(31 downto 0);
-        variable data_out            : out   std_logic_vector
-    )is
-    begin
-        case size is
-        when 8 =>
-            case (address mod 4) is
-            when 0 =>
-                data_out(7 downto 0) := data_in(7 downto 0);
-            when 1 =>
-                data_out(7 downto 0) := data_in(15 downto 8);
-            when 2 =>
-                data_out(7 downto 0) := data_in(23 downto 16);
-            when 3 =>
-                data_out(7 downto 0) := data_in(31 downto 24);
-            when others =>
-                error_m("Invalid 32 bit access!");
-            end case;
-        when 16 =>
-            case (address mod 4) is
-            when 0 =>
-                data_out(15 downto 0) := data_in(15 downto 0);
-            when 2 =>
-                data_out(15 downto 0) := data_in(31 downto 16);
-            when others =>
-                error_m("Invalid address for 16 bit access!");
-            end case;
-        when 32 =>
-            data_out := data_in;
-        when others =>
-            error_m("Unknown access size: " & integer'image(size));
-        end case;
-    end;
-
     procedure mem_bus_master_agent_write(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
@@ -783,9 +630,7 @@ package body mem_bus_master_agent_pkg is
         variable data_32        :       std_logic_vector(31 downto 0);
         variable loop_count     :       integer;
     begin
-        if (not check_access_size(address, write_data'length)) then
-            return;
-        end if;
+        check_access_size(address, write_data'length);
 
         if (write_data'length = 8 or write_data'length = 16 or write_data'length = 32) then
             addr_aligned := address - (address mod 4);
@@ -827,9 +672,7 @@ package body mem_bus_master_agent_pkg is
         variable data_32        :       std_logic_vector(31 downto 0);
         variable loop_count     :       integer;
     begin
-        if (not check_access_size(address, read_data'length)) then
-            return;
-        end if;
+        check_access_size(address, read_data'length);
 
         if (read_data'length = 8 or read_data'length = 16 or read_data'length = 32) then
             addr_aligned := address - (address mod 4);
