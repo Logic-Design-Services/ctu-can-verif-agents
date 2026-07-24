@@ -67,22 +67,46 @@
 --------------------------------------------------------------------------------
 
 --------------------------------------------------------------------------------
--- Purpose:
---   Declaration of common test-bench libraries.
+--  Purpose:
+--    API with package for feature tests.
+--
+--    Testbench that uses feature test agent shall implement a body of this
+--    package.
 --
 --------------------------------------------------------------------------------
 -- Revision History:
---    20.7.2026   Created file
+--    20.7.2026     Created file
 --------------------------------------------------------------------------------
 
-context agents_deps_context is
+library ctu_can_agents;
+context ctu_can_agents.ieee_context;
+context ctu_can_agents.agents_deps_context;
 
-    library ctu_can_agents;
-    use ctu_can_agents.tb_report_pkg.all;
-    use ctu_can_agents.tb_random_pkg.all;
-    use ctu_can_agents.tb_types_pkg.all;
-    use ctu_can_agents.tb_communication_pkg.all;
-    use ctu_can_agents.tb_helpers_pkg.all;
-    use ctu_can_agents.tb_shared_vars_pkg.all;
+package feature_test_agent_api_pkg is
 
-end context;
+    ----------------------------------------------------------------------------
+    -- Initializes feature test.
+    --
+    --  Shall perform all Testbench or DUT settings needed before running
+    --  actual logic of the test. The same function runs in each feature test.
+    --
+    -- Arguments:
+    --  channel         Communication channel
+    ----------------------------------------------------------------------------
+    procedure init_feature_test(
+        signal   channel      : inout   t_com_channel
+    );
+
+    ----------------------------------------------------------------------------
+    -- Executes feature test.
+    --
+    -- Arguments:
+    --  test_name       Name of the test to execute
+    --  channel         Communication channel
+    ----------------------------------------------------------------------------
+    procedure exec_feature_test(
+        constant test_name    : in      string;
+        signal   channel      : inout   t_com_channel
+    );
+
+end package;
