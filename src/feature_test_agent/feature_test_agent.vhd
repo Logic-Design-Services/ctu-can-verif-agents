@@ -93,7 +93,7 @@ entity feature_test_agent is
 
         -- Test details
         test_name                   :     string;
-        dut_name                    :     string
+        G_DUT_NAME                  :     string
     );
     port(
         -----------------------------------------------------------------------
@@ -106,17 +106,17 @@ entity feature_test_agent is
         rst_n                       : in  std_logic;
 
         -- Memory bus slave (both CTU CAN FD and CTU CAN XL)
-        mbs_write_data              : in  std_logic_vector(31 DOWNTO 0);
-        mbs_read_data               : out std_logic_vector(31 DOWNTO 0);
-        mbs_adress                  : in  std_logic_vector(15 DOWNTO 0);
+        mbs_write_data              : in  std_logic_vector(31 downto 0);
+        mbs_read_data               : out std_logic_vector(31 downto 0);
+        mbs_adress                  : in  std_logic_vector(15 downto 0);
         mbs_scs                     : in  std_logic;
         mbs_srd                     : in  std_logic;
         mbs_swr                     : in  std_logic;
-        mbs_sbe                     : in  std_logic_vector(3 DOWNTO 0);
+        mbs_sbe                     : in  std_logic_vector(3 downto 0);
 
         -- Memory bus master (only CTU CAN XL)
-        mbm_data_in                 : in  std_logic_vector(31 downto 0);
-        mbm_data_out                : out std_logic_vector(31 downto 0);
+        mbm_read_data               : in  std_logic_vector(31 downto 0);
+        mbm_write_data              : out std_logic_vector(31 downto 0);
         mbm_adress                  : out std_logic_vector(31 downto 0);
         mbm_scs                     : out std_logic;
         mbm_srd                     : out std_logic;
@@ -240,7 +240,7 @@ architecture tb of feature_test_agent is
         scan_mode           : in  std_logic;
 
         -- Memory interface (slave)
-        mbs_data_in         : in  std_logic_vector(31 downto 0);
+        mbs_write_data      : in  std_logic_vector(31 downto 0);
         mbs_data_out        : out std_logic_vector(31 downto 0);
         mbs_adress          : in  std_logic_vector(15 downto 0);
         mbs_scs             : in  std_logic;
@@ -249,8 +249,8 @@ architecture tb of feature_test_agent is
         mbs_sbe             : in  std_logic_vector(3 downto 0);
 
         -- Memory interface (master)
-        mbm_data_in         : in  std_logic_vector(31 downto 0);
-        mbm_data_out        : out std_logic_vector(31 downto 0);
+        mbm_read_data       : in  std_logic_vector(31 downto 0);
+        mbm_write_data      : out std_logic_vector(31 downto 0);
         mbm_adress          : out std_logic_vector(31 downto 0);
         mbm_scs             : out std_logic;
         mbm_srd             : out std_logic;
@@ -276,7 +276,7 @@ begin
     ---------------------------------------------------------------------------
     -- Test node
     ---------------------------------------------------------------------------
-    g_dut : if (dut_name = "ctu_can_fd_top") generate
+    g_dut : if (G_DUT_NAME = "ctu_can_fd_top") generate
 
         i_test_node : ctu_can_fd_top
         generic map(
@@ -324,7 +324,7 @@ begin
             timestamp           => (others => '1')
         );
 
-    elsif (dut_name = "ctu_can_xl_top") generate
+    elsif (G_DUT_NAME = "ctu_can_xl_top") generate
 
         i_test_node : ctu_can_xl_top
         generic map (
@@ -344,7 +344,7 @@ begin
             scan_mode           => '0',
 
             -- Memory interface (slave)
-            mbs_data_in         => mbs_write_data,
+            mbs_write_data      => mbs_write_data,
             mbs_data_out        => mbs_read_data,
             mbs_adress          => mbs_adress,
             mbs_scs             => mbs_scs,
@@ -353,8 +353,8 @@ begin
             mbs_sbe             => mbs_sbe,
 
             -- Memory interface (master)
-            mbm_data_in         => mbm_data_in,
-            mbm_data_out        => mbm_data_out,
+            mbm_read_data       => mbm_read_data,
+            mbm_write_data      => mbm_write_data,
             mbm_adress          => mbm_adress,
             mbm_scs             => mbm_scs,
             mbm_srd             => mbm_srd,
@@ -378,7 +378,7 @@ begin
 
         process
         begin
-            report "Unsupported dut_name: " & dut_name severity failure;
+            report "Unsupported G_DUT_NAME: " & G_DUT_NAME severity failure;
             wait;
         end process;
 

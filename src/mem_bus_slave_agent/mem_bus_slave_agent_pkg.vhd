@@ -86,15 +86,16 @@ package mem_bus_slave_agent_pkg is
     ---------------------------------------------------------------------------
     component mem_bus_slave_agent is
     generic(
-        G_COM_ID                : natural
+        G_COM_ID                    : natural;
+        G_WAIT_CYCLES_FIFO_DEPTH    : natural
     );
     port (
         -- Clock
         clk                 : in    std_logic;
 
         -- Memory interface (master)
-        data_in             : in  std_logic_vector(31 downto 0);
-        data_out            : out std_logic_vector(31 downto 0);
+        write_data          : in  std_logic_vector(31 downto 0);
+        read_data           : out std_logic_vector(31 downto 0);
         adress              : in  std_logic_vector(31 downto 0);
         scs                 : in  std_logic;
         srd                 : in  std_logic;

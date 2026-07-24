@@ -108,16 +108,15 @@ use ctu_can_agents.mem_bus_master_agent_pkg.all;
 
 entity mem_bus_master_agent is
     generic(
-        G_ACCESS_FIFO_DEPTH     : natural := 32;
-        G_NUM_SLAVES            : natural := 2;
-        G_COM_ID                : natural
+        G_COM_ID                : natural;
+        G_ACCESS_FIFO_DEPTH     : natural := 32
     );
     port (
         -- Clock
         clk             : in    std_logic;
 
         -- Memory bus interface
-        scs             : out   std_logic_vector(G_NUM_SLAVES - 1 downto 0) := (OTHERS => '0');
+        scs             : out   std_logic := '0';
         swr             : out   std_logic := 'X';
         srd             : out   std_logic := 'X';
         sbe             : out   std_logic_vector(3 downto 0) := "XXXX";
@@ -148,19 +147,9 @@ architecture tb of mem_bus_master_agent is
 
     -- Output signal is output data only!
     signal data_out_delay           :   time := 3 ns;
-
     signal period                   :   time := 10 ns;
-
     signal read_data_i              :   std_logic_vector(31 downto 0);
-
-    signal scs_i                    :   std_logic := '0';
-
-    -- By default, transactions go to first slave (DUT). This is used in compliance
-    -- tests which only talk to DUT node via Memory bus master agent.
-    signal slave_index              :   natural := 0;
-
     signal last_clk_re              :   time := 0 ns;
-
     signal trans_report_en          :   boolean := true;
 
 begin
@@ -252,10 +241,6 @@ begin
                 wait until fifo_wp = fifo_rp;
             end if;
 
-        when MEM_BUS_MASTER_AGNT_CMD_SET_SLAVE_INDEX =>
-            slave_index <= com_channel_data.get_param;
-            wait for 0 ns;
-
         when MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT =>
             trans_report_en <= true;
 
@@ -292,14 +277,9 @@ begin
         ) is
             variable node_str  : string(1 to 10);
         begin
-            if (slave_index = 0) then
-                node_str := "DUT Node  ";
-            else
-                node_str := "TEST Node ";
-            end if;
-
             if (trans_report_en) then
-                info_m(MEM_BUS_MASTER_AGENT_TAG & "Write to:  " & node_str &
+                mem_bus_master_agent_info_m(G_COM_ID,
+                    "Write transfer,  " &
                     "Address: 0x" & to_hstring(std_logic_vector(to_unsigned(curr_access.address, 32))) &
                     ", Write Data: 0x" & to_hstring(curr_access.write_data) &
                     ", Be: " & to_hstring(curr_access.byte_enable)
@@ -313,14 +293,9 @@ begin
         ) is
             variable node_str  : string(1 to 10);
         begin
-            if (slave_index = 0) then
-                node_str := "DUT Node  ";
-            else
-                node_str := "TEST Node ";
-            end if;
 
             if (trans_report_en) then
-                info_m(MEM_BUS_MASTER_AGENT_TAG & "Read from: " & node_str &
+                mem_bus_master_agent_info_m(G_COM_ID, "Read transfer, from: " &
                     "Address: 0x" & to_hstring(std_logic_vector(to_unsigned(curr_access.address, 32))) &
                     ", Read Data: 0x" & to_hstring(curr_access.read_data) &
                     ", Be: " & to_hstring(curr_access.byte_enable)
@@ -338,7 +313,7 @@ begin
         begin
             -- Chip select can't have Xs, otherwise we get dummy transactions!
             wait until falling_edge(clk);
-            scs_i <= '1';
+            scs <= '1';
 
             if (is_x_mode) then
                 swr <= 'X';
@@ -377,7 +352,7 @@ begin
                 wait for post_re_time;
 
                 if (post_re_time = x_mode_hold) then
-                    scs_i <= '0';
+                    scs <= '0';
                     swr <= 'X';
                     srd <= 'X';
                     write_data <= (OTHERS => 'X');
@@ -393,7 +368,7 @@ begin
                 if (post_re_time = x_mode_hold) then
                     read_data_in <= read_data;
                 else
-                    scs_i <= '0';
+                    scs <= '0';
                     swr <= 'X';
                     srd <= 'X';
                     write_data <= (OTHERS => 'X');
@@ -408,7 +383,7 @@ begin
                 wait for (period / 2) - 2 ps; -- This will end up just before next falling edge!
                 swr <= '0';
                 srd <= '0';
-                scs_i <= '0';
+                scs <= '0';
                 address <= (OTHERS => '0');
                 write_data <= (OTHERS => '0');
                 sbe <= (OTHERS => '0');
@@ -447,13 +422,5 @@ begin
             wait until agent_ena;
         end if;
     end process;
-
-    ---------------------------------------------------------------------------
-    -- Propagate chip select to slave which is selected
-    ---------------------------------------------------------------------------
-    g_cs : for i in 0 to G_NUM_SLAVES - 1 generate
-        scs(i) <= scs_i when (slave_index = i) else
-                  '0';
-    end generate;
 
 end architecture;

@@ -90,13 +90,15 @@ use ctu_can_agents.tb_shared_vars_pkg.all;
 package test_controller_agent_pkg is
 
     component test_controller_agent is
-    generic(
-        -- Test configuration
-        test_name               : string;
-        test_type               : string
+    generic (
+        G_COM_ID                : natural;
+
+        -- Static configuration (resolved at elaboration)
+        G_TEST_NAME             : string;
+        G_TEST_TYPE             : string
     );
     port (
-        -- VPI top test control / status signals
+        -- VIP test control / status signals
         test_start              : in  std_logic;
         test_done               : out std_logic := '0';
         test_success            : out std_logic := '0';

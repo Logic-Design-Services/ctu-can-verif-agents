@@ -90,7 +90,7 @@ use ctu_can_agents.timestamp_agent_pkg.all;
 
 entity timestamp_agent is
     generic (
-        G_ID        :     natural
+        G_COM_ID    :     natural
     );
     port (
         clk_sys     : in  std_logic;
@@ -128,7 +128,7 @@ begin
         variable tmp : std_logic_vector(127 downto 0);
         variable tmp_int : integer;
     begin
-        receive_start(default_channel, G_ID);
+        receive_start(default_channel, G_COM_ID);
 
         -- Command is sent as message type
         cmd := com_channel_data.get_msg_code;

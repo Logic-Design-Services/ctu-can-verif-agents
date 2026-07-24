@@ -90,7 +90,7 @@ use ctu_can_agents.dio_agent_pkg.all;
 
 entity dio_agent is
     generic(
-        G_COM_ID                : natural
+        G_COM_ID                :       natural
     );
     port (
         dio                     : inout std_logic

@@ -260,11 +260,11 @@ package feature_test_agent_pkg is
     component feature_test_agent is
     generic (
         -- Addresss on communication channel
-        G_ID                        :     natural;
+        G_COM_ID                    :     natural;
 
         -- Test details
-        test_name                   :     string;
-        dut_name                    :     string
+        G_TEST_NAME                 :     string;
+        G_DUT_NAME                  :     string
     );
     port(
         -----------------------------------------------------------------------
@@ -277,17 +277,17 @@ package feature_test_agent_pkg is
         rst_n                       : in  std_logic;
 
         -- Memory bus slave (both CTU CAN FD and CTU CAN XL)
-        mbs_write_data              : in  std_logic_vector(31 DOWNTO 0);
-        mbs_read_data               : out std_logic_vector(31 DOWNTO 0);
-        mbs_adress                  : in  std_logic_vector(15 DOWNTO 0);
+        mbs_write_data              : in  std_logic_vector(31 downto 0);
+        mbs_read_data               : out std_logic_vector(31 downto 0);
+        mbs_adress                  : in  std_logic_vector(15 downto 0);
         mbs_scs                     : in  std_logic;
         mbs_srd                     : in  std_logic;
         mbs_swr                     : in  std_logic;
-        mbs_sbe                     : in  std_logic_vector(3 DOWNTO 0);
+        mbs_sbe                     : in  std_logic_vector(3 downto 0);
 
         -- Memory bus master (only CTU CAN XL)
-        mbm_data_in                 : in  std_logic_vector(31 downto 0);
-        mbm_data_out                : out std_logic_vector(31 downto 0);
+        mbm_read_data               : in  std_logic_vector(31 downto 0);
+        mbm_write_data              : out std_logic_vector(31 downto 0);
         mbm_adress                  : out std_logic_vector(31 downto 0);
         mbm_scs                     : out std_logic;
         mbm_srd                     : out std_logic;

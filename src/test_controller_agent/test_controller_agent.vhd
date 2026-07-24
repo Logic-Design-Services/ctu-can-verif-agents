@@ -94,8 +94,8 @@ entity test_controller_agent is
         G_COM_ID                : natural;
 
         -- Static configuration (resolved at elaboration)
-        test_name               : string;
-        test_type               : string
+        G_TEST_NAME             : string;
+        G_TEST_TYPE             : string
     );
     port (
         -- VIP test control / status signals
@@ -157,12 +157,12 @@ begin
         -----------------------------------------------------------------------
         -- Start the test (give command to corresponding test type agent)
         -----------------------------------------------------------------------
-        if (test_type = "compliance" or test_type = "reference") then
+        if (G_TEST_TYPE = "compliance" or G_TEST_TYPE = "reference") then
             cosim_start <= '1';
             wait until cosim_done = '1';
             test_success_i := pli_test_result;
 
-        elsif (test_type = "feature") then
+        elsif (G_TEST_TYPE = "feature") then
             feature_start <= '1';
             wait until feature_done = '1';
             test_success_i := feature_result;
@@ -196,7 +196,7 @@ begin
     -- Cosimulation (for compliance and reference tests)
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    g_cosimulation : if (test_type = "compliance" or test_type = "reference") generate
+    g_cosimulation : if (G_TEST_TYPE = "compliance" or G_TEST_TYPE = "reference") generate
 
         ---------------------------------------------------------------------------
         -- Cosimulation handling process
@@ -323,5 +323,13 @@ begin
         end process;
 
     end generate;
+
+    ---------------------------------------------------------------------------
+    -- Checks
+    ---------------------------------------------------------------------------
+    assert G_TEST_TYPE = "feature" or G_TEST_TYPE = "compliance" or G_TEST_TYPE = "reference"
+        report "Unsupported test type: " & G_TEST_TYPE & ", choose one of: feature, compliance, reference"
+        severity failure;
+
 
 end architecture;

@@ -89,13 +89,12 @@ package mem_bus_master_agent_pkg is
     ---------------------------------------------------------------------------
     component mem_bus_master_agent is
     generic(
-        G_ACCESS_FIFO_DEPTH     : natural := 32;
-        G_NUM_SLAVES            : natural := 2;
-        G_COM_ID                : natural
+        G_COM_ID                : natural;
+        G_ACCESS_FIFO_DEPTH     : natural := 32
     );
     port (
         clk             : in    std_logic;
-        scs             : out   std_logic_vector(G_NUM_SLAVES - 1 downto 0) := (OTHERS => '0');
+        scs             : out   std_logic;
         swr             : out   std_logic := 'X';
         srd             : out   std_logic := 'X';
         sbe             : out   std_logic_vector(3 downto 0) := "XXXX";
@@ -354,20 +353,6 @@ package mem_bus_master_agent_pkg is
         constant    stat_burst  : in    boolean := false
     );
 
-
-    ---------------------------------------------------------------------------
-    -- Changes slave node to which the transaction will be routed. Slave nodes
-    -- are distuiguished by chip select.
-    --
-    -- @param channel       Channel on which to send the request
-    --
-    ---------------------------------------------------------------------------
-    procedure mem_bus_master_agent_set_slave_index(
-        signal      channel     : inout t_com_channel;
-        constant    id          : in    natural;
-                    node        : in    natural
-    );
-
     ---------------------------------------------------------------------------
     -- Enable transaction reporting (reports each memory access to console)
     --
@@ -411,10 +396,8 @@ package mem_bus_master_agent_pkg is
     constant MEM_BUS_MASTER_AGNT_CMD_SET_OUTPUT_DELAY      : integer := 10;
     constant MEM_BUS_MASTER_AGNT_CMD_WAIT_DONE             : integer := 11;
 
-    constant MEM_BUS_MASTER_AGNT_CMD_SET_SLAVE_INDEX       : integer := 12;
-
-    constant MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT   : integer := 13;
-    constant MEM_BUS_MASTER_AGNT_CMD_DISABLE_TRANS_REPORT  : integer := 14;
+    constant MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT   : integer := 12;
+    constant MEM_BUS_MASTER_AGNT_CMD_DISABLE_TRANS_REPORT  : integer := 13;
 
     -- Tag for messages
     constant MEM_BUS_MASTER_AGENT_TAG : string := "Memory Bus Master Agent: ";
@@ -606,16 +589,6 @@ package body mem_bus_master_agent_pkg is
         mem_bus_master_agent_info_m(id, "All accesses are executed!");
     end procedure;
 
-
-    procedure mem_bus_master_agent_set_slave_index(
-        signal      channel     : inout t_com_channel;
-        constant    id          : in    natural;
-                    node        : in    natural
-    ) is
-    begin
-        com_channel_data.set_param(node);
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_SLAVE_INDEX);
-    end procedure;
 
     procedure mem_bus_master_agent_write(
         signal      channel     : inout t_com_channel;

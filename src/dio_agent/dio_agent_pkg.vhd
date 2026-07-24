@@ -86,10 +86,10 @@ package dio_agent_pkg is
     ---------------------------------------------------------------------------
     component dio_agent is
     generic (
-        G_COM_ID        :      natural
+        G_COM_ID        :         natural
     );
     port (
-        dio             :   in std_logic
+        dio             :   inout std_logic
     );
     end component;
 

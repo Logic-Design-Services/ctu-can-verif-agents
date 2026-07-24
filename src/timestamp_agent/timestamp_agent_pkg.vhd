@@ -86,8 +86,11 @@ package timestamp_agent_pkg is
     -- Interrupt agent component
     ---------------------------------------------------------------------------
     component timestamp_agent is
+    generic (
+        G_COM_ID    :     natural
+    );
     port (
-        clk_sys     : in std_logic;
+        clk_sys     : in  std_logic;
         timestamp   : out std_logic_vector(63 downto 0)
     );
     end component;

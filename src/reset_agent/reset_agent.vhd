@@ -85,11 +85,11 @@ use ctu_can_agents.reset_agent_pkg.all;
 
 entity reset_agent is
     generic (
-        G_ID    :       natural
+        G_COM_ID    :       natural
     );
     port (
         -- Generated reset output
-        reset   :   out std_logic
+        reset       :   out std_logic
     );
 end entity;
 
@@ -110,7 +110,7 @@ begin
         variable cmd : integer;
         variable reply_code : integer;
     begin
-        receive_start(default_channel, G_ID);
+        receive_start(default_channel, G_COM_ID);
 
         -- Command is sent as message type
         cmd := com_channel_data.get_msg_code;

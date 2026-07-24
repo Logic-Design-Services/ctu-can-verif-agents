@@ -88,11 +88,11 @@ package reset_agent_pkg is
     ---------------------------------------------------------------------------
     component reset_agent is
     generic (
-        G_ID    :       natural
+        G_COM_ID    :       natural
     );
     port (
         -- Generated reset
-        reset   :   out std_logic
+        reset       :   out std_logic
     );
     end component;
 
