@@ -14,6 +14,7 @@ source_list:
     - file: reset_agent/reset_agent_pkg.vhd
     - file: can_agent/can_agent_pkg.vhd
     - file: dio_agent/dio_agent_pkg.vhd
+    - file: test_controller_agent/test_controller_agent_pkg.vhd
 
     ###############################################################################################
     # Agents
@@ -27,3 +28,4 @@ source_list:
     - file: reset_agent/reset_agent.vhd
     - file: can_agent/can_agent.vhd
     - file: dio_agent/dio_agent.vhd
+    - file: test_controller_agent/test_controller_agent.vhd

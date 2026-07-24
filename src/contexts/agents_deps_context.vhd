@@ -85,5 +85,6 @@ context agents_deps_context is
     use ctu_can_agents.tb_types_pkg.all;
     use ctu_can_agents.tb_communication_pkg.all;
     use ctu_can_agents.tb_helpers_pkg.all;
+    use ctu_can_agents.tb_shared_vars_pkg.all;
 
 end context;

@@ -15,3 +15,4 @@ source_list:
     - file: pkg/tb_communication_pkg.vhd
     - file: pkg/tb_random_pkg.vhd
     - file: pkg/tb_helpers_pkg.vhd
+    - file: pkg/tb_shared_vars_pkg.vhd

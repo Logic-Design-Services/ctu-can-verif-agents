@@ -74,16 +74,17 @@
 --    31.1.2020   Created file
 --------------------------------------------------------------------------------
 
-Library ctu_can_fd_tb;
-context ctu_can_fd_tb.ieee_context;
-context ctu_can_fd_tb.tb_common_context;
+library ctu_can_agents;
+context ctu_can_agents.ieee_context;
+context ctu_can_agents.agents_deps_context;
 
-use ctu_can_fd_tb.can_agent_pkg.all;
-use ctu_can_fd_tb.clk_gen_agent_pkg.all;
-use ctu_can_fd_tb.interrupt_agent_pkg.all;
-use ctu_can_fd_tb.mem_bus_agent_pkg.all;
-use ctu_can_fd_tb.reset_agent_pkg.all;
-use ctu_can_fd_tb.tb_shared_vars_pkg.all;
+use ctu_can_agents.can_agent_pkg.all;
+use ctu_can_agents.clk_gen_agent_pkg.all;
+use ctu_can_agents.interrupt_agent_pkg.all;
+use ctu_can_agents.mem_bus_master_agent_pkg.all;
+use ctu_can_agents.mem_bus_slave_agent_pkg.all;
+use ctu_can_agents.reset_agent_pkg.all;
+use ctu_can_agents.tb_shared_vars_pkg.all;
 
 
 package test_controller_agent_pkg is
@@ -92,28 +93,13 @@ package test_controller_agent_pkg is
     generic(
         -- Test configuration
         test_name               : string;
-        test_type               : string;
-        seed                    : natural;
-
-        -- DUT configuration
-        cfg_sys_clk_period      : string;
-
-        cfg_brp                 : natural;
-        cfg_prop                : natural;
-        cfg_ph_1                : natural;
-        cfg_ph_2                : natural;
-        cfg_sjw                 : natural;
-        cfg_brp_fd              : natural;
-        cfg_prop_fd             : natural;
-        cfg_ph_1_fd             : natural;
-        cfg_ph_2_fd             : natural;
-        cfg_sjw_fd              : natural
+        test_type               : string
     );
     port (
         -- VPI top test control / status signals
-        test_start          : in  std_logic;
-        test_done           : out std_logic := '0';
-        test_success        : out std_logic := '0';
+        test_start              : in  std_logic;
+        test_done               : out std_logic := '0';
+        test_success            : out std_logic := '0';
 
         -- PLI interface for communication with compliance test library
         pli_clk                 : out std_logic;
@@ -133,39 +119,39 @@ package test_controller_agent_pkg is
     end component;
 
     -- PLI command destinations
-    constant PLI_DEST_TEST_CONTROLLER_AGENT : std_logic_vector(7 downto 0) := x"00";
-    constant PLI_DEST_CLK_GEN_AGENT         : std_logic_vector(7 downto 0) := x"01";
-    constant PLI_DEST_RES_GEN_AGENT         : std_logic_vector(7 downto 0) := x"02";
-    constant PLI_DEST_MEM_BUS_AGENT         : std_logic_vector(7 downto 0) := x"03";
-    constant PLI_DEST_CAN_AGENT             : std_logic_vector(7 downto 0) := x"04";
+    constant PLI_DEST_TEST_CONTROLLER_AGENT             : std_logic_vector(7 downto 0) := x"00";
+    constant PLI_DEST_CLK_GEN_AGENT                     : std_logic_vector(7 downto 0) := x"01";
+    constant PLI_DEST_RES_GEN_AGENT                     : std_logic_vector(7 downto 0) := x"02";
+    constant PLI_DEST_MEM_BUS_MASTER_AGENT              : std_logic_vector(7 downto 0) := x"03";
+    constant PLI_DEST_CAN_AGENT                         : std_logic_vector(7 downto 0) := x"04";
 
     -- PLI commands for Reset agent
-    constant PLI_RST_AGNT_CMD_ASSERT        : std_logic_vector(7 downto 0) := x"01";
-    constant PLI_RST_AGNT_CMD_DEASSERT      : std_logic_vector(7 downto 0) := x"02";
-    constant PLI_RST_AGNT_CMD_POLARITY_SET  : std_logic_vector(7 downto 0) := x"03";
-    constant PLI_RST_AGNT_CMD_POLARITY_GET  : std_logic_vector(7 downto 0) := x"04";
+    constant PLI_RST_AGNT_CMD_ASSERT                    : std_logic_vector(7 downto 0) := x"01";
+    constant PLI_RST_AGNT_CMD_DEASSERT                  : std_logic_vector(7 downto 0) := x"02";
+    constant PLI_RST_AGNT_CMD_POLARITY_SET              : std_logic_vector(7 downto 0) := x"03";
+    constant PLI_RST_AGNT_CMD_POLARITY_GET              : std_logic_vector(7 downto 0) := x"04";
 
     -- PLI commands for Clock generator
-    constant PLI_CLK_AGNT_CMD_START        : std_logic_vector(7 downto 0) := x"01";
-    constant PLI_CLK_AGNT_CMD_STOP         : std_logic_vector(7 downto 0) := x"02";
-    constant PLI_CLK_AGNT_CMD_PERIOD_SET   : std_logic_vector(7 downto 0) := x"03";
-    constant PLI_CLK_AGNT_CMD_PERIOD_GET   : std_logic_vector(7 downto 0) := x"04";
-    constant PLI_CLK_AGNT_CMD_JITTER_SET   : std_logic_vector(7 downto 0) := x"05";
-    constant PLI_CLK_AGNT_CMD_JITTER_GET   : std_logic_vector(7 downto 0) := x"06";
-    constant PLI_CLK_AGNT_CMD_DUTY_SET     : std_logic_vector(7 downto 0) := x"07";
-    constant PLI_CLK_AGNT_CMD_DUTY_GET     : std_logic_vector(7 downto 0) := x"08";
+    constant PLI_CLK_AGNT_CMD_START                     : std_logic_vector(7 downto 0) := x"01";
+    constant PLI_CLK_AGNT_CMD_STOP                      : std_logic_vector(7 downto 0) := x"02";
+    constant PLI_CLK_AGNT_CMD_PERIOD_SET                : std_logic_vector(7 downto 0) := x"03";
+    constant PLI_CLK_AGNT_CMD_PERIOD_GET                : std_logic_vector(7 downto 0) := x"04";
+    constant PLI_CLK_AGNT_CMD_JITTER_SET                : std_logic_vector(7 downto 0) := x"05";
+    constant PLI_CLK_AGNT_CMD_JITTER_GET                : std_logic_vector(7 downto 0) := x"06";
+    constant PLI_CLK_AGNT_CMD_DUTY_SET                  : std_logic_vector(7 downto 0) := x"07";
+    constant PLI_CLK_AGNT_CMD_DUTY_GET                  : std_logic_vector(7 downto 0) := x"08";
 
     -- PLI commands for Memory bus agent
-    constant PLI_MEM_BUS_AGNT_START                 : std_logic_vector(7 downto 0) := x"01";
-    constant PLI_MEM_BUS_AGNT_STOP                  : std_logic_vector(7 downto 0) := x"02";
-    constant PLI_MEM_BUS_AGNT_WRITE                 : std_logic_vector(7 downto 0) := x"03";
-    constant PLI_MEM_BUS_AGNT_READ                  : std_logic_vector(7 downto 0) := x"04";
-    constant PLI_MEM_BUS_AGNT_X_MODE_START          : std_logic_vector(7 downto 0) := x"05";
-    constant PLI_MEM_BUS_AGNT_X_MODE_STOP           : std_logic_vector(7 downto 0) := x"06";
-    constant PLI_MEM_BUS_AGNT_SET_X_MODE_SETUP      : std_logic_vector(7 downto 0) := x"07";
-    constant PLI_MEM_BUS_AGNT_SET_X_MODE_HOLD       : std_logic_vector(7 downto 0) := x"08";
-    constant PLI_MEM_BUS_AGNT_SET_OUTPUT_DELAY      : std_logic_vector(7 downto 0) := x"0A";
-    constant PLI_MEM_BUS_AGNT_WAIT_DONE             : std_logic_vector(7 downto 0) := x"0B";
+    constant PLI_MEM_BUS_MASTER_AGNT_START              : std_logic_vector(7 downto 0) := x"01";
+    constant PLI_MEM_BUS_MASTER_AGNT_STOP               : std_logic_vector(7 downto 0) := x"02";
+    constant PLI_MEM_BUS_MASTER_AGNT_WRITE              : std_logic_vector(7 downto 0) := x"03";
+    constant PLI_MEM_BUS_MASTER_AGNT_READ               : std_logic_vector(7 downto 0) := x"04";
+    constant PLI_MEM_BUS_MASTER_AGNT_X_MODE_START       : std_logic_vector(7 downto 0) := x"05";
+    constant PLI_MEM_BUS_MASTER_AGNT_X_MODE_STOP        : std_logic_vector(7 downto 0) := x"06";
+    constant PLI_MEM_BUS_MASTER_AGNT_SET_X_MODE_SETUP   : std_logic_vector(7 downto 0) := x"07";
+    constant PLI_MEM_BUS_MASTER_AGNT_SET_X_MODE_HOLD    : std_logic_vector(7 downto 0) := x"08";
+    constant PLI_MEM_BUS_MASTER_AGNT_SET_OUTPUT_DELAY   : std_logic_vector(7 downto 0) := x"0A";
+    constant PLI_MEM_BUS_MASTER_AGNT_WAIT_DONE          : std_logic_vector(7 downto 0) := x"0B";
 
     -- PLI commands for CAN Agent
     constant PLI_CAN_AGNT_DRIVER_START                  : std_logic_vector(7 downto 0) := x"01";
@@ -214,37 +200,18 @@ package test_controller_agent_pkg is
     ---------------------------------------------------------------------------
 
     -- Interface between test controller agent and
-    signal feature_start    : std_logic := '0';
-    signal feature_done     : std_logic := '0';
-    signal feature_result   : std_logic := '0';
+    signal feature_start            : std_logic := '0';
+    signal feature_done             : std_logic := '0';
+    signal feature_result           : std_logic := '0';
 
     -- Interface between main test controller process and compliance test
     -- process (within test controller agent)
-    signal compliance_start : std_logic := '0';
-    signal compliance_done  : std_logic := '0';
+    signal cosim_start              : std_logic := '0';
+    signal cosim_done               : std_logic := '0';
 
     -- Interface between test controller agent and compliance library
-    signal pli_test_end     : std_logic := '0';
-    signal pli_test_result  : std_logic := '0';
-
-    -- Interface between test controller agent and reference test agent
-    signal reference_start  : std_logic := '0';
-    signal reference_done   : std_logic := '0';
-    signal reference_result : std_logic := '0';
-
-    -- Bit timing cofnig used in; compliance tests
-    signal cfg_sys_clk_period_i     : time;
-    signal cfg_brp_i                : natural;
-    signal cfg_prop_i               : natural;
-    signal cfg_ph_1_i               : natural;
-    signal cfg_ph_2_i               : natural;
-    signal cfg_sjw_i                : natural;
-    signal cfg_brp_fd_i             : natural;
-    signal cfg_prop_fd_i            : natural;
-    signal cfg_ph_1_fd_i            : natural;
-    signal cfg_ph_2_fd_i            : natural;
-    signal cfg_sjw_fd_i             : natural;
-    signal cfg_seed_i               : natural;
+    signal pli_test_end             : std_logic := '0';
+    signal pli_test_result          : std_logic := '0';
 
 
     ---------------------------------------------------------------------------
@@ -259,7 +226,8 @@ package test_controller_agent_pkg is
         signal      pli_cmd         : in    std_logic_vector(7 downto 0);
         signal      pli_data_out    : out   std_logic_vector;
         signal      pli_data_in     : in    std_logic_vector;
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     );
 
     ---------------------------------------------------------------------------
@@ -274,22 +242,24 @@ package test_controller_agent_pkg is
         signal      pli_cmd         : in    std_logic_vector(7 downto 0);
         signal      pli_data_out    : out   std_logic_vector;
         signal      pli_data_in     : in    std_logic_vector;
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     );
 
     ---------------------------------------------------------------------------
-    -- Process command for memory bus agent.
+    -- Process command for memory bus master agent.
     --
     -- @param pli_cmd      PLI command signal
     -- @param pli_data_out PLI data out signal
     -- @param pli_data_in  PLI data input
     -- @param channel      Communication channel
     ---------------------------------------------------------------------------
-    procedure pli_process_mem_bus_agent(
+    procedure pli_process_mem_bus_master_agent(
         signal      pli_cmd         : in    std_logic_vector(7 downto 0);
         signal      pli_data_out    : out   std_logic_vector;
         signal      pli_data_in     : in    std_logic_vector;
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     );
 
     ---------------------------------------------------------------------------
@@ -308,7 +278,8 @@ package test_controller_agent_pkg is
         signal      pli_data_in     : in    std_logic_vector;
         signal      pli_data_in_2   : in    std_logic_vector;
         signal      pli_str_buf_in  : in    std_logic_vector(511 downto 0);
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     );
 
     ---------------------------------------------------------------------------
@@ -342,19 +313,20 @@ package body test_controller_agent_pkg is
         signal      pli_cmd         : in    std_logic_vector(7 downto 0);
         signal      pli_data_out    : out   std_logic_vector;
         signal      pli_data_in     : in    std_logic_vector;
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     ) is
         variable data   :  std_logic;
     begin
         case pli_cmd is
         when PLI_RST_AGNT_CMD_ASSERT =>
-            rst_agent_assert(channel);
+            rst_agent_assert(channel, com_id);
         when PLI_RST_AGNT_CMD_DEASSERT =>
-            rst_agent_deassert(channel);
+            rst_agent_deassert(channel, com_id);
         when PLI_RST_AGNT_CMD_POLARITY_SET =>
-            rst_agent_polarity_set(channel, pli_data_in(0));
+            rst_agent_polarity_set(channel, com_id, pli_data_in(0));
         when PLI_RST_AGNT_CMD_POLARITY_GET =>
-            rst_agent_polarity_get(channel, data);
+            rst_agent_polarity_get(channel, com_id, data);
             pli_data_out(0) <= data;
             wait for 0 ns;
         when others =>
@@ -367,7 +339,8 @@ package body test_controller_agent_pkg is
         signal      pli_cmd         : in    std_logic_vector(7 downto 0);
         signal      pli_data_out    : out   std_logic_vector;
         signal      pli_data_in     : in    std_logic_vector;
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     ) is
         variable period : time;
         variable jitter : time;
@@ -376,28 +349,28 @@ package body test_controller_agent_pkg is
     begin
         case pli_cmd is
         when PLI_CLK_AGNT_CMD_START =>
-            clk_gen_agent_start(channel);
+            clk_gen_agent_start(channel, com_id);
         when PLI_CLK_AGNT_CMD_STOP =>
-            clk_gen_agent_stop(channel);
+            clk_gen_agent_stop(channel, com_id);
         when PLI_CLK_AGNT_CMD_PERIOD_SET =>
             pli_logic_vector_to_time(pli_data_in, period);
-            clk_agent_set_period(channel, period);
+            clk_agent_set_period(channel, com_id, period);
         when PLI_CLK_AGNT_CMD_PERIOD_GET =>
-            clk_agent_get_period(channel, period);
+            clk_agent_get_period(channel, com_id, period);
             pli_time_to_logic_vector(period, pli_data_out_i);
             pli_data_out <= pli_data_out_i;
         when PLI_CLK_AGNT_CMD_JITTER_SET =>
             pli_logic_vector_to_time(pli_data_in, jitter);
-            clk_agent_set_jitter(channel, jitter);
+            clk_agent_set_jitter(channel, com_id, jitter);
         when PLI_CLK_AGNT_CMD_JITTER_GET =>
-            clk_agent_get_jitter(channel, jitter);
+            clk_agent_get_jitter(channel, com_id, jitter);
             pli_time_to_logic_vector(jitter, pli_data_out_i);
             pli_data_out <= pli_data_out_i;
         when PLI_CLK_AGNT_CMD_DUTY_SET =>
             duty := to_integer(unsigned(pli_data_in));
-            clk_agent_set_duty(channel, duty);
+            clk_agent_set_duty(channel, com_id, duty);
         when PLI_CLK_AGNT_CMD_DUTY_GET =>
-            clk_agent_get_duty(channel, duty);
+            clk_agent_get_duty(channel, com_id, duty);
             pli_data_out <= std_logic_vector(to_unsigned(duty, 64));
         when others =>
             error_m("VPI: Unknown Clock generator agent command with code: 0x" & to_hstring(pli_cmd));
@@ -405,11 +378,12 @@ package body test_controller_agent_pkg is
     end procedure;
 
 
-    procedure pli_process_mem_bus_agent(
+    procedure pli_process_mem_bus_master_agent(
         signal      pli_cmd         : in    std_logic_vector(7 downto 0);
         signal      pli_data_out    : out   std_logic_vector;
         signal      pli_data_in     : in    std_logic_vector;
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     ) is
         variable address        :  integer;
         variable data_8         :  std_logic_vector(7 downto 0);
@@ -422,11 +396,11 @@ package body test_controller_agent_pkg is
         variable output_delay   :  time;
     begin
         case pli_cmd is
-        when PLI_MEM_BUS_AGNT_START =>
-            mem_bus_agent_start(channel);
-        when PLI_MEM_BUS_AGNT_STOP =>
-            mem_bus_agent_stop(channel);
-        when PLI_MEM_BUS_AGNT_WRITE =>
+        when PLI_MEM_BUS_MASTER_AGNT_START =>
+            mem_bus_master_agent_start(channel, com_id);
+        when PLI_MEM_BUS_MASTER_AGNT_STOP =>
+            mem_bus_master_agent_stop(channel, com_id);
+        when PLI_MEM_BUS_MASTER_AGNT_WRITE =>
             data_8 := pli_data_in(7 downto 0);
             data_16 := pli_data_in(15 downto 0);
             data_32 := pli_data_in(31 downto 0);
@@ -441,57 +415,58 @@ package body test_controller_agent_pkg is
 
             -- Access size encoded in these two bits!
             if (pli_data_in(49 downto 48) = "00") then
-                mem_bus_agent_write(channel, address, data_8, blocking);
+                mem_bus_master_agent_write(channel, com_id, address, data_8, blocking);
             elsif (pli_data_in(49 downto 48) = "01") then
-                mem_bus_agent_write(channel, address, data_16, blocking);
+                mem_bus_master_agent_write(channel, com_id, address, data_16, blocking);
             elsif (pli_data_in(49 downto 48) = "10") then
-                mem_bus_agent_write(channel, address, data_32, blocking);
+                mem_bus_master_agent_write(channel, com_id, address, data_32, blocking);
             else
                 error_m("VPI: Invalid memory bus agent write access size: " &
                         to_hstring(pli_data_in(49 downto 48)));
             end if;
 
-        when PLI_MEM_BUS_AGNT_READ =>
+        when PLI_MEM_BUS_MASTER_AGNT_READ =>
             address := to_integer(unsigned(pli_data_in(47 downto 32)));
 
             pli_data_out(pli_data_out'length - 1 downto 0) <= (OTHERS => '0');
             if (pli_data_in(49 downto 48) = "00") then
-                mem_bus_agent_read(channel, address, data_8);
+                mem_bus_master_agent_read(channel, com_id, address, data_8);
                 pli_data_out(7 downto 0) <= data_8;
             elsif (pli_data_in(49 downto 48) = "01") then
-                mem_bus_agent_read(channel, address, data_16);
+                mem_bus_master_agent_read(channel, com_id, address, data_16);
                 pli_data_out(15 downto 0) <= data_16;
             elsif (pli_data_in(49 downto 48) = "10") then
-                mem_bus_agent_read(channel, address, data_32);
+                mem_bus_master_agent_read(channel, com_id, address, data_32);
                 pli_data_out(31 downto 0) <= data_32;
             else
                 error_m("VPI: Invalid memory bus agent read access size: " &
                         to_hstring(pli_data_in(49 downto 48)));
             end if;
 
-        when PLI_MEM_BUS_AGNT_X_MODE_START =>
-            mem_bus_agent_x_mode_start(channel);
+        when PLI_MEM_BUS_MASTER_AGNT_X_MODE_START =>
+            mem_bus_master_agent_x_mode_start(channel, com_id);
 
-        when PLI_MEM_BUS_AGNT_X_MODE_STOP =>
-            mem_bus_agent_x_mode_start(channel);
+        when PLI_MEM_BUS_MASTER_AGNT_X_MODE_STOP =>
+            mem_bus_master_agent_x_mode_start(channel, com_id);
 
-        when PLI_MEM_BUS_AGNT_SET_X_MODE_SETUP =>
+        when PLI_MEM_BUS_MASTER_AGNT_SET_X_MODE_SETUP =>
             pli_logic_vector_to_time(pli_data_in, setup);
-            mem_bus_agent_set_x_mode_setup(channel, setup);
+            mem_bus_master_agent_set_x_mode_setup(channel, com_id, setup);
 
-        when PLI_MEM_BUS_AGNT_SET_X_MODE_HOLD =>
+        when PLI_MEM_BUS_MASTER_AGNT_SET_X_MODE_HOLD =>
             pli_logic_vector_to_time(pli_data_in, hold);
-            mem_bus_agent_set_x_mode_hold(channel, hold);
+            mem_bus_master_agent_set_x_mode_hold(channel, com_id, hold);
 
-        when PLI_MEM_BUS_AGNT_SET_OUTPUT_DELAY =>
+        when PLI_MEM_BUS_MASTER_AGNT_SET_OUTPUT_DELAY =>
             pli_logic_vector_to_time(pli_data_in, output_delay);
-            mem_bus_agent_set_output_delay(channel, output_delay);
+            mem_bus_master_agent_set_output_delay(channel, com_id, output_delay);
 
-        when PLI_MEM_BUS_AGNT_WAIT_DONE =>
-            mem_bus_agent_wait_done(channel);
+        when PLI_MEM_BUS_MASTER_AGNT_WAIT_DONE =>
+            mem_bus_master_agent_wait_done(channel, com_id);
 
         when others =>
-            error_m("VPI: Unknown Memory bus agent command with code: 0x" & to_hstring(pli_cmd));
+            error_m("VPI: Unknown Memory bus master agent command with code: 0x" &
+                    to_hstring(pli_cmd));
         end case;
     end procedure;
 
@@ -502,7 +477,8 @@ package body test_controller_agent_pkg is
         signal      pli_data_in     : in    std_logic_vector;
         signal      pli_data_in_2   : in    std_logic_vector;
         signal      pli_str_buf_in  : in    std_logic_vector(511 downto 0);
-        signal      channel         : inout t_com_channel
+        signal      channel         : inout t_com_channel;
+                    com_id          : in    integer
     ) is
         variable progress       : boolean;
         variable driven_val     : std_logic;
@@ -520,16 +496,16 @@ package body test_controller_agent_pkg is
         case pli_cmd is
 
         when PLI_CAN_AGNT_DRIVER_START =>
-            can_agent_driver_start(channel);
+            can_agent_driver_start(channel, com_id);
 
         when PLI_CAN_AGNT_DRIVER_STOP =>
-            can_agent_driver_stop(channel);
+            can_agent_driver_stop(channel, com_id);
 
         when PLI_CAN_AGNT_DRIVER_FLUSH =>
-            can_agent_driver_flush(channel);
+            can_agent_driver_flush(channel, com_id);
 
         when PLI_CAN_AGNT_DRIVER_GET_PROGRESS =>
-            can_agent_driver_get_progress(channel, progress);
+            can_agent_driver_get_progress(channel, com_id, progress);
             if (progress) then
                 pli_data_out(0) <= '1';
             else
@@ -537,7 +513,7 @@ package body test_controller_agent_pkg is
             end if;
 
         when PLI_CAN_AGNT_DRIVER_GET_DRIVEN_VAL =>
-            can_agent_driver_get_driven_val(channel, driven_val);
+            can_agent_driver_get_driven_val(channel, com_id, driven_val);
             pli_data_out(0) <= driven_val;
 
         when PLI_CAN_AGNT_DRIVER_PUSH_ITEM =>
@@ -554,14 +530,14 @@ package body test_controller_agent_pkg is
             end if;
             pli_logic_vector_to_time(pli_data_in, driver_item.drive_time);
 
-            can_agent_driver_push_item(channel, driver_item);
+            can_agent_driver_push_item(channel, com_id, driver_item);
 
         when PLI_CAN_AGNT_DRIVER_SET_WAIT_TIMEOUT =>
             pli_logic_vector_to_time(pli_data_in, timeout);
-            can_agent_driver_set_wait_timeout(channel, timeout);
+            can_agent_driver_set_wait_timeout(channel, com_id, timeout);
 
         when PLI_CAN_AGNT_DRIVER_WAIT_FINISH =>
-            can_agent_driver_wait_finish(channel);
+            can_agent_driver_wait_finish(channel, com_id);
 
         when PLI_CAN_AGNT_DRIVER_DRIVE_SINGLE_ITEM =>
 
@@ -576,29 +552,29 @@ package body test_controller_agent_pkg is
                 driver_item.print_msg := false;
             end if;
             pli_logic_vector_to_time(pli_data_in, driver_item.drive_time);
-            can_agent_driver_drive_single_item(channel, driver_item);
+            can_agent_driver_drive_single_item(channel, com_id, driver_item);
 
         when PLI_CAN_AGNT_DRIVER_DRIVE_ALL_ITEM =>
-            can_agent_driver_drive_all_items(channel);
+            can_agent_driver_drive_all_items(channel, com_id);
 
         when PLI_CAN_AGNT_DRIVER_SET_WAIT_FOR_MONITOR =>
             if (pli_data_in(0) = '1') then
-                can_agent_driver_set_wait_for_monitor(channel, true);
+                can_agent_driver_set_wait_for_monitor(channel, com_id, true);
             else
-                can_agent_driver_set_wait_for_monitor(channel, false);
+                can_agent_driver_set_wait_for_monitor(channel, com_id, false);
             end if;
 
         when PLI_CAN_AGNT_MONITOR_START =>
-            can_agent_monitor_start(channel);
+            can_agent_monitor_start(channel, com_id);
 
         when PLI_CAN_AGNT_MONITOR_STOP =>
-            can_agent_monitor_stop(channel);
+            can_agent_monitor_stop(channel, com_id);
 
         when PLI_CAN_AGNT_MONITOR_FLUSH =>
-            can_agent_monitor_flush(channel);
+            can_agent_monitor_flush(channel, com_id);
 
         when PLI_CAN_AGNT_MONITOR_GET_STATE =>
-            can_agent_monitor_get_state(channel, monitor_state);
+            can_agent_monitor_get_state(channel, com_id, monitor_state);
             case monitor_state is
             when mon_disabled =>
                 pli_data_out(2 downto 0) <= "000";
@@ -613,7 +589,7 @@ package body test_controller_agent_pkg is
             end case;
 
         when PLI_CAN_AGNT_MONITOR_GET_MONITORED_VAL =>
-            can_agent_monitor_get_monitored_val(channel, monitored_val);
+            can_agent_monitor_get_monitored_val(channel, com_id, monitored_val);
             pli_data_out(0) <= monitored_val;
 
         when PLI_CAN_AGNT_MONITOR_PUSH_ITEM =>
@@ -631,14 +607,14 @@ package body test_controller_agent_pkg is
             pli_logic_vector_to_time(pli_data_in, monitor_item.monitor_time);
             pli_logic_vector_to_time(pli_data_in_2, monitor_item.sample_rate);
 
-            can_agent_monitor_push_item(channel, monitor_item);
+            can_agent_monitor_push_item(channel, com_id, monitor_item);
 
         when PLI_CAN_AGNT_MONITOR_SET_WAIT_TIMEOUT =>
             pli_logic_vector_to_time(pli_data_in, timeout);
-            can_agent_monitor_set_wait_timeout(channel, timeout);
+            can_agent_monitor_set_wait_timeout(channel, com_id, timeout);
 
         when PLI_CAN_AGNT_MONITOR_WAIT_FINISH =>
-            can_agent_monitor_wait_finish(channel);
+            can_agent_monitor_wait_finish(channel, com_id);
 
         when PLI_CAN_AGNT_MONITOR_MONITOR_SINGLE_ITEM =>
             monitor_item.value := pli_data_in(63);
@@ -655,10 +631,10 @@ package body test_controller_agent_pkg is
             pli_logic_vector_to_time(pli_data_in, monitor_item.monitor_time);
             pli_logic_vector_to_time(pli_data_in_2, monitor_item.sample_rate);
 
-            can_agent_monitor_single_item(channel, monitor_item);
+            can_agent_monitor_single_item(channel, com_id, monitor_item);
 
         when PLI_CAN_AGNT_MONITOR_MONITOR_ALL_ITEMS =>
-            can_agent_monitor_all_items(channel);
+            can_agent_monitor_all_items(channel, com_id);
 
         when PLI_CAN_AGNT_MONITOR_SET_TRIGGER =>
             case pli_data_in(2 downto 0) is
@@ -682,10 +658,10 @@ package body test_controller_agent_pkg is
                 error_m("Invalid monitor trigger type: " &
                         to_hstring(pli_data_in(2 downto 0)));
             end case;
-            can_agent_monitor_set_trigger(channel, trigger);
+            can_agent_monitor_set_trigger(channel, com_id, trigger);
 
         when PLI_CAN_AGNT_MONITOR_GET_TRIGGER =>
-            can_agent_monitor_get_trigger(channel, trigger);
+            can_agent_monitor_get_trigger(channel, com_id, trigger);
             case trigger is
             when trig_immediately =>
                 pli_data_out(2 downto 0) <= "000";
@@ -706,17 +682,17 @@ package body test_controller_agent_pkg is
             end case;
 
         when PLI_CAN_AGNT_MONITOR_CHECK_RESULT =>
-            can_agent_monitor_check_result(channel);
+            can_agent_monitor_check_result(channel, com_id);
 
         when PLI_CAN_AGNT_MONITOR_SET_INPUT_DELAY =>
             pli_logic_vector_to_time(pli_data_in, input_delay);
-            can_agent_monitor_set_input_delay(channel, input_delay);
+            can_agent_monitor_set_input_delay(channel, com_id, input_delay);
 
         when PLI_CAN_AGNT_TX_RX_FEEDBACK_ENABLE =>
-            can_agent_configure_tx_to_rx_feedback(channel, true);
+            can_agent_configure_tx_to_rx_feedback(channel, com_id, true);
 
         when PLI_CAN_AGNT_TX_RX_FEEDBACK_DISABLE =>
-            can_agent_configure_tx_to_rx_feedback(channel, false);
+            can_agent_configure_tx_to_rx_feedback(channel, com_id, false);
 
         when others =>
             error_m("VPI: Unknown CAN agent command with code: 0x" & to_hstring(pli_cmd));
@@ -752,7 +728,11 @@ package body test_controller_agent_pkg is
                     param_name(i) := ' ';
                 end if;
             end loop;
-            info_m("SW test queries parameter: " & param_name(1 to 64));
+            info_m("Cosimulation queries parameter: " & param_name(1 to 64));
+
+            /*
+
+            TODO: Need to adapt this to read from Config DB, not directly generics !!!
 
             if (param_name(1 to 20) = "CFG_DUT_CLOCK_PERIOD") then
                 pli_time_to_logic_vector(cfg_sys_clk_period_i, pli_data_out_i);
@@ -795,8 +775,11 @@ package body test_controller_agent_pkg is
                 error_m("Unsupported configuration parameter name: " & param_name);
             end if;
 
+
         when PLI_TEST_AGNT_GET_SEED =>
             pli_data_out <= std_logic_vector(to_unsigned(cfg_seed_i, pli_data_out'length));
+
+            */
 
         when others =>
             error_m("VPI: Unknown test agent command with code: 0x" & to_hstring(pli_cmd));

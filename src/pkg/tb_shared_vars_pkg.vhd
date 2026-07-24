@@ -75,10 +75,10 @@
 --    15.2.2023   Created file
 --------------------------------------------------------------------------------
 
-Library ctu_can_tb;
-context ctu_can_tb.ieee_context;
+Library ctu_can_agents;
+context ctu_can_agents.ieee_context;
 
-use ctu_can_tb.tb_types_pkg.all;
+use ctu_can_agents.tb_types_pkg.all;
 
 package tb_shared_vars_pkg is
 

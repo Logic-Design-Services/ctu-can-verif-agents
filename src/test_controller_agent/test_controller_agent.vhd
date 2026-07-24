@@ -76,23 +76,26 @@
 --    23.7.2026   Adapt for need of CTU CAN XL testbench.
 --------------------------------------------------------------------------------
 
-Library ctu_can_fd_tb;
-context ctu_can_fd_tb.ieee_context;
-context ctu_can_fd_tb.tb_common_context;
+library ctu_can_agents;
+context ctu_can_agents.ieee_context;
+context ctu_can_agents.agents_deps_context;
 
-use ctu_can_fd_tb.test_controller_agent_pkg.all;
-use ctu_can_fd_tb.timestamp_agent_pkg.all;
-use ctu_can_fd_tb.mem_bus_agent_pkg.all;
-use ctu_can_fd_tb.interrupt_agent_pkg.all;
-use ctu_can_fd_tb.clk_gen_agent_pkg.all;
-use ctu_can_fd_tb.test_probe_agent_pkg.all;
-use ctu_can_fd_tb.reset_agent_pkg.all;
-use ctu_can_fd_tb.can_agent_pkg.all;
-use ctu_can_fd_tb.tb_shared_vars_pkg.all;
+use ctu_can_agents.test_controller_agent_pkg.all;
+use ctu_can_agents.timestamp_agent_pkg.all;
+use ctu_can_agents.mem_bus_master_agent_pkg.all;
+use ctu_can_agents.mem_bus_slave_agent_pkg.all;
+use ctu_can_agents.interrupt_agent_pkg.all;
+use ctu_can_agents.clk_gen_agent_pkg.all;
+use ctu_can_agents.reset_agent_pkg.all;
+use ctu_can_agents.can_agent_pkg.all;
 
 entity test_controller_agent is
-    generic(
-        config_db               : t_config_db;
+    generic (
+        G_COM_ID                : natural;
+
+        -- Static configuration (resolved at elaboration)
+        test_name               : string;
+        test_type               : string
     );
     port (
         -- VIP test control / status signals
@@ -129,7 +132,7 @@ begin
     --
     -- Gives commands to other processes / agents like so:
     --
-    --  Feature tests:
+    -- Feature tests:
     --   Invoke Feature test top which runs the test and gives back result
     --
     -- Compliance tests and Reference tests:
@@ -147,108 +150,28 @@ begin
         -- If there are multiple iterations, we want different random data
         -- to be used for each one!
         if (seed_applied = false) then
-            apply_rand_seed(seed);
+            apply_rand_seed(config_db.get("seed"));
             seed_applied <= true;
-        end if;
-
-        -----------------------------------------------------------------------
-        -- Configure System clock,
-        --  - Period based on generic
-        -----------------------------------------------------------------------
-        info_m("Configuring Clock agent");
-        clk_agent_set_period(default_channel, time'value(cfg_sys_clk_period));
-        clk_agent_set_duty(default_channel, 50);
-        clk_agent_set_jitter(default_channel, 0 ns);
-        clk_gen_agent_start(default_channel);
-
-        -----------------------------------------------------------------------
-        -- Configure Timestamp generation
-        --  - Step 1
-        --  - Each clock cycle
-        -----------------------------------------------------------------------
-        info_m("Configuring Timestamp agent");
-        timestamp_agent_set_step(default_channel, 1);
-        timestamp_agent_set_prescaler(default_channel, 1);
-        timestamp_agent_timestamp_preset(default_channel, x"0000000000000000");
-        timestamp_agent_start(default_channel);
-
-        -----------------------------------------------------------------------
-        -- Randomize starting timestamp for better toggle coverage
-        -----------------------------------------------------------------------
-        rand_logic_vect_v(init_timestamp, 0.5);
-        timestamp_agent_timestamp_preset(default_channel, init_timestamp);
-
-        -----------------------------------------------------------------------
-        -- Configure Reset agent and Exectue reset
-        --  - Polarity 0
-        -----------------------------------------------------------------------
-        info_m("Configuring Reset agent, executing reset");
-        rst_agent_polarity_set(default_channel, '0');
-        rst_agent_assert(default_channel);
-        wait for 10 ns;
-        rst_agent_deassert(default_channel);
-        wait for 100 ns; -- For reset to internally de-assert!
-
-        -----------------------------------------------------------------------
-        -- Configure Memory bus agent
-        -----------------------------------------------------------------------
-        info_m("Configuring Memory bus agent");
-        mem_bus_agent_x_mode_start(default_channel);
-        mem_bus_agent_set_x_mode_setup(default_channel, 2 ns);
-        mem_bus_agent_set_x_mode_hold(default_channel, 2 ns);
-        mem_bus_agent_set_output_delay(default_channel, 4 ns);
-        mem_bus_agent_start(default_channel);
-
-        -----------------------------------------------------------------------
-        -- Configure CAN agent
-        --
-        -- Present in compliance tests and reference tests only!
-        -----------------------------------------------------------------------
-        if (test_type = "compliance" or test_type = "reference") then
-            info_m("Configuring CAN Agent");
-            can_agent_monitor_flush(default_channel);
-            can_agent_driver_flush(default_channel);
-            can_agent_monitor_stop(default_channel);
-            can_agent_driver_stop(default_channel);
-            can_agent_monitor_set_input_delay(default_channel, 20 ns);
         end if;
 
         -----------------------------------------------------------------------
         -- Start the test (give command to corresponding test type agent)
         -----------------------------------------------------------------------
-        if (test_type = "compliance") then
-            compliance_start <= '1';
-            wait until compliance_done = '1';
+        if (test_type = "compliance" or test_type = "reference") then
+            cosim_start <= '1';
+            wait until cosim_done = '1';
             test_success_i := pli_test_result;
 
         elsif (test_type = "feature") then
             feature_start <= '1';
             wait until feature_done = '1';
             test_success_i := feature_result;
-
-        elsif (test_type = "reference") then
-            reference_start <= '1';
-            wait until reference_done = '1';
-            test_success_i := reference_result;
-
         else
             error_m("Unknown test type!");
         end if;
 
-        -----------------------------------------------------------------------
-        -- Reset the DUT to clean-up
-        -----------------------------------------------------------------------
-        rst_agent_assert(default_channel);
-        wait for 10 ns;
-        rst_agent_deassert(default_channel);
-        wait for 100 ns;
-
-        -- Stop clock agent (not to generate any further simulation events)
-        clk_gen_agent_stop(default_channel);
-
-        compliance_start <= '0';
+        cosim_start <= '0';
         feature_start <= '0';
-        reference_start <= '0';
         wait for 5 ns;
 
         test_done <= '1';
@@ -270,26 +193,26 @@ begin
 
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    -- Compliance test specific part
+    -- Cosimulation (for compliance and reference tests)
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    g_compliance_tests : if (test_type = "compliance") generate
+    g_cosimulation : if (test_type = "compliance" or test_type = "reference") generate
 
         ---------------------------------------------------------------------------
-        -- Compliance test handling process
+        -- Cosimulation handling process
         --
-        -- Passes control to Compliance test library linked to simulator.
-        -- Communication with this library is done via PLI interface.
+        -- Passes control to Cosimulation plugin linked to simulator.
+        -- Communication with this plugin is done via PLI interface.
         ---------------------------------------------------------------------------
-        p_compliance_test : process
+        p_cosimulation_control : process
         begin
-            wait until compliance_start = '1';
+            wait until cosim_start = '1';
 
             -----------------------------------------------------------------------
-            -- Give control over the TB to compliance test library which runs the
+            -- Give control over the TB to Cosimulation plugin which runs the
             -- test and operates on other agents.
             -----------------------------------------------------------------------
-            info_m("Requesting TB control from Compliance test library via PLI...");
+            info_m("Requesting TB control from Cosimulation plugin via PLI...");
             pli_control_req <= '1';
             wait for 1 ns;
 
@@ -299,17 +222,17 @@ begin
 
             wait for 0 ns;
             check_m(pli_control_gnt = '1',
-                    "Compliance test library took over simulation control!");
+                    "Cosimulation plugin took over simulation control!");
             wait for 0 ns;
 
-            info_m("Waiting till Compliance test library is done running test...");
+            info_m("Waiting till Cosimulation plugin is done running test...");
             wait until (pli_test_end = '1');
-            compliance_done <= '1';
-            info_m("Compliance test library signals test has ended");
+            cosim_done <= '1';
+            info_m("Cosimulation plugin signals test has ended");
 
             wait for 50 ns;
             pli_control_req <= '0';
-            compliance_done <= '0';
+            cosim_done <= '0';
             wait for 50 ns;
         end process;
 
@@ -317,6 +240,14 @@ begin
         -- Listen on PLI commands and send them to individual agents!
         -----------------------------------------------------------------------
         p_pli_listener : process
+            -- TODO: This is temporary hack just for the TB to compile !
+            --       Must extend the PLI interface to provide the address of
+            --       the agent that it wants to talk to !
+            --       This could be somehow provided via generics of this
+            --       module, but that is wrong! This information must be known
+            --       by the test sequence (as it must be aware of agents mappings
+            --       and connections to know what functionality to reach)!
+            variable com_id : integer := 0;
         begin
 
             -------------------------------------------------------------------
@@ -331,23 +262,25 @@ begin
             case pli_dest is
             when PLI_DEST_RES_GEN_AGENT =>
                 pli_process_rst_agnt(pli_cmd, pli_data_out, pli_data_in,
-                                     default_channel);
+                                     default_channel, com_id);
 
             when PLI_DEST_CLK_GEN_AGENT =>
                 pli_process_clk_agent(pli_cmd, pli_data_out, pli_data_in,
-                                      default_channel);
+                                      default_channel, com_id);
 
-            when PLI_DEST_MEM_BUS_AGENT =>
-                pli_process_mem_bus_agent(pli_cmd, pli_data_out, pli_data_in,
-                                          default_channel);
+            when PLI_DEST_MEM_BUS_MASTER_AGENT =>
+                pli_process_mem_bus_master_agent(pli_cmd, pli_data_out, pli_data_in,
+                                                 default_channel, com_id);
 
             when PLI_DEST_CAN_AGENT =>
                 pli_process_can_agent(pli_cmd, pli_data_out, pli_data_in,
-                    pli_data_in_2, pli_str_buf_in, default_channel);
+                    pli_data_in_2, pli_str_buf_in, default_channel, com_id);
 
             when PLI_DEST_TEST_CONTROLLER_AGENT =>
                 pli_process_test_agent(pli_cmd, pli_data_out, pli_data_in,
                     pli_str_buf_in, pli_test_end, pli_test_result);
+
+            -- TODO: Need to add Memory bus slave, DIO agent and Memory model!
 
             when OTHERS =>
                 error_m("Unknown agent destination: " & to_hstring(pli_dest));
@@ -390,6 +323,5 @@ begin
         end process;
 
     end generate;
-
 
 end architecture;
