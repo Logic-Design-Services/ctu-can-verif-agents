@@ -30,5 +30,6 @@ source_list:
     - file: reset_agent/reset_agent.vhd
     - file: can_agent/can_agent.vhd
     - file: dio_agent/dio_agent.vhd
+    - file: test_controller_agent/test_controller_agent.vhd
     - file: feature_test_agent/feature_test_agent_signal_delayer.vhd
     - file: feature_test_agent/feature_test_agent.vhd

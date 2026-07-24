@@ -92,7 +92,7 @@ entity feature_test_agent is
         G_COM_ID                    :     natural;
 
         -- Test details
-        test_name                   :     string;
+        G_TEST_NAME                 :     string;
         G_DUT_NAME                  :     string
     );
     port(
@@ -538,7 +538,7 @@ begin
 
         -- Initialize and execute feature test
         init_feature_test(default_channel);
-        exec_feature_test(test_name, default_channel);
+        exec_feature_test(G_TEST_NAME, default_channel);
 
         -- Signal test is done.
         feature_result <= ctu_vip_test_result.get_result;
