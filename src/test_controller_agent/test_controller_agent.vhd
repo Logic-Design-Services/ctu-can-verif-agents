@@ -331,5 +331,17 @@ begin
         report "Unsupported test type: " & G_TEST_TYPE & ", choose one of: feature, compliance, reference"
         severity failure;
 
+    ---------------------------------------------------------------------------
+    -- Watchdog
+    ---------------------------------------------------------------------------
+    process
+        -- TODO: Query from Config DB
+        variable timeout : time := 10 ms;
+    begin
+        wait for 1 ns;
+        wait for timeout - 1 ns;
+        report "Timeout reached!" severity failure;
+    end process;
+
 
 end architecture;
