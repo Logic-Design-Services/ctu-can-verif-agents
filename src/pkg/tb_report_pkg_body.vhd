@@ -78,46 +78,94 @@
 library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-package tb_report_pkg is
+use ctu_can_agents.tb_shared_vars_pkg.all;
 
-    type t_log_verbosity is (
-        verbosity_debug,
-        verbosity_info,
-        verbosity_warning,
-        verbosity_error
-    );
-
-    signal global_verbosity         : t_log_verbosity := verbosity_info;
+package body tb_report_pkg is
 
     procedure set_log_verbosity(
         constant value                : in  t_log_verbosity;
         signal   verbosity            : out t_log_verbosity
-    );
-
-    procedure debug_m(
-        msg         : in string
-    );
+    ) is
+    begin
+        verbosity <= value;
+    end procedure;
 
     procedure info_m(
         msg         : in string
-    );
+    ) is
+    begin
+        if (global_verbosity = verbosity_debug or
+            global_verbosity = verbosity_info)
+        then
+            report "INFO: " & msg severity note;
+        end if;
+    end procedure;
 
     procedure warning_m(
         msg         : in string
-    );
+    ) is
+    begin
+        if (global_verbosity = verbosity_debug or
+            global_verbosity = verbosity_info or
+            global_verbosity = verbosity_warning)
+        then
+            report "WARNING: " & msg severity warning;
+        end if;
+    end procedure;
 
     procedure error_m(
         msg         : in string
-    );
+    ) is
+    begin
+        if ((global_verbosity = verbosity_debug or
+            global_verbosity = verbosity_info or
+            global_verbosity = verbosity_warning or
+            global_verbosity = verbosity_error))
+        then
+            ctu_vip_test_result.set(false);
+            report "ERROR: " & msg severity error;
+        end if;
+    end procedure;
+
+    procedure debug_m(
+        msg         : in string
+    ) is
+    begin
+        if (global_verbosity = verbosity_debug) then
+            report "DEBUG: " & msg severity note;
+        end if;
+    end procedure;
 
     procedure check_m(
         cond        : in boolean;
         msg         : in string
-    );
+    ) is
+    begin
+        if (cond) then
+            if (global_verbosity = verbosity_debug or
+                global_verbosity = verbosity_info) then
+                report "PASS: " & msg;
+            end if;
+        else
+            ctu_vip_test_result.set(false);
+            report "FAIL: " & msg severity error;
+        end if;
+    end procedure;
 
     procedure check_false_m(
         cond        : in boolean;
         msg         : in string
-    );
+    ) is
+    begin
+        if (not cond) then
+            if (global_verbosity = verbosity_debug or
+                global_verbosity = verbosity_info) then
+                report "PASS: " & msg;
+            end if;
+        else
+            ctu_vip_test_result.set(false);
+            report "FAIL: " & msg severity error;
+        end if;
+    end procedure;
 
-end package;
+end package body;

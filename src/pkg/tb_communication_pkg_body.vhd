@@ -68,56 +68,88 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Package with reporting routines.
+--    Package body with CTU CAN FD TB communication routines between agents.
 --
 --------------------------------------------------------------------------------
 -- Revision History:
 --    28.2.2021   Created file
+--    20.7.2026   Changed hard-coded addressing constants to "DEF" (default)
+--                constants only
 --------------------------------------------------------------------------------
 
 library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-package tb_report_pkg is
+use ctu_can_agents.tb_report_pkg.all;
+use ctu_can_agents.tb_types_pkg.all;
 
-    type t_log_verbosity is (
-        verbosity_debug,
-        verbosity_info,
-        verbosity_warning,
-        verbosity_error
-    );
+package body tb_communication_pkg is
 
-    signal global_verbosity         : t_log_verbosity := verbosity_info;
+    procedure notify(
+        signal channel      : inout t_com_channel
+    ) is
+    begin
+        if channel /= C_COM_CHANNEL_ACTIVE then
+            channel <= C_COM_CHANNEL_ACTIVE;
+            wait until channel = C_COM_CHANNEL_ACTIVE;
+            channel <= C_COM_CHANNEL_INACTIVE;
+            wait until channel = C_COM_CHANNEL_INACTIVE;
+        else
+            error_m(COM_PKG_TAG & "Attempting to notify over active channel!");
+        end if;
+    end procedure;
 
-    procedure set_log_verbosity(
-        constant value                : in  t_log_verbosity;
-        signal   verbosity            : out t_log_verbosity
-    );
 
-    procedure debug_m(
-        msg         : in string
-    );
+    procedure send(
+        signal   channel    : inout t_com_channel;
+        constant dest       : in    integer;
+        constant msg_code   : in    integer
+    ) is
+    begin
+        com_channel_data.set_dest_and_msg_code(dest, msg_code);
+        wait for 0 ns;
 
-    procedure info_m(
-        msg         : in string
-    );
+        -- Send over the channel
+        notify(channel);
 
-    procedure warning_m(
-        msg         : in string
-    );
+        -- Wait for response back. Agents should satisfy that only one agent
+        -- will process sent message (thanks to dest), and therefore we
+        -- are guaranteed to get ACK only from one agent back.
+        wait until channel = C_COM_CHANNEL_ACTIVE;
 
-    procedure error_m(
-        msg         : in string
-    );
+        -- Check reply code
+        if com_channel_data.get_reply_code /= C_REPLY_CODE_OK then
+            error_m(COM_PKG_TAG & "Reply code error from " & integer'image(dest));
+        end if;
 
-    procedure check_m(
-        cond        : in boolean;
-        msg         : in string
-    );
+        wait until channel = C_COM_CHANNEL_INACTIVE;
 
-    procedure check_false_m(
-        cond        : in boolean;
-        msg         : in string
-    );
+    end procedure;
 
-end package;
+
+    procedure receive_start(
+        signal   channel     : inout  t_com_channel;
+        constant dest        : in     integer
+    ) is
+    begin
+        -- Poll till there is request on the channel
+        while true loop
+            wait until channel = C_COM_CHANNEL_ACTIVE;
+            if (com_channel_data.get_dest = dest) then
+                exit;
+            end if;
+        end loop;
+    end procedure;
+
+
+    procedure receive_finish(
+        signal   channel     : inout  t_com_channel;
+        constant reply_code  : in     natural
+    ) is
+    begin
+        com_channel_data.set_reply_code(reply_code);
+        wait for 0 ns;
+        notify(channel);
+    end procedure;
+
+end package body;

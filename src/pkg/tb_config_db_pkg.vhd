@@ -68,56 +68,70 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Package with reporting routines.
+--    Configuration database package.
 --
 --------------------------------------------------------------------------------
 -- Revision History:
---    28.2.2021   Created file
+--    20.7.2026   Created file
 --------------------------------------------------------------------------------
 
 library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-package tb_report_pkg is
+package tb_config_db_pkg is
 
-    type t_log_verbosity is (
-        verbosity_debug,
-        verbosity_info,
-        verbosity_warning,
-        verbosity_error
-    );
+    constant C_CONFIG_DB_MAX_ENTRIES : natural := 128;
+    constant C_CONFIG_DB_STR_LEN     : natural := 64;
 
-    signal global_verbosity         : t_log_verbosity := verbosity_info;
+    subtype t_config_db_str is string(1 to C_CONFIG_DB_STR_LEN);
 
-    procedure set_log_verbosity(
-        constant value                : in  t_log_verbosity;
-        signal   verbosity            : out t_log_verbosity
-    );
+    type t_config_db_item is record
+        name        : t_config_db_str;
+        val_type    : t_config_db_str;
+        val         : t_config_db_str;
+        randomize   : boolean;
+        range_low   : t_config_db_str;
+        range_high  : t_config_db_str;
+    end record;
 
-    procedure debug_m(
-        msg         : in string
-    );
+    type t_config_db_array is array (0 to C_CONFIG_DB_MAX_ENTRIES - 1) of t_config_db_item;
 
-    procedure info_m(
-        msg         : in string
-    );
+    type t_config_db is protected
 
-    procedure warning_m(
-        msg         : in string
-    );
+        procedure put(
+            constant name       : in string;
+            constant val_type   : in string;
+            constant val        : in string;
+            constant randomize  : in boolean := false;
+            constant range_low  : in string := "0";
+            constant range_high : in string := "1"
+        );
 
-    procedure error_m(
-        msg         : in string
-    );
+        impure function get(
+            constant name : in string
+        ) return t_config_db_item;
 
-    procedure check_m(
-        cond        : in boolean;
-        msg         : in string
-    );
+        impure function get(
+            constant name : in string
+        ) return integer;
 
-    procedure check_false_m(
-        cond        : in boolean;
-        msg         : in string
-    );
+        impure function get(
+            constant name : in string
+        ) return boolean;
+
+        impure function get(
+            constant name : in string
+        ) return time;
+
+        impure function get(
+            constant name : in string
+        ) return string;
+
+        procedure randomize;
+        procedure print;
+
+    end protected;
+
+    constant C_CONFIG_DB_TAG : string := "Configuration Database: ";
 
 end package;

@@ -73,51 +73,104 @@
 --------------------------------------------------------------------------------
 -- Revision History:
 --    28.2.2021   Created file
+--    20.7.2026   Removed dependency on CTU CAN FD VIP, use "error_ocurred"
+--                flag instead.
 --------------------------------------------------------------------------------
 
 library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-package tb_report_pkg is
+use ctu_can_agents.tb_shared_vars_pkg.all;
 
-    type t_log_verbosity is (
-        verbosity_debug,
-        verbosity_info,
-        verbosity_warning,
-        verbosity_error
-    );
+-- Only place where Vunit is used. All functions are wrapped so that TB can run
+-- also without Vunit!
+library vunit_lib;
+context vunit_lib.vunit_context;
 
-    signal global_verbosity         : t_log_verbosity := verbosity_info;
+package body tb_report_pkg is
 
     procedure set_log_verbosity(
-        constant value                : in  t_log_verbosity;
-        signal   verbosity            : out t_log_verbosity
-    );
+        constant value              : in  t_log_verbosity;
+        signal verbosity            : out t_log_verbosity
+    ) is
+    begin
+        show_all(display_handler);
+        if value >= verbosity_debug then
+            null;
+        end if;
 
-    procedure debug_m(
-        msg         : in string
-    );
+        if value >= verbosity_info then
+            hide(display_handler, debug);
+            null;
+        end if;
+
+        if value >= verbosity_warning then
+            hide(display_handler, debug);
+            hide(display_handler, info);
+            hide(display_handler, pass);
+            hide(display_handler, trace);
+
+        end if;
+
+        if value >= verbosity_error then
+            hide(display_handler, debug);
+            hide(display_handler, info);
+            hide(display_handler, pass);
+            hide(display_handler, trace);
+            hide(display_handler, warning);
+        end if;
+        verbosity <= value;
+    end procedure;
 
     procedure info_m(
         msg         : in string
-    );
+    ) is
+    begin
+        info(msg);
+    end procedure;
 
     procedure warning_m(
-        msg         : in string
-    );
+                 msg         : in string
+    ) is
+    begin
+        warning(msg);
+    end procedure;
 
     procedure error_m(
-        msg         : in string
-    );
+                 msg         : in string
+    ) is
+    begin
+        ctu_vip_test_result.set(false);
+        error(msg);
+    end procedure;
+
+    procedure debug_m(
+                 msg         : in string
+    ) is
+    begin
+        debug(msg);
+    end procedure;
 
     procedure check_m(
-        cond        : in boolean;
-        msg         : in string
-    );
+                 cond        : in boolean;
+                 msg         : in string
+    ) is
+    begin
+        if (not cond) then
+            ctu_vip_test_result.set(false);
+        end if;
+        check(cond, msg);
+    end procedure;
 
     procedure check_false_m(
-        cond        : in boolean;
-        msg         : in string
-    );
+                 cond        : in boolean;
+                 msg         : in string
+    ) is
+    begin
+        if (cond) then
+            ctu_vip_test_result.set(false);
+        end if;
+        check_false(cond, msg);
+    end procedure;
 
-end package;
+end package body;

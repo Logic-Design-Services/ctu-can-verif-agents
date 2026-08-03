@@ -534,14 +534,19 @@ begin
         wait until feature_start = '1';
 
         -- Pre-set test to be "passed", any error will make it fail
-        ctu_vip_test_result.set_result(true);
+        ctu_vip_test_result.set(true);
 
         -- Initialize and execute feature test
         init_feature_test(default_channel);
         exec_feature_test(G_TEST_NAME, default_channel);
 
         -- Signal test is done.
-        feature_result <= ctu_vip_test_result.get_result;
+        if (ctu_vip_test_result.get) then
+            feature_result <= '1';
+        else
+            feature_result <= '0';
+        end if;
+
         wait for 0 ns;
         feature_done <= '1';
         wait until feature_start = '0';

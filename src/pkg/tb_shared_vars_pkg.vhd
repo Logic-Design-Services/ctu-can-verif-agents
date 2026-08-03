@@ -79,20 +79,17 @@ Library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
 use ctu_can_agents.tb_types_pkg.all;
+use ctu_can_agents.tb_config_db_pkg.all;
 
 package tb_shared_vars_pkg is
 
     -- Test result
-    shared variable ctu_vip_test_result : t_ctu_test_result;
-
-    -- Finish on error
-    shared variable finish_on_error_i   : t_prot_boolean;
+    shared variable ctu_vip_test_result : t_prot_boolean;
 
     -- Configuration Database
     shared variable config_db           : t_config_db;
 
 end package;
-
 
 package body tb_shared_vars_pkg is
 

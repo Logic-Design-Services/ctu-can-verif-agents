@@ -12,7 +12,15 @@ source_list:
     ###############################################################################################
     - file: pkg/tb_types_pkg.vhd
     - file: pkg/tb_report_pkg.vhd
-    - file: pkg/tb_communication_pkg.vhd
     - file: pkg/tb_random_pkg.vhd
+    - file: pkg/tb_config_db_pkg.vhd
+    - file: pkg/tb_communication_pkg.vhd
     - file: pkg/tb_helpers_pkg.vhd
+
     - file: pkg/tb_shared_vars_pkg.vhd
+
+    - file: pkg/tb_report_pkg_body.vhd
+    - file: pkg/tb_random_pkg_body.vhd
+    - file: pkg/tb_config_db_pkg_body.vhd
+    - file: pkg/tb_communication_pkg_body.vhd
+    - file: pkg/tb_helpers_pkg_body.vhd

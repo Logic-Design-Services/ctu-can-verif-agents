@@ -77,10 +77,9 @@
 --                constants only
 --------------------------------------------------------------------------------
 
-Library ctu_can_agents;
+library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
-use ctu_can_agents.tb_report_pkg.all;
 use ctu_can_agents.tb_types_pkg.all;
 
 package tb_communication_pkg is
@@ -105,15 +104,15 @@ package tb_communication_pkg is
     -----------------------------------------------------------------------
     subtype t_com_channel is std_logic;
 
-    constant C_COM_CHANNEL_ACTIVE       : t_com_channel := '1';
-    constant C_COM_CHANNEL_INACTIVE     : t_com_channel := 'Z';
+    constant C_COM_CHANNEL_ACTIVE               : t_com_channel := '1';
+    constant C_COM_CHANNEL_INACTIVE             : t_com_channel := 'Z';
 
-    signal default_channel              : t_com_channel := C_COM_CHANNEL_INACTIVE;
-    shared variable com_channel_data    : t_com_channel_data;
+    signal default_channel                      : t_com_channel := C_COM_CHANNEL_INACTIVE;
+    shared variable com_channel_data            : t_com_channel_data;
 
     -- Reply codes
-    constant C_REPLY_CODE_OK            : natural := 0;
-    constant C_REPLY_CODE_ERR           : natural := 1;
+    constant C_REPLY_CODE_OK                    : natural := 0;
+    constant C_REPLY_CODE_ERR                   : natural := 1;
 
     -----------------------------------------------------------------------
     -- Sends request on a channel to an agent
@@ -155,75 +154,3 @@ package tb_communication_pkg is
     );
 
 end package;
-
-
-package body tb_communication_pkg is
-
-    procedure notify(
-        signal channel      : inout t_com_channel
-    ) is
-    begin
-        if channel /= C_COM_CHANNEL_ACTIVE then
-            channel <= C_COM_CHANNEL_ACTIVE;
-            wait until channel = C_COM_CHANNEL_ACTIVE;
-            channel <= C_COM_CHANNEL_INACTIVE;
-            wait until channel = C_COM_CHANNEL_INACTIVE;
-        else
-            error_m(COM_PKG_TAG & "Attempting to notify over active channel!");
-        end if;
-    end procedure;
-
-
-    procedure send(
-        signal   channel    : inout t_com_channel;
-        constant dest       : in    integer;
-        constant msg_code   : in    integer
-    ) is
-    begin
-        com_channel_data.set_dest_and_msg_code(dest, msg_code);
-        wait for 0 ns;
-
-        -- Send over the channel
-        notify(channel);
-
-        -- Wait for response back. Agents should satisfy that only one agent
-        -- will process sent message (thanks to dest), and therefore we
-        -- are guaranteed to get ACK only from one agent back.
-        wait until channel = C_COM_CHANNEL_ACTIVE;
-
-        -- Check reply code
-        if com_channel_data.get_reply_code /= C_REPLY_CODE_OK then
-            error_m(COM_PKG_TAG & "Reply code error from " & integer'image(dest));
-        end if;
-
-        wait until channel = C_COM_CHANNEL_INACTIVE;
-
-    end procedure;
-
-
-    procedure receive_start(
-        signal   channel     : inout  t_com_channel;
-        constant dest        : in     integer
-    ) is
-    begin
-        -- Poll till there is request on the channel
-        while true loop
-            wait until channel = C_COM_CHANNEL_ACTIVE;
-            if (com_channel_data.get_dest = dest) then
-                exit;
-            end if;
-        end loop;
-    end procedure;
-
-
-    procedure receive_finish(
-        signal   channel     : inout  t_com_channel;
-        constant reply_code  : in     natural
-    ) is
-    begin
-        com_channel_data.set_reply_code(reply_code);
-        wait for 0 ns;
-        notify(channel);
-    end procedure;
-
-end package body;

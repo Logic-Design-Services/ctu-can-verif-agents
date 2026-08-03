@@ -75,19 +75,10 @@
 --    20.7.2026   Created file
 --------------------------------------------------------------------------------
 
-Library ctu_can_agents;
+library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 
 package tb_types_pkg is
-
-    -----------------------------------------------------------------------
-    -- Result of test
-    -----------------------------------------------------------------------
-    type t_ctu_test_result is protected
-        procedure set_result(result : boolean);
-        impure function get_result return boolean;
-        impure function get_result return std_logic;
-    end protected;
 
     -----------------------------------------------------------------------
     -- Communication channel data
@@ -182,84 +173,10 @@ package tb_types_pkg is
         read_data_valid_cycles      :   natural;
     end record;
 
-    -----------------------------------------------------------------------
-    -- Testbench configuration database
-    -----------------------------------------------------------------------
-    constant C_CONFIG_DB_MAX_ENTRIES : natural := 128;
-    constant C_CONFIG_DB_STR_LEN     : natural := 64;
-
-    subtype t_config_db_str is string(1 to C_CONFIG_DB_STR_LEN);
-
-    type t_config_db_item is record
-        name     : t_config_db_str;
-        val_type : t_config_db_str;
-        val      : t_config_db_str;
-    end record;
-
-    type t_config_db_array is array (0 to C_CONFIG_DB_MAX_ENTRIES - 1) of t_config_db_item;
-
-    type t_config_db is protected
-
-        procedure put(
-            constant name     : in string;
-            constant val_type : in string;
-            constant val      : in string
-        );
-
-        impure function get(
-            constant name : in string
-        ) return t_config_db_item;
-
-        impure function get(
-            constant name : in string
-        ) return integer;
-
-        impure function get(
-            constant name : in string
-        ) return boolean;
-
-        impure function get(
-            constant name : in string
-        ) return time;
-
-        impure function get(
-            constant name : in string
-        ) return string;
-
-    end protected;
-
 end package;
 
 
 package body tb_types_pkg is
-
-    -----------------------------------------------------------------------
-    -- Test result
-    -----------------------------------------------------------------------
-    type t_ctu_test_result is protected body
-
-        variable result_i : boolean;
-
-        procedure set_result(result : boolean) is
-        begin
-            result_i := result;
-        end procedure;
-
-        impure function get_result return boolean is
-        begin
-            return result_i;
-        end function;
-
-        impure function get_result return std_logic is
-        begin
-            if result_i then
-                return '1';
-            else
-                return '0';
-            end if;
-        end function;
-
-    end protected body;
 
     -----------------------------------------------------------------------
     -- Communication channel data
@@ -591,99 +508,6 @@ package body tb_types_pkg is
         impure function get return boolean is
         begin
             return val;
-        end function;
-
-    end protected body;
-
-    -----------------------------------------------------------------------
-    -- Configuration database
-    -----------------------------------------------------------------------
-
-    type t_config_db is protected body
-
-        variable entries     : t_config_db_array;
-        variable num_entries : natural := 0;
-
-        function to_config_db_str(
-            constant s : string
-        ) return t_config_db_str is
-            variable ret : t_config_db_str := (others => ' ');
-        begin
-            assert s'length <= C_CONFIG_DB_STR_LEN
-                report "Configuration Database: string '" & s & "' exceeds max length!"
-                severity failure;
-            ret(1 to s'length) := s;
-            return ret;
-        end function;
-
-        procedure put(
-            constant name     : in string;
-            constant val_type : in string;
-            constant val      : in string
-        ) is
-        begin
-            assert num_entries < C_CONFIG_DB_MAX_ENTRIES
-                report "Configuration Database: capacity exceeded, cannot put '" & name & "'!"
-                severity failure;
-
-            entries(num_entries).name     := to_config_db_str(name);
-            entries(num_entries).val_type := to_config_db_str(val_type);
-            entries(num_entries).val      := to_config_db_str(val);
-
-            num_entries := num_entries + 1;
-        end procedure;
-
-        impure function get(
-            constant name : in string
-        ) return t_config_db_item is
-            variable cmp_name : t_config_db_str := to_config_db_str(name);
-        begin
-            for i in 0 to num_entries - 1 loop
-                if (entries(i).name = cmp_name) then
-                    return entries(i);
-                end if;
-            end loop;
-
-            report "Configuration Database: entry '" & name & "' not found!"
-                severity failure;
-
-            return entries(0);
-        end function;
-
-        impure function get(
-            constant name : in string
-        ) return integer is
-            variable item : t_config_db_item := get(name);
-        begin
-            assert item.val_type(1 to 7) = "integer";
-            return integer'value(item.val);
-        end function;
-
-        impure function get(
-            constant name : in string
-        ) return boolean is
-            variable item : t_config_db_item := get(name);
-        begin
-            assert item.val_type(1 to 7) = "boolean";
-            return boolean'value(item.val);
-        end function;
-
-        impure function get(
-            constant name : in string
-        ) return string is
-            variable item : t_config_db_item := get(name);
-        begin
-            assert item.val_type(1 to 6) = "string";
-            return item.val;
-        end function;
-
-        impure function get(
-            constant name : in string
-        ) return time is
-            variable item : t_config_db_item := get(name);
-        begin
-            assert item.val_type(1 to 4) = "time";
-            return time'value(item.val);
         end function;
 
     end protected body;
