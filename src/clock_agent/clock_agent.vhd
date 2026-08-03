@@ -96,9 +96,9 @@ library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 context ctu_can_agents.agents_deps_context;
 
-use ctu_can_agents.clk_gen_agent_pkg.all;
+use ctu_can_agents.clock_agent_pkg.all;
 
-entity clk_gen_agent is
+entity clock_agent is
     generic (
         G_COM_ID                : natural := C_CAN_AGENT_DEF_ID
     );
@@ -109,7 +109,7 @@ entity clk_gen_agent is
     );
 end entity;
 
-architecture tb of clk_gen_agent is
+architecture tb of clock_agent is
 
     ---------------------------------------------------------------------------
     -- Parameters configured over communication library
@@ -160,33 +160,33 @@ begin
         cmd := com_channel_data.get_msg_code;
 
         case cmd is
-        when CLK_AGNT_CMD_START =>
+        when CLOCK_AGNT_CMD_START =>
             enabled <= true;
 
-        when CLK_AGNT_CMD_STOP =>
+        when CLOCK_AGNT_CMD_STOP =>
             enabled <= false;
 
-        when CLK_AGNT_CMD_PERIOD_SET =>
+        when CLOCK_AGNT_CMD_PERIOD_SET =>
             period <= com_channel_data.get_param;
             recalc_parameters(period, duty, t_low, t_high);
 
-        when CLK_AGNT_CMD_PERIOD_GET =>
+        when CLOCK_AGNT_CMD_PERIOD_GET =>
             com_channel_data.set_param(period);
 
-        when CLK_AGNT_CMD_JITTER_SET =>
+        when CLOCK_AGNT_CMD_JITTER_SET =>
             jitter <= com_channel_data.get_param;
 
-        when CLK_AGNT_CMD_JITTER_GET =>
+        when CLOCK_AGNT_CMD_JITTER_GET =>
             com_channel_data.set_param(jitter);
 
-        when CLK_AGNT_CMD_DUTY_SET =>
+        when CLOCK_AGNT_CMD_DUTY_SET =>
             duty <= com_channel_data.get_param;
             recalc_parameters(period, duty, t_low, t_high);
 
-        when CLK_AGNT_CMD_DUTY_GET =>
+        when CLOCK_AGNT_CMD_DUTY_GET =>
             com_channel_data.set_param(duty);
 
-        when CLK_AGNT_CMD_WAIT_CYCLE =>
+        when CLOCK_AGNT_CMD_WAIT_CYCLE =>
             wait until rising_edge(clock_in) for 1 us;
 
         when others =>

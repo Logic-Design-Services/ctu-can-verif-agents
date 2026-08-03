@@ -79,7 +79,7 @@ context ctu_can_agents.ieee_context;
 context ctu_can_agents.agents_deps_context;
 
 use ctu_can_agents.can_agent_pkg.all;
-use ctu_can_agents.clk_gen_agent_pkg.all;
+use ctu_can_agents.clock_agent_pkg.all;
 use ctu_can_agents.interrupt_agent_pkg.all;
 use ctu_can_agents.mem_bus_master_agent_pkg.all;
 use ctu_can_agents.mem_bus_slave_agent_pkg.all;
@@ -118,7 +118,7 @@ package test_controller_agent_pkg is
 
     -- PLI command destinations
     constant PLI_DEST_TEST_CONTROLLER_AGENT             : std_logic_vector(7 downto 0) := x"00";
-    constant PLI_DEST_CLK_GEN_AGENT                     : std_logic_vector(7 downto 0) := x"01";
+    constant PLI_DEST_CLOCK_AGENT                       : std_logic_vector(7 downto 0) := x"01";
     constant PLI_DEST_RES_GEN_AGENT                     : std_logic_vector(7 downto 0) := x"02";
     constant PLI_DEST_MEM_BUS_MASTER_AGENT              : std_logic_vector(7 downto 0) := x"03";
     constant PLI_DEST_CAN_AGENT                         : std_logic_vector(7 downto 0) := x"04";
@@ -347,28 +347,28 @@ package body test_controller_agent_pkg is
     begin
         case pli_cmd is
         when PLI_CLK_AGNT_CMD_START =>
-            clk_gen_agent_start(channel, com_id);
+            clock_agent_start(channel, com_id);
         when PLI_CLK_AGNT_CMD_STOP =>
-            clk_gen_agent_stop(channel, com_id);
+            clock_agent_stop(channel, com_id);
         when PLI_CLK_AGNT_CMD_PERIOD_SET =>
             pli_logic_vector_to_time(pli_data_in, period);
-            clk_agent_set_period(channel, com_id, period);
+            clock_agent_set_period(channel, com_id, period);
         when PLI_CLK_AGNT_CMD_PERIOD_GET =>
-            clk_agent_get_period(channel, com_id, period);
+            clock_agent_get_period(channel, com_id, period);
             pli_time_to_logic_vector(period, pli_data_out_i);
             pli_data_out <= pli_data_out_i;
         when PLI_CLK_AGNT_CMD_JITTER_SET =>
             pli_logic_vector_to_time(pli_data_in, jitter);
-            clk_agent_set_jitter(channel, com_id, jitter);
+            clock_agent_set_jitter(channel, com_id, jitter);
         when PLI_CLK_AGNT_CMD_JITTER_GET =>
-            clk_agent_get_jitter(channel, com_id, jitter);
+            clock_agent_get_jitter(channel, com_id, jitter);
             pli_time_to_logic_vector(jitter, pli_data_out_i);
             pli_data_out <= pli_data_out_i;
         when PLI_CLK_AGNT_CMD_DUTY_SET =>
             duty := to_integer(unsigned(pli_data_in));
-            clk_agent_set_duty(channel, com_id, duty);
+            clock_agent_set_duty(channel, com_id, duty);
         when PLI_CLK_AGNT_CMD_DUTY_GET =>
-            clk_agent_get_duty(channel, com_id, duty);
+            clock_agent_get_duty(channel, com_id, duty);
             pli_data_out <= std_logic_vector(to_unsigned(duty, 64));
         when others =>
             error_m("VPI: Unknown Clock generator agent command with code: 0x" & to_hstring(pli_cmd));

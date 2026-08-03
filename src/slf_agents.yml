@@ -5,7 +5,7 @@ source_list:
     ###############################################################################################
     # Packages for agents
     ###############################################################################################
-    - file: clock_agent/clk_gen_agent_pkg.vhd
+    - file: clock_agent/clock_agent_pkg.vhd
     - file: interrupt_agent/interrupt_agent_pkg.vhd
     - file: timestamp_agent/timestamp_agent_pkg.vhd
     - file: mem_bus_master_agent/mem_bus_master_agent_pkg.vhd
@@ -21,7 +21,7 @@ source_list:
     ###############################################################################################
     # Agents
     ###############################################################################################
-    - file: clock_agent/clk_gen_agent.vhd
+    - file: clock_agent/clock_agent.vhd
     - file: interrupt_agent/interrupt_agent.vhd
     - file: timestamp_agent/timestamp_agent.vhd
     - file: mem_bus_master_agent/mem_bus_master_agent.vhd

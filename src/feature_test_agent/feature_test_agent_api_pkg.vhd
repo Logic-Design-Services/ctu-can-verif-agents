@@ -94,7 +94,7 @@ package feature_test_agent_api_pkg is
     --  channel         Communication channel
     ----------------------------------------------------------------------------
     procedure init_feature_test(
-        signal   channel      : inout   t_com_channel
+        signal   chn        : inout   t_com_channel
     );
 
     ----------------------------------------------------------------------------
@@ -105,8 +105,19 @@ package feature_test_agent_api_pkg is
     --  channel         Communication channel
     ----------------------------------------------------------------------------
     procedure exec_feature_test(
-        constant test_name    : in      string;
-        signal   channel      : inout   t_com_channel
+        constant test_name  : in      string;
+        signal   chn        : inout   t_com_channel
+    );
+
+    ----------------------------------------------------------------------------
+    -- Exits feature test.
+    --
+    -- Arguments:
+    --  test_name       Name of the test to execute
+    --  channel         Communication channel
+    ----------------------------------------------------------------------------
+    procedure exit_feature_test(
+        signal   chn        : inout   t_com_channel
     );
 
 end package;

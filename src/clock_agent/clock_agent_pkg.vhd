@@ -68,7 +68,7 @@
 
 --------------------------------------------------------------------------------
 --  @Purpose:
---    Package with API for Clock generator agent.
+--    Package with API for Clock agent.
 --
 --------------------------------------------------------------------------------
 -- Revision History:
@@ -81,12 +81,12 @@ library ctu_can_agents;
 context ctu_can_agents.ieee_context;
 context ctu_can_agents.agents_deps_context;
 
-package clk_gen_agent_pkg is
+package clock_agent_pkg is
 
     ---------------------------------------------------------------------------
     -- Clock generator component
     ---------------------------------------------------------------------------
-    component clk_gen_agent is
+    component clock_agent is
     generic (
         G_COM_ID                : natural := C_CAN_AGENT_DEF_ID
     );
@@ -100,12 +100,12 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     -- Message print helpers
     ---------------------------------------------------------------------------
-    procedure clk_agent_info_m(
+    procedure clock_agent_info_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     );
 
-    procedure clk_agent_debug_m(
+    procedure clock_agent_debug_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     );
@@ -121,7 +121,7 @@ package clk_gen_agent_pkg is
     --
     -- @param channel   Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure clk_gen_agent_start(
+    procedure clock_agent_start(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
@@ -131,7 +131,7 @@ package clk_gen_agent_pkg is
     --
     -- @param channel   Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure clk_gen_agent_stop(
+    procedure clock_agent_stop(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
@@ -142,7 +142,7 @@ package clk_gen_agent_pkg is
     -- @param channel   Channel on which to send the request
     -- @param period    Clock period to be set.
     ---------------------------------------------------------------------------
-    procedure clk_agent_set_period(
+    procedure clock_agent_set_period(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         constant    period      : in    time
@@ -154,7 +154,7 @@ package clk_gen_agent_pkg is
     -- @param channel   Channel on which to send the request
     -- @param period    Obtained clock period.
     ---------------------------------------------------------------------------
-    procedure clk_agent_get_period(
+    procedure clock_agent_get_period(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         variable    period      : out   time
@@ -166,7 +166,7 @@ package clk_gen_agent_pkg is
     -- @param channel   Channel on which to send the request
     -- @param jitter    Jitter to be set.
     ---------------------------------------------------------------------------
-    procedure clk_agent_set_jitter(
+    procedure clock_agent_set_jitter(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         constant    jitter      : in    time
@@ -178,7 +178,7 @@ package clk_gen_agent_pkg is
     -- @param channel   Channel on which to send the request
     -- @param jitter    Obtained jitter.
     ---------------------------------------------------------------------------
-    procedure clk_agent_get_jitter(
+    procedure clock_agent_get_jitter(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         variable    jitter      : out   time
@@ -190,7 +190,7 @@ package clk_gen_agent_pkg is
     -- @param channel   Channel on which to send the request
     -- @param duty      Duty cycle to be set.
     ---------------------------------------------------------------------------
-    procedure clk_agent_set_duty(
+    procedure clock_agent_set_duty(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         constant    duty        : in    integer range 0 to 100
@@ -202,7 +202,7 @@ package clk_gen_agent_pkg is
     -- @param channel   Channel on which to send the request
     -- @param duty      Obtained duty cycle.
     ---------------------------------------------------------------------------
-    procedure clk_agent_get_duty(
+    procedure clock_agent_get_duty(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         variable    duty        : out   integer range 0 to 100
@@ -219,7 +219,7 @@ package clk_gen_agent_pkg is
     -- @param channel    Channel on which to send the request
     -- @param num_cycles Number
     ---------------------------------------------------------------------------
-    procedure clk_agent_wait_cycle(
+    procedure clock_agent_wait_cycle(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     );
@@ -232,40 +232,40 @@ package clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
 
     -- Supported commands for clock agent (sent as message types)
-    constant CLK_AGNT_CMD_START         : integer := 0;
-    constant CLK_AGNT_CMD_STOP          : integer := 1;
-    constant CLK_AGNT_CMD_PERIOD_SET    : integer := 2;
-    constant CLK_AGNT_CMD_PERIOD_GET    : integer := 3;
-    constant CLK_AGNT_CMD_JITTER_SET    : integer := 4;
-    constant CLK_AGNT_CMD_JITTER_GET    : integer := 5;
-    constant CLK_AGNT_CMD_DUTY_SET      : integer := 6;
-    constant CLK_AGNT_CMD_DUTY_GET      : integer := 7;
-    constant CLK_AGNT_CMD_WAIT_CYCLE    : integer := 8;
+    constant CLOCK_AGNT_CMD_START         : integer := 0;
+    constant CLOCK_AGNT_CMD_STOP          : integer := 1;
+    constant CLOCK_AGNT_CMD_PERIOD_SET    : integer := 2;
+    constant CLOCK_AGNT_CMD_PERIOD_GET    : integer := 3;
+    constant CLOCK_AGNT_CMD_JITTER_SET    : integer := 4;
+    constant CLOCK_AGNT_CMD_JITTER_GET    : integer := 5;
+    constant CLOCK_AGNT_CMD_DUTY_SET      : integer := 6;
+    constant CLOCK_AGNT_CMD_DUTY_GET      : integer := 7;
+    constant CLOCK_AGNT_CMD_WAIT_CYCLE    : integer := 8;
 
     -- Tag for messages
-    constant CLK_AGENT_TAG : string := "Clock Agent: ";
+    constant clock_agent_TAG : string := "Clock Agent: ";
 
 end package;
 
 
-package body clk_gen_agent_pkg is
+package body clock_agent_pkg is
 
 
     ---------------------------------------------------------------------------
     -- Message print helpers
     ---------------------------------------------------------------------------
-    procedure clk_agent_info_m(
+    procedure clock_agent_info_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     ) is begin
-        info_m(CLK_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
+        info_m(clock_agent_TAG & "(" & natural'image(id) & "): " & msg);
     end procedure;
 
-    procedure clk_agent_debug_m(
+    procedure clock_agent_debug_m(
         constant    id          : in    natural;
         constant    msg         : in    string
     ) is begin
-        debug_m(CLK_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
+        debug_m(clock_agent_TAG & "(" & natural'image(id) & "): " & msg);
     end procedure;
 
     ---------------------------------------------------------------------------
@@ -274,114 +274,114 @@ package body clk_gen_agent_pkg is
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
 
-    procedure clk_gen_agent_start(
+    procedure clock_agent_start(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        clk_agent_info_m(id, "Starting clock generator agent!");
-        send(channel, id, CLK_AGNT_CMD_START);
-        clk_agent_debug_m(id, "Clock generator agent started!");
+        clock_agent_info_m(id, "Starting clock generator agent!");
+        send(channel, id, CLOCK_AGNT_CMD_START);
+        clock_agent_debug_m(id, "Clock generator agent started!");
     end procedure;
 
 
-    procedure clk_gen_agent_stop(
+    procedure clock_agent_stop(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        clk_agent_info_m(id, "Stopping clock generator agent!");
-        send(channel, id, CLK_AGNT_CMD_STOP);
-        clk_agent_debug_m(id, "Clock generator agent stopped");
+        clock_agent_info_m(id, "Stopping clock generator agent!");
+        send(channel, id, CLOCK_AGNT_CMD_STOP);
+        clock_agent_debug_m(id, "Clock generator agent stopped");
     end procedure;
 
 
-    procedure clk_agent_set_period(
+    procedure clock_agent_set_period(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         constant    period      : in    time
     ) is
     begin
-        clk_agent_info_m(id, "Setting clock agent period to: " & time'image(period));
+        clock_agent_info_m(id, "Setting clock agent period to: " & time'image(period));
         com_channel_data.set_param(period);
-        send(channel, id, CLK_AGNT_CMD_PERIOD_SET);
-        clk_agent_debug_m(id, "Clock generator period set");
+        send(channel, id, CLOCK_AGNT_CMD_PERIOD_SET);
+        clock_agent_debug_m(id, "Clock generator period set");
     end procedure;
 
 
-    procedure clk_agent_get_period(
+    procedure clock_agent_get_period(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         variable    period      : out   time
     ) is
     begin
-        clk_agent_info_m(id, "Getting clock agent period");
-        send(channel, id, CLK_AGNT_CMD_PERIOD_GET);
+        clock_agent_info_m(id, "Getting clock agent period");
+        send(channel, id, CLOCK_AGNT_CMD_PERIOD_GET);
         period := com_channel_data.get_param;
-        clk_agent_debug_m(id, "Clock generator period got");
+        clock_agent_debug_m(id, "Clock generator period got");
     end procedure;
 
 
-    procedure clk_agent_set_jitter(
+    procedure clock_agent_set_jitter(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         constant    jitter      : in    time
     ) is
     begin
-        clk_agent_info_m(id, "Setting clock agent jitter to: " & time'image(jitter));
+        clock_agent_info_m(id, "Setting clock agent jitter to: " & time'image(jitter));
         com_channel_data.set_param(jitter);
-        send(channel, id, CLK_AGNT_CMD_JITTER_SET);
-        clk_agent_debug_m(id, "Clock generator period set");
+        send(channel, id, CLOCK_AGNT_CMD_JITTER_SET);
+        clock_agent_debug_m(id, "Clock generator period set");
     end procedure;
 
 
-    procedure clk_agent_get_jitter(
+    procedure clock_agent_get_jitter(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         variable    jitter      : out   time
     ) is
     begin
-        clk_agent_info_m(id, "Getting clock agent jitter");
-        send(channel, id, CLK_AGNT_CMD_JITTER_GET);
+        clock_agent_info_m(id, "Getting clock agent jitter");
+        send(channel, id, CLOCK_AGNT_CMD_JITTER_GET);
         jitter := com_channel_data.get_param;
-        clk_agent_debug_m(id, "Clock generator jitter got");
+        clock_agent_debug_m(id, "Clock generator jitter got");
     end procedure;
 
 
-    procedure clk_agent_set_duty(
+    procedure clock_agent_set_duty(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         constant    duty        : in    integer range 0 to 100
     ) is
     begin
-        clk_agent_info_m(id, "Setting clock agent duty cycle to: " & integer'image(duty));
+        clock_agent_info_m(id, "Setting clock agent duty cycle to: " & integer'image(duty));
         com_channel_data.set_param(duty);
-        send(channel, id, CLK_AGNT_CMD_DUTY_SET);
-        clk_agent_debug_m(id, "Clock generator period set");
+        send(channel, id, CLOCK_AGNT_CMD_DUTY_SET);
+        clock_agent_debug_m(id, "Clock generator period set");
     end procedure;
 
 
-    procedure clk_agent_get_duty(
+    procedure clock_agent_get_duty(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
         variable    duty        : out   integer range 0 to 100
     ) is
     begin
-        clk_agent_info_m(id, "Getting clock agent duty cycle");
-        send(channel, id, CLK_AGNT_CMD_DUTY_GET);
+        clock_agent_info_m(id, "Getting clock agent duty cycle");
+        send(channel, id, CLOCK_AGNT_CMD_DUTY_GET);
         duty := com_channel_data.get_param;
-        clk_agent_debug_m(id, "Clock generator duty cycle got");
+        clock_agent_debug_m(id, "Clock generator duty cycle got");
     end procedure;
 
 
-    procedure clk_agent_wait_cycle(
+    procedure clock_agent_wait_cycle(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
     begin
-        clk_agent_debug_m(id, "Waiting one clock cycle");
-        send(channel, id, CLK_AGNT_CMD_WAIT_CYCLE);
-        clk_agent_debug_m(id, "Waited one clock cycle");
+        clock_agent_debug_m(id, "Waiting one clock cycle");
+        send(channel, id, CLOCK_AGNT_CMD_WAIT_CYCLE);
+        clock_agent_debug_m(id, "Waited one clock cycle");
     end procedure;
 
 

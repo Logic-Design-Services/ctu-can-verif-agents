@@ -85,7 +85,7 @@ use ctu_can_agents.timestamp_agent_pkg.all;
 use ctu_can_agents.mem_bus_master_agent_pkg.all;
 use ctu_can_agents.mem_bus_slave_agent_pkg.all;
 use ctu_can_agents.interrupt_agent_pkg.all;
-use ctu_can_agents.clk_gen_agent_pkg.all;
+use ctu_can_agents.clock_agent_pkg.all;
 use ctu_can_agents.reset_agent_pkg.all;
 use ctu_can_agents.can_agent_pkg.all;
 
@@ -260,7 +260,7 @@ begin
             pli_process_rst_agnt(pli_cmd, pli_data_out, pli_data_in,
                                     default_channel, com_id);
 
-        when PLI_DEST_CLK_GEN_AGENT =>
+        when PLI_DEST_CLOCK_AGENT =>
             pli_process_clk_agent(pli_cmd, pli_data_out, pli_data_in,
                                     default_channel, com_id);
 

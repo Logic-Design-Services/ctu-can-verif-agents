@@ -125,7 +125,7 @@ begin
     p_receiver : process
         variable cmd : integer;
         variable reply_code : integer;
-        variable tmp : std_logic_vector(127 downto 0);
+        variable tmp : std_logic_vector(255 downto 0);
         variable tmp_int : integer;
     begin
         receive_start(default_channel, G_COM_ID);
