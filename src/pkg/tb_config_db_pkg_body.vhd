@@ -104,44 +104,75 @@ package body tb_config_db_pkg is
             return ret;
         end function;
 
-        procedure put(
-            constant name       : in string;
-            constant val_type   : in string;
-            constant val        : in string;
-            constant randomize  : in boolean := false;
-            constant range_low  : in string := "0";
-            constant range_high : in string := "1"
+        procedure put_i(
+            name       : in string;
+            val        : in string;
+            val_len    : in integer;
+            val_type   : in string;
+            randomize  : in boolean;
+            range_low  : in string;
+            range_high : in string
         ) is
         begin
             assert num_entries < C_CONFIG_DB_MAX_ENTRIES
                 report C_CONFIG_DB_TAG & "capacity exceeded, cannot put '" & name & "'!"
                 severity failure;
 
-            assert val_type = "string" or
-                   val_type = "integer" or
-                   val_type = "boolean" or
-                   val_type = "time"
-            report
-                   C_CONFIG_DB_TAG & "invalid type: " & val_type &
-                   ". Shall be one of string, integer, boolean, time";
-
-            if (randomize) then
-                assert (val_type = "integer" or val_type = "boolean" or val_type = "time")
-                report C_CONFIG_DB_TAG & "invalid type for randomization. Shall be one of: integer, boolean or time.";
-            end if;
-
             entries(num_entries).name       := to_config_db_str(name);
+            entries(num_entries).name_len   := name'length;
             entries(num_entries).val_type   := to_config_db_str(val_type);
             entries(num_entries).val        := to_config_db_str(val);
+            entries(num_entries).val_len    := val_len;
             entries(num_entries).randomize  := randomize;
-            entries(num_entries).range_low  := range_low;
-            entries(num_entries).range_high := range_high;
+            entries(num_entries).range_low  := to_config_db_str(range_low);
+            entries(num_entries).range_high := to_config_db_str(range_high);
+
 
             num_entries := num_entries + 1;
         end procedure;
 
+        procedure put(
+            name       : in string;
+            val        : in string
+        ) is
+        begin
+            put_i(name, val, val'length, "string", false, "", "");
+        end procedure;
+
+        procedure put(
+            name       : in string;
+            val        : in boolean;
+            randomize  : in boolean := false
+        ) is
+        begin
+            put_i(name, boolean'image(val), 1, "boolean", randomize, "", "");
+        end procedure;
+
+        procedure put(
+            name       : in string;
+            val        : in integer;
+            randomize  : in boolean := false;
+            range_lo   : in integer := 0;
+            range_hi   : in integer := 10
+        ) is
+        begin
+            put_i(name, integer'image(val), 1, "integer", randomize, integer'image(range_lo),
+                        integer'image(range_hi));
+        end procedure;
+
+        procedure put(
+            name       : in string;
+            val        : in time;
+            randomize  : in boolean := false;
+            range_lo   : in time := 1 ns;
+            range_hi   : in time := 100 ns
+        ) is
+        begin
+            put_i(name, time'image(val), 1, "time", randomize, time'image(range_lo), time'image(range_hi));
+        end procedure;
+
         impure function get(
-            constant name : in string
+            name : in string
         ) return t_config_db_item is
             variable cmp_name : t_config_db_str := to_config_db_str(name);
         begin
@@ -158,7 +189,7 @@ package body tb_config_db_pkg is
         end function;
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return integer is
             variable item : t_config_db_item := get(name);
         begin
@@ -167,7 +198,7 @@ package body tb_config_db_pkg is
         end function;
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return boolean is
             variable item : t_config_db_item := get(name);
         begin
@@ -176,16 +207,25 @@ package body tb_config_db_pkg is
         end function;
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return string is
             variable item : t_config_db_item := get(name);
         begin
             assert item.val_type(1 to 6) = "string";
-            return item.val;
+            return item.val(1 to item.val_len);
+        end function;
+
+        impure function get_string(
+            name : in string
+        ) return string is
+            variable item : t_config_db_item := get(name);
+        begin
+            assert item.val_type(1 to 6) = "string";
+            return item.val(1 to item.val_len);
         end function;
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return time is
             variable item : t_config_db_item := get(name);
         begin
@@ -223,14 +263,20 @@ package body tb_config_db_pkg is
         end procedure;
 
         procedure print is
+            variable max_len : integer := 0;
         begin
-            info_m("*********************************************************************");
+            info_m("***************************************************************");
             info_m(C_CONFIG_DB_TAG & " Content");
-            info_m("*********************************************************************");
+            info_m("***************************************************************");
             for i in 0 to num_entries - 1 loop
-                info_m("    " & entries(i).name & ":" & entries(i).val);
+                if (entries(i).name_len > max_len) then
+                    max_len := entries(i).name_len;
+                end if;
             end loop;
-            info_m("*********************************************************************");
+            for i in 0 to num_entries - 1 loop
+                info_m("    " & entries(i).name(1 to max_len) & "  : " & entries(i).val);
+            end loop;
+            info_m("***************************************************************");
         end procedure;
 
     end protected body;

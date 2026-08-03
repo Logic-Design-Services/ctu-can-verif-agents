@@ -91,11 +91,7 @@ package test_controller_agent_pkg is
 
     component test_controller_agent is
     generic (
-        G_COM_ID                : natural;
-
-        -- Static configuration (resolved at elaboration)
-        G_TEST_NAME             : string;
-        G_TEST_TYPE             : string
+        G_COM_ID                : natural
     );
     port (
         -- VIP test control / status signals

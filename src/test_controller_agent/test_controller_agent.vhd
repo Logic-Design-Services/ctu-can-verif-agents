@@ -91,11 +91,7 @@ use ctu_can_agents.can_agent_pkg.all;
 
 entity test_controller_agent is
     generic (
-        G_COM_ID                : natural;
-
-        -- Static configuration (resolved at elaboration)
-        G_TEST_NAME             : string;
-        G_TEST_TYPE             : string
+        G_COM_ID                : natural
     );
     port (
         -- VIP test control / status signals
@@ -150,19 +146,20 @@ begin
         -- If there are multiple iterations, we want different random data
         -- to be used for each one!
         if (seed_applied = false) then
-            apply_rand_seed(config_db.get("seed"));
+            apply_rand_seed(config_db.get("SEED"));
             seed_applied <= true;
         end if;
 
         -----------------------------------------------------------------------
         -- Start the test (give command to corresponding test type agent)
         -----------------------------------------------------------------------
-        if (G_TEST_TYPE = "compliance" or G_TEST_TYPE = "reference") then
+        if (config_db.get_string("TEST_TYPE") = "compliance" or
+            config_db.get_string("TEST_TYPE") = "reference") then
             cosim_start <= '1';
             wait until cosim_done = '1';
             test_success_i := pli_test_result;
 
-        elsif (G_TEST_TYPE = "feature") then
+        elsif (config_db.get_string("TEST_TYPE") = "feature") then
             feature_start <= '1';
             wait until feature_done = '1';
             test_success_i := feature_result;
@@ -196,152 +193,157 @@ begin
     -- Cosimulation (for compliance and reference tests)
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
-    g_cosimulation : if (G_TEST_TYPE = "compliance" or G_TEST_TYPE = "reference") generate
 
-        ---------------------------------------------------------------------------
-        -- Cosimulation handling process
-        --
-        -- Passes control to Cosimulation plugin linked to simulator.
-        -- Communication with this plugin is done via PLI interface.
-        ---------------------------------------------------------------------------
-        p_cosimulation_control : process
-        begin
-            wait until cosim_start = '1';
-
-            -----------------------------------------------------------------------
-            -- Give control over the TB to Cosimulation plugin which runs the
-            -- test and operates on other agents.
-            -----------------------------------------------------------------------
-            info_m("Requesting TB control from Cosimulation plugin via PLI...");
-            pli_control_req <= '1';
-            wait for 1 ns;
-
-            if (pli_control_gnt /= '1') then
-                wait until pli_control_gnt = '1' for 10 ns;
-            end if;
-
-            wait for 0 ns;
-            check_m(pli_control_gnt = '1',
-                    "Cosimulation plugin took over simulation control!");
-            wait for 0 ns;
-
-            info_m("Waiting till Cosimulation plugin is done running test...");
-            wait until (pli_test_end = '1');
-            cosim_done <= '1';
-            info_m("Cosimulation plugin signals test has ended");
-
-            wait for 50 ns;
-            pli_control_req <= '0';
-            cosim_done <= '0';
-            wait for 50 ns;
-        end process;
+    ---------------------------------------------------------------------------
+    -- Cosimulation handling process
+    --
+    -- Passes control to Cosimulation plugin linked to simulator.
+    -- Communication with this plugin is done via PLI interface.
+    ---------------------------------------------------------------------------
+    p_cosimulation_control : process
+    begin
+        wait until cosim_start = '1';
 
         -----------------------------------------------------------------------
-        -- Listen on PLI commands and send them to individual agents!
+        -- Give control over the TB to Cosimulation plugin which runs the
+        -- test and operates on other agents.
         -----------------------------------------------------------------------
-        p_pli_listener : process
-            -- TODO: This is temporary hack just for the TB to compile !
-            --       Must extend the PLI interface to provide the address of
-            --       the agent that it wants to talk to !
-            --       This could be somehow provided via generics of this
-            --       module, but that is wrong! This information must be known
-            --       by the test sequence (as it must be aware of agents mappings
-            --       and connections to know what functionality to reach)!
-            variable com_id : integer := 0;
-        begin
+        info_m("Requesting TB control from Cosimulation plugin via PLI...");
+        pli_control_req <= '1';
+        wait for 1 ns;
 
-            -------------------------------------------------------------------
-            -- Poll on for pli_req = '1'
-            -------------------------------------------------------------------
-            wait until (pli_req = '1');
-            wait for 1 ps;
+        if (pli_control_gnt /= '1') then
+            wait until pli_control_gnt = '1' for 10 ns;
+        end if;
 
-            -------------------------------------------------------------------
-            -- Process command (and get answer in case of read)
-            -------------------------------------------------------------------
-            case pli_dest is
-            when PLI_DEST_RES_GEN_AGENT =>
-                pli_process_rst_agnt(pli_cmd, pli_data_out, pli_data_in,
-                                     default_channel, com_id);
+        wait for 0 ns;
+        check_m(pli_control_gnt = '1',
+                "Cosimulation plugin took over simulation control!");
+        wait for 0 ns;
 
-            when PLI_DEST_CLK_GEN_AGENT =>
-                pli_process_clk_agent(pli_cmd, pli_data_out, pli_data_in,
-                                      default_channel, com_id);
+        info_m("Waiting till Cosimulation plugin is done running test...");
+        wait until (pli_test_end = '1');
+        cosim_done <= '1';
+        info_m("Cosimulation plugin signals test has ended");
 
-            when PLI_DEST_MEM_BUS_MASTER_AGENT =>
-                pli_process_mem_bus_master_agent(pli_cmd, pli_data_out, pli_data_in,
-                                                 default_channel, com_id);
+        wait for 50 ns;
+        pli_control_req <= '0';
+        cosim_done <= '0';
+        wait for 50 ns;
+    end process;
 
-            when PLI_DEST_CAN_AGENT =>
-                pli_process_can_agent(pli_cmd, pli_data_out, pli_data_in,
-                    pli_data_in_2, pli_str_buf_in, default_channel, com_id);
+    -----------------------------------------------------------------------
+    -- Listen on PLI commands and send them to individual agents!
+    -----------------------------------------------------------------------
+    p_pli_listener : process
+        -- TODO: This is temporary hack just for the TB to compile !
+        --       Must extend the PLI interface to provide the address of
+        --       the agent that it wants to talk to !
+        --       This could be somehow provided via generics of this
+        --       module, but that is wrong! This information must be known
+        --       by the test sequence (as it must be aware of agents mappings
+        --       and connections to know what functionality to reach)!
+        variable com_id : integer := 0;
+    begin
 
-            when PLI_DEST_TEST_CONTROLLER_AGENT =>
-                pli_process_test_agent(pli_cmd, pli_data_out, pli_data_in,
-                    pli_str_buf_in, pli_test_end, pli_test_result);
+        -------------------------------------------------------------------
+        -- Poll on for pli_req = '1'
+        -------------------------------------------------------------------
+        wait until (pli_req = '1');
+        wait for 1 ps;
 
-            -- TODO: Need to add Memory bus slave, DIO agent and Memory model!
+        -------------------------------------------------------------------
+        -- Process command (and get answer in case of read)
+        -------------------------------------------------------------------
+        case pli_dest is
+        when PLI_DEST_RES_GEN_AGENT =>
+            pli_process_rst_agnt(pli_cmd, pli_data_out, pli_data_in,
+                                    default_channel, com_id);
 
-            when OTHERS =>
-                error_m("Unknown agent destination: " & to_hstring(pli_dest));
-            end case;
+        when PLI_DEST_CLK_GEN_AGENT =>
+            pli_process_clk_agent(pli_cmd, pli_data_out, pli_data_in,
+                                    default_channel, com_id);
 
-            wait for 1 ps;
+        when PLI_DEST_MEM_BUS_MASTER_AGENT =>
+            pli_process_mem_bus_master_agent(pli_cmd, pli_data_out, pli_data_in,
+                                                default_channel, com_id);
 
-            -------------------------------------------------------------------
-            -- Issue pli_ack = '1'
-            -------------------------------------------------------------------
-            pli_ack <= '1';
-            wait for 1 ps;
+        when PLI_DEST_CAN_AGENT =>
+            pli_process_can_agent(pli_cmd, pli_data_out, pli_data_in,
+                pli_data_in_2, pli_str_buf_in, default_channel, com_id);
 
-            -------------------------------------------------------------------
-            -- Finish the PLI handshake
-            -------------------------------------------------------------------
-            wait until (pli_req = '0');
-            wait for 1 ps;
-            pli_ack <= '0';
-            wait for 1 ps;
+        when PLI_DEST_TEST_CONTROLLER_AGENT =>
+            pli_process_test_agent(pli_cmd, pli_data_out, pli_data_in,
+                pli_str_buf_in, pli_test_end, pli_test_result);
 
-        end process;
+        -- TODO: Need to add Memory bus slave, DIO agent and Memory model!
+
+        when OTHERS =>
+            error_m("Unknown agent destination: " & to_hstring(pli_dest));
+        end case;
+
+        wait for 1 ps;
+
+        -------------------------------------------------------------------
+        -- Issue pli_ack = '1'
+        -------------------------------------------------------------------
+        pli_ack <= '1';
+        wait for 1 ps;
+
+        -------------------------------------------------------------------
+        -- Finish the PLI handshake
+        -------------------------------------------------------------------
+        wait until (pli_req = '0');
+        wait for 1 ps;
+        pli_ack <= '0';
+        wait for 1 ps;
+
+    end process;
 
 
-        -----------------------------------------------------------------------
-        -- PLI clock generation
-        --
-        -- Create clock for synchronous communication over PLI interface.
-        -- Although compliance test library executes test in different context,
-        -- it needs to synchronize with simulator context. To do this,
-        -- compliance test library passes all messages to TB via shared memory,
-        -- which is read synchronously with PLI callbacks!
-        -----------------------------------------------------------------------
-        p_pli_clk_gen : process
-        begin
-            pli_clk <= '1';
-            wait for 5 ns;
-            pli_clk <= '0';
-            wait for 5 ns;
-        end process;
-
-    end generate;
+    -----------------------------------------------------------------------
+    -- PLI clock generation
+    --
+    -- Create clock for synchronous communication over PLI interface.
+    -- Although compliance test library executes test in different context,
+    -- it needs to synchronize with simulator context. To do this,
+    -- compliance test library passes all messages to TB via shared memory,
+    -- which is read synchronously with PLI callbacks!
+    -----------------------------------------------------------------------
+    p_pli_clk_gen : process
+    begin
+        pli_clk <= '1';
+        wait for 5 ns;
+        pli_clk <= '0';
+        wait for 5 ns;
+    end process;
 
     ---------------------------------------------------------------------------
     -- Checks
     ---------------------------------------------------------------------------
-    assert G_TEST_TYPE = "feature" or G_TEST_TYPE = "compliance" or G_TEST_TYPE = "reference"
-        report "Unsupported test type: " & G_TEST_TYPE & ", choose one of: feature, compliance, reference"
+    process
+    begin
+        wait for 1 ns;
+        assert config_db.get_string("TEST_TYPE") = "feature" or
+               config_db.get_string("TEST_TYPE") = "compliance" or
+               config_db.get_string("TEST_TYPE") = "reference"
+        report "Unsupported test type: " & config_db.get_string("TEST_NAME") &
+                ", choose one of: feature, compliance, reference"
         severity failure;
+        wait;
+    end process;
+
 
     ---------------------------------------------------------------------------
     -- Watchdog
     ---------------------------------------------------------------------------
     process
-        -- TODO: Query from Config DB
-        variable timeout : time := 10 ms;
+        variable timeout : time;
     begin
         wait for 1 ns;
+        timeout := config_db.get("TIMEOUT");
         wait for timeout - 1 ns;
         report "Timeout reached!" severity failure;
     end process;
-
 
 end architecture;

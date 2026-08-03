@@ -263,7 +263,6 @@ package feature_test_agent_pkg is
         G_COM_ID                    :     natural;
 
         -- Test details
-        G_TEST_NAME                 :     string;
         G_DUT_NAME                  :     string
     );
     port(

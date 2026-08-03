@@ -87,8 +87,10 @@ package tb_config_db_pkg is
 
     type t_config_db_item is record
         name        : t_config_db_str;
-        val_type    : t_config_db_str;
+        name_len    : integer;
         val         : t_config_db_str;
+        val_type    : t_config_db_str;
+        val_len     : integer;
         randomize   : boolean;
         range_low   : t_config_db_str;
         range_high  : t_config_db_str;
@@ -99,32 +101,54 @@ package tb_config_db_pkg is
     type t_config_db is protected
 
         procedure put(
-            constant name       : in string;
-            constant val_type   : in string;
-            constant val        : in string;
-            constant randomize  : in boolean := false;
-            constant range_low  : in string := "0";
-            constant range_high : in string := "1"
+            name       : in string;
+            val        : in string
+        );
+
+        procedure put(
+            name       : in string;
+            val        : in boolean;
+            randomize  : in boolean := false
+        );
+
+        procedure put(
+            name       : in string;
+            val        : in integer;
+            randomize  : in boolean := false;
+            range_lo   : in integer := 0;
+            range_hi   : in integer := 10
+        );
+
+        procedure put(
+            name       : in string;
+            val        : in time;
+            randomize  : in boolean := false;
+            range_lo   : in time := 1 ns;
+            range_hi   : in time := 100 ns
         );
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return t_config_db_item;
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return integer;
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return boolean;
 
         impure function get(
-            constant name : in string
+            name : in string
         ) return time;
 
         impure function get(
-            constant name : in string
+            name : in string
+        ) return string;
+
+        impure function get_string(
+            name : in string
         ) return string;
 
         procedure randomize;
