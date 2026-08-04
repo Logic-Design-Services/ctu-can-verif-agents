@@ -146,6 +146,11 @@ package tb_random_pkg is
     ----------------------------------------------------------------------------
     constant EXPONENTIAL_mean   :	natural := 0;
 
+    ----------------------------------------------------------------------------
+    -- Auxiliarly types
+    ----------------------------------------------------------------------------
+    type t_rand_vect_array is array (natural range <>) of
+        std_logic_vector;
 
     ----------------------------------------------------------------------------
     ----------------------------------------------------------------------------
@@ -408,6 +413,20 @@ package tb_random_pkg is
         constant cons_chance    : in    real
     );
 
+    ----------------------------------------------------------------------------
+    -- Generate random array of logic vectors.
+    --
+    -- Arguments:
+    --  retval          Return value
+    --  chances    		Probabilty (between 0 and 1) that a bit of a vector
+    --					will be 1
+    --	unique			If true, only unique vectors will be generated
+    ----------------------------------------------------------------------------
+    procedure rand_logic_vect_arr(
+        variable retVal			: inout t_rand_vect_array;
+        constant chances        : in 	real := 0.5;
+        constant unique			: in 	boolean := false
+    );
 
     ----------------------------------------------------------------------------
     -- Waits for random number of clock cycles with minimum and maximum amount

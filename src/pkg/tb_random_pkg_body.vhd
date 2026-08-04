@@ -509,5 +509,36 @@ package body tb_random_pkg is
         end case;
     end procedure;
 
+    procedure rand_logic_vect_arr(
+		variable retVal			: inout t_rand_vect_array;
+		constant chances        : in    real := 0.5;
+		constant unique			: in    boolean := false
+	) is
+        variable arr_len        : integer;
+        variable elem_len       : integer;
+        variable is_conflict    : boolean;
+    begin
+        arr_len := retVal'length;
+        assert(arr_len > 0);
+        elem_len := retVal(0)'length;
+
+        for i in 0 to arr_len - 1 loop
+            if (unique) then
+                is_conflict := true;
+                while (is_conflict) loop
+                    rand_logic_vect_v(retVal(i), chances);
+                    is_conflict := false;
+                    for j in 0 to arr_len - 1 loop
+                        if (retVal(i) = retVal(j) and i /= j) then
+                            is_conflict := true;
+                        end if;
+                    end loop;
+                end loop;
+            else
+                rand_logic_vect_v(retVal(i), chances);
+            end if;
+        end loop;
+
+    end procedure;
 
 end package body;
