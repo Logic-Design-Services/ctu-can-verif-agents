@@ -81,6 +81,12 @@ context ctu_can_agents.agents_deps_context;
 
 package mem_model_pkg is
 
+    component mem_model is
+    generic(
+        G_COM_ID                : natural
+    );
+    end component;
+
     ---------------------------------------------------------------------------
     -- Message print helpers
     ---------------------------------------------------------------------------
