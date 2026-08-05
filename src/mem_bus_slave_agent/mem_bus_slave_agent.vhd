@@ -82,6 +82,7 @@ context ctu_can_agents.ieee_context;
 context ctu_can_agents.agents_deps_context;
 
 use ctu_can_agents.mem_bus_slave_agent_pkg.all;
+use ctu_can_agents.mem_model_pkg.all;
 
 entity mem_bus_slave_agent is
     generic(
@@ -94,20 +95,21 @@ entity mem_bus_slave_agent is
 
         -- Memory interface (master)
         write_data          : in  std_logic_vector(31 downto 0);
-        read_data           : out std_logic_vector(31 downto 0);
+        read_data           : out std_logic_vector(31 downto 0) := (others => 'X');
         adress              : in  std_logic_vector(31 downto 0);
         scs                 : in  std_logic;
         srd                 : in  std_logic;
         swr                 : in  std_logic;
         sbe                 : in  std_logic_vector(3 downto 0);
-        wait_request        : out std_logic;
-        read_data_valid     : out std_logic
+        wait_request        : out std_logic := '0';
+        read_data_valid     : out std_logic := '0'
     );
 end entity;
 
 architecture tb of mem_bus_slave_agent is
 
     signal agent_enabled            : boolean := false;
+    signal mem_id                   : integer := 0;
 
     type t_transfer_fifo is
         array (0 to G_WAIT_CYCLES_FIFO_DEPTH - 1) of integer;
@@ -160,12 +162,49 @@ begin
     -- Slave response handling
     ---------------------------------------------------------------------------
     p_slave_response : process
+        variable tmp_rdata      : std_logic_vector(31 downto 0);
+        variable initialized    : boolean;
     begin
+        if (not agent_enabled) then
+            wait until agent_enabled;
+        end if;
+
         wait until rising_edge(clk);
+        wait for 1 ps;
+        wait_request <= '0';
+        read_data_valid <= '0';
+        read_data <= (others => 'X');
 
-        -- TODO: Implement responses from memory model here!
+        -- TODO: Implement controlled and randomized stall insertion to the
+        --       on wait_request and readdatavalid !
         if (scs = '1') then
+            if (swr = '1') then
+                wait for 1 ps;
+                mem_model_put_data(
+                    default_channel,
+                    mem_id,
+                    to_integer(unsigned(adress)),
+                    write_data
+                );
+            elsif (srd = '1') then
+                wait for 1 ps;
+                mem_model_get_data(
+                    default_channel,
+                    mem_id,
+                    to_integer(unsigned(adress)),
+                    tmp_rdata,
+                    initialized
+                );
 
+                if (not initialized) then
+                    mem_model_dump(default_channel, mem_id);
+                    mem_bus_slave_agent_error_m(G_COM_ID,
+                        "Read undefined data (0x" & to_hstring(tmp_rdata) & ") from address: 0x" &
+                        to_hstring(adress));
+                end if;
+                read_data <= tmp_rdata;
+                read_data_valid <= '1';
+            end if;
         end if;
 
     end process;
@@ -191,6 +230,9 @@ begin
 
         when MEM_BUS_SLAVE_AGNT_CMD_STOP =>
             agent_enabled <= false;
+
+        when MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID =>
+            mem_id <= com_channel_data.get_param;
 
         when MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES =>
             put_to_fifo(com_channel_data.get_param, wrq_fifo, wrq_wp, wrq_rp);

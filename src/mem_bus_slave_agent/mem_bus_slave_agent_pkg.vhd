@@ -119,6 +119,11 @@ package mem_bus_slave_agent_pkg is
         constant    msg         : in    string
     );
 
+    procedure mem_bus_slave_agent_error_m(
+        constant    id          : in    natural;
+        constant    msg         : in    string
+    );
+
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
     -- Memory bus slave agent API
@@ -143,6 +148,17 @@ package mem_bus_slave_agent_pkg is
     procedure mem_bus_slave_agent_stop(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
+    );
+
+    ---------------------------------------------------------------------------
+    -- Sets ID of memory model to communicate with
+    --
+    -- @param channel   Channel on which to send the request
+    ---------------------------------------------------------------------------
+    procedure mem_bus_slave_agent_set_mem_id(
+        signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
+                    mem_id      : in    integer
     );
 
     ---------------------------------------------------------------------------
@@ -177,8 +193,9 @@ package mem_bus_slave_agent_pkg is
     -- Supported commands for clock agent (sent as message types)
     constant MEM_BUS_SLAVE_AGNT_CMD_START                       : integer := 0;
     constant MEM_BUS_SLAVE_AGNT_CMD_STOP                        : integer := 1;
-    constant MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES     : integer := 2;
-    constant MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES  : integer := 3;
+    constant MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID                  : integer := 2;
+    constant MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES     : integer := 3;
+    constant MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES  : integer := 4;
 
     -- Tag for messages
     constant MEM_BUS_SLAVE_AGENT_TAG : string := "Memory Bus Slave Agent: ";
@@ -207,6 +224,14 @@ package body mem_bus_slave_agent_pkg is
         debug_m(MEM_BUS_SLAVE_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
     end procedure;
 
+    procedure mem_bus_slave_agent_error_m(
+        constant    id          : in    natural;
+        constant    msg         : in    string
+    )  is
+    begin
+        error_m(MEM_BUS_SLAVE_AGENT_TAG & "(" & natural'image(id) & "): " & msg);
+    end procedure;
+
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
     -- Memory bus slave agent API
@@ -230,6 +255,18 @@ package body mem_bus_slave_agent_pkg is
         mem_bus_slave_agent_info_m(id, "Starting");
         send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_STOP);
         mem_bus_slave_agent_debug_m(id, "Started");
+    end procedure;
+
+    procedure mem_bus_slave_agent_set_mem_id(
+        signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
+                    mem_id      : in    integer
+    ) is
+    begin
+        mem_bus_slave_agent_info_m(id, "Setting Memory model ID to: " & integer'image(mem_id));
+        com_channel_data.set_param(mem_id);
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID);
+        mem_bus_slave_agent_debug_m(id, "Memory model ID set");
     end procedure;
 
     procedure mem_bus_slave_agent_add_wait_request_cycles(
