@@ -106,23 +106,23 @@ package mem_model_pkg is
     ---------------------------------------------------------------------------
     procedure mem_model_put_data(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural;
+                    id          : in    natural;
                     address     : in    integer;
                     data        : in    std_logic_vector
     );
 
     procedure mem_model_get_data(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural;
+                    id          : in    natural;
                     address     : in    integer;
         variable    data        : out   std_logic_vector;
         variable    initialized : out   boolean
     );
 
     type t_mem_model_init_mode is (
+        MEM_MODEL_INIT_X,
         MEM_MODEL_INIT_RANDOM,
         MEM_MODEL_INIT_ZERO,
-        MEM_MODEL_INIT_X,
         MEM_MODEL_INIT_U
     );
 
@@ -130,6 +130,11 @@ package mem_model_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     init_mode   : in    t_mem_model_init_mode
+    );
+
+    procedure mem_model_dump(
+        signal      channel     : inout t_com_channel;
+        constant    id          : in    natural
     );
 
     ---------------------------------------------------------------------------
@@ -140,9 +145,10 @@ package mem_model_pkg is
     constant MEM_MODEL_CMD_PUT_DATA                 : integer := 0;
     constant MEM_MODEL_CMD_GET_DATA                 : integer := 1;
     constant MEM_MODEL_CMD_SET_NON_INIT_MODE        : integer := 2;
+    constant MEM_MODEL_CMD_DUMP                     : integer := 3;
 
     -- Tag for messages
-    constant MEM_MODEL_TAG : string := "Memory Model tag ";
+    constant MEM_MODEL_TAG : string := "Memory Model ";
 
 end package;
 
@@ -167,13 +173,14 @@ package body mem_model_pkg is
 
     procedure mem_model_put_data(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural;
+                    id          : in    natural;
                     address     : in    integer;
                     data        : in    std_logic_vector
     ) is
     begin
-        mem_model_info_m(id, "Put Data: " & to_hstring(data) &
-                             " to Address: " & integer'image(address));
+        mem_model_info_m(id, "Put Data: 0x" & to_hstring(data) &
+                             " to Address: 0x" &
+                             to_hstring(std_logic_vector(to_unsigned(address, 32))));
         com_channel_data.set_param(data);
         com_channel_data.set_param(address);
         com_channel_data.set_param_2(data'length);
@@ -183,21 +190,22 @@ package body mem_model_pkg is
 
     procedure mem_model_get_data(
         signal      channel     : inout t_com_channel;
-        constant    id          : in    natural;
+                    id          : in    natural;
                     address     : in    integer;
         variable    data        : out   std_logic_vector;
         variable    initialized : out   boolean
     ) is
     begin
         assert (data'length mod 8 = 0);
-        mem_model_info_m(id, "Get " & integer'image(data'length / 8) & "Bytes " &
-                             " from Address: " & integer'image(address));
+        mem_model_info_m(id, "Get " & integer'image(data'length / 8) & " Bytes" &
+                             " from Address: 0x" &
+                             to_hstring(std_logic_vector(to_unsigned(address, 32))));
         com_channel_data.set_param(address);
         com_channel_data.set_param_2(data'length);
         send(channel, id, MEM_MODEL_CMD_GET_DATA);
         data := com_channel_data.get_param(data'length - 1 downto 0);
         initialized := com_channel_data.get_param;
-        mem_model_debug_m(id, "Data obtained: " & to_hstring(data));
+        mem_model_info_m(id, "Data obtained: 0x" & to_hstring(data));
     end procedure;
 
     procedure mem_model_set_init_mode(
@@ -210,6 +218,16 @@ package body mem_model_pkg is
         com_channel_data.set_param(t_mem_model_init_mode'pos(init_mode));
         send(channel, id, MEM_MODEL_CMD_SET_NON_INIT_MODE);
         mem_model_debug_m(id, "Init mode set");
+    end procedure;
+
+    procedure mem_model_dump(
+        signal      channel     : inout t_com_channel;
+        constant    id          : in    natural
+    ) is
+    begin
+        mem_model_info_m(id, "Dump memory model");
+        send(channel, id, MEM_MODEL_CMD_DUMP);
+        mem_model_debug_m(id, "Model dumped");
     end procedure;
 
 end package body;

@@ -234,15 +234,14 @@ architecture tb of mem_model is
                 report "Only multiples of 8 are supported";
 
             n_bytes := data'length / 8;
-
             byte_loop : for i in 0 to n_bytes - 1 loop
-                find_key_node(i, k_node);
+                find_key_node(address + i, k_node);
 
                 v_node := k_node.val_head;
                 if (v_node = null) then
                     v_node := new val_node_t;
                     v_node.address := address + i;
-                    if (i = address + n_bytes) then
+                    if (i = n_bytes - 1) then
                         v_node.data := data(data'length - 1 downto i * 8);
                     else
                         v_node.data := data(((i + 1) * 8) - 1 downto i * 8);
@@ -261,8 +260,8 @@ architecture tb of mem_model is
                     -- Append if at the end
                     elsif (v_node.next_val = null) then
                         v_node := new val_node_t;
-                        v_node.address := i;
-                        if (i = address + n_bytes) then
+                        v_node.address := address + i;
+                        if (i = n_bytes - 1) then
                             v_node.data := data(data'length - 1 downto i * 8);
                         else
                             v_node.data := data(((i + 1) * 8) - 1 downto i * 8);
@@ -294,20 +293,23 @@ architecture tb of mem_model is
                 report "Only multiples of 8 are supported";
 
             n_bytes := data'length / 8;
+            data_ok := true;
 
-            byte_loop : for i in address to address + n_bytes loop
-                find_key_node(i, k_node);
+            byte_loop : for i in 0 to n_bytes - 1 loop
+                find_key_node(address + i, k_node);
 
                 if (k_node = null or k_node.val_head = null) then
                     get_uninited_byte(tmp_byte);
+                    data_ok := false;
                 else
                     v_node := k_node.val_head;
                     key_loop: loop
-                        if (v_node.address = address) then
+                        if (v_node.address = address + i) then
                             tmp_byte := v_node.data;
                             exit key_loop;
                         elsif (v_node.next_val = null) then
                             get_uninited_byte(tmp_byte);
+                            data_ok := false;
                             exit key_loop;
                         else
                             v_node := v_node.next_val;
