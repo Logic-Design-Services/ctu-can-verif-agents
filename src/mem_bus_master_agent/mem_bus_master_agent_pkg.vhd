@@ -502,7 +502,7 @@ package body mem_bus_master_agent_pkg is
         variable    read_data   : inout std_logic_vector(31 downto 0);
                     byte_enable : in    std_logic_vector(3 downto 0)
     ) is
-        variable tmp : std_logic_vector(127 downto 0);
+        variable tmp : std_logic_vector(255 downto 0);
     begin
         --mem_bus_master_agent_info_m(id, "Read, Address: 0x" &
         --       to_hstring(std_logic_vector(to_unsigned(address, 16))));
