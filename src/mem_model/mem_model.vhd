@@ -126,6 +126,10 @@ architecture tb of mem_model is
             data_ok     : out boolean;
             data        : out std_logic_vector
         );
+
+        -- Dump memory contents
+        procedure dump;
+
     end protected t_mem_model_map;
 
     -----------------------------------------------------------------------
@@ -149,7 +153,7 @@ architecture tb of mem_model is
         val_tail    : val_node_ptr; -- FIFO tail (Write/Push location)
     end record;
 
-    constant C_HASH_BUCKETS : integer := 256;
+    constant C_HASH_BUCKETS : integer := 512;
     type table_array_t is array (0 to C_HASH_BUCKETS - 1) of key_node_ptr;
 
     -----------------------------------------------------------------------
@@ -321,6 +325,26 @@ architecture tb of mem_model is
             data := rv;
         end procedure;
 
+        procedure dump is
+            variable k_node     : key_node_ptr;
+            variable v_node     : val_node_ptr;
+        begin
+            -- TODO: Sort dumped contents!
+            mem_model_info_m(G_COM_ID, "Memory Model content (unsorted):");
+
+            for i in 0 to C_HASH_BUCKETS - 1 loop
+                k_node := table(i);
+                v_node := k_node.val_head;
+                while (v_node /= null) loop
+                    mem_model_info_m(G_COM_ID,
+                                     "Address: 0x" & to_hstring(to_unsigned(v_node.address, 32)) &
+                                     " Data: 0x" & to_hstring(v_node.data));
+                    v_node := v_node.next_val;
+                end loop;
+            end loop;
+
+        end procedure;
+
     end protected body t_mem_model_map;
 
     shared variable mem : t_mem_model_map;
@@ -376,6 +400,9 @@ begin
         when MEM_MODEL_CMD_SET_NON_INIT_MODE =>
             tmp_int := com_channel_data.get_param;
             mem.set_init_mode(t_mem_model_init_mode'val(tmp_int));
+
+        when MEM_MODEL_CMD_DUMP =>
+            mem.dump;
 
         when others =>
             info_m("Invalid message type: " & integer'image(cmd));
