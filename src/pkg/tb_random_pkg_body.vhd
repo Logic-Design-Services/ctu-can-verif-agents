@@ -246,7 +246,6 @@ package body tb_random_pkg is
     ) is
     begin
         rand_ctr.increment;
-        wait for 0 ns;
 
         if (randomLibData(rand_ctr.get) < chances) then
             retVal := '1';
@@ -300,8 +299,6 @@ package body tb_random_pkg is
         for i in 0 to retVal'length - 1 loop
             rand_ctr.increment;
 
-            wait for 0 ns;
-
             if (randomLibData(rand_ctr.get) < chances) then
                 retVal(i) := '1';
             else
@@ -352,7 +349,6 @@ package body tb_random_pkg is
 
             -- Swap value with "p(1 - cons_chance)"
             rand_real_v(tmp_real);
-            wait for 0 ns;
             if (tmp_real > cons_chance) then
                 tmp := not tmp;
             end if;
@@ -419,16 +415,13 @@ package body tb_random_pkg is
     )is
     begin
         for i in 0 to retVal'length - 1 loop
-
             rand_ctr.increment;
-            wait for 0 ns;
 
             if (randomLibData(rand_ctr.get) < chances) then
                 retVal(i) := '1';
             else
                 retVal(i) := '0';
             end if;
-
         end loop;
 
         if (unsigned(retVal) <= bt) then
