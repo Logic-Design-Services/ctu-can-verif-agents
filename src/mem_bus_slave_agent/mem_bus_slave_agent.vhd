@@ -187,7 +187,6 @@ begin
                     write_data
                 );
             elsif (srd = '1') then
-                wait for 1 ps;
                 mem_model_get_data(
                     default_channel,
                     mem_id,
@@ -202,6 +201,8 @@ begin
                         "Read undefined data (0x" & to_hstring(tmp_rdata) & ") from address: 0x" &
                         to_hstring(adress));
                 end if;
+                wait until rising_edge(clk);
+                wait for 1 ps;
                 read_data <= tmp_rdata;
                 read_data_valid <= '1';
             end if;
