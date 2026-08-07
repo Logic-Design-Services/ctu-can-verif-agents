@@ -275,7 +275,7 @@ begin
     ---------------------------------------------------------------------------
     -- Test node
     ---------------------------------------------------------------------------
-    g_dut : if (G_DUT_NAME = "ctu_can_fd_top") generate
+    g_test_node : if (G_DUT_NAME = "ctu_can_fd_top") generate
 
         i_test_node : ctu_can_fd_top
         generic map(
