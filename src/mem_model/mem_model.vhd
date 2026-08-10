@@ -259,7 +259,11 @@ architecture tb of mem_model is
                 key_loop: loop
                     -- Overwrite the address if it exists
                     if (v_node.address = address) then
-                        v_node.data := data;
+                        if (i = n_bytes - 1) then
+                        v_node.data := data(data'length - 1 downto i * 8);
+                        else
+                            v_node.data := data(((i + 1) * 8) - 1 downto i * 8);
+                        end if;
                         exit key_loop;
                     -- Append if at the end
                     elsif (v_node.next_val = null) then
