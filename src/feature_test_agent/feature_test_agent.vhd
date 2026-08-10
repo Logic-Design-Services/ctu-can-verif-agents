@@ -240,7 +240,7 @@ architecture tb of feature_test_agent is
 
         -- Memory interface (slave)
         mbs_write_data      : in  std_logic_vector(31 downto 0);
-        mbs_data_out        : out std_logic_vector(31 downto 0);
+        mbs_read_data       : out std_logic_vector(31 downto 0);
         mbs_adress          : in  std_logic_vector(15 downto 0);
         mbs_scs             : in  std_logic;
         mbs_srd             : in  std_logic;
@@ -344,7 +344,7 @@ begin
 
             -- Memory interface (slave)
             mbs_write_data      => mbs_write_data,
-            mbs_data_out        => mbs_read_data,
+            mbs_read_data       => mbs_read_data,
             mbs_adress          => mbs_adress,
             mbs_scs             => mbs_scs,
             mbs_srd             => mbs_srd,
