@@ -123,6 +123,8 @@ entity feature_test_agent is
         mbm_sbe                     : out std_logic_vector(3 downto 0);
         mbm_wait_request            : in  std_logic;
         mbm_read_data_valid         : in  std_logic;
+        mbm_response                : in  std_logic_vector(1 downto 0);
+        mbm_write_response_valid    : in  std_logic;
 
         -- CAN bus from/to DUT
         dut_can_tx                  : in  std_logic;
@@ -231,42 +233,44 @@ architecture tb of feature_test_agent is
     );
     port(
         -- Clock and Asynchronous reset
-        clk_sys             : in std_logic;
-        clk_can             : in std_logic;
-        rst_n               : in std_logic;
+        clk_sys                     : in std_logic;
+        clk_can                     : in std_logic;
+        rst_n                       : in std_logic;
 
         -- DFT support
-        scan_mode           : in  std_logic;
+        scan_mode                   : in  std_logic;
 
         -- Memory interface (slave)
-        mbs_write_data      : in  std_logic_vector(31 downto 0);
-        mbs_read_data       : out std_logic_vector(31 downto 0);
-        mbs_adress          : in  std_logic_vector(15 downto 0);
-        mbs_scs             : in  std_logic;
-        mbs_srd             : in  std_logic;
-        mbs_swr             : in  std_logic;
-        mbs_sbe             : in  std_logic_vector(3 downto 0);
+        mbs_write_data              : in  std_logic_vector(31 downto 0);
+        mbs_read_data               : out std_logic_vector(31 downto 0);
+        mbs_adress                  : in  std_logic_vector(15 downto 0);
+        mbs_scs                     : in  std_logic;
+        mbs_srd                     : in  std_logic;
+        mbs_swr                     : in  std_logic;
+        mbs_sbe                     : in  std_logic_vector(3 downto 0);
 
         -- Memory interface (master)
-        mbm_read_data       : in  std_logic_vector(31 downto 0);
-        mbm_write_data      : out std_logic_vector(31 downto 0);
-        mbm_adress          : out std_logic_vector(31 downto 0);
-        mbm_scs             : out std_logic;
-        mbm_srd             : out std_logic;
-        mbm_swr             : out std_logic;
-        mbm_sbe             : out std_logic_vector(3 downto 0);
-        mbm_wait_request    : in  std_logic;
-        mbm_read_data_valid : in  std_logic;
+        mbm_read_data               : in  std_logic_vector(31 downto 0);
+        mbm_write_data              : out std_logic_vector(31 downto 0);
+        mbm_adress                  : out std_logic_vector(31 downto 0);
+        mbm_scs                     : out std_logic;
+        mbm_srd                     : out std_logic;
+        mbm_swr                     : out std_logic;
+        mbm_sbe                     : out std_logic_vector(3 downto 0);
+        mbm_wait_request            : in  std_logic;
+        mbm_read_data_valid         : in  std_logic;
+        mbm_response                : in  std_logic_vector(1 downto 0);
+        mbm_write_response_valid    : in  std_logic;
 
         -- Interrupt
-        int                 : out std_logic;
+        int                         : out std_logic;
 
         -- CAN Bus Interface
-        can_tx              : out std_logic;
-        can_rx              : in  std_logic;
+        can_tx                      : out std_logic;
+        can_rx                      : in  std_logic;
 
         -- Timestamp for time based transmission / reception
-        timestamp           : in std_logic_vector(63 downto 0)
+        timestamp                   : in std_logic_vector(63 downto 0)
     );
     end component ctu_can_xl_top;
 
@@ -327,50 +331,52 @@ begin
 
         i_test_node : ctu_can_xl_top
         generic map (
-            G_TX_FRAME_SLOT_CNT => 8,
-            G_RX_FRAME_SLOT_CNT => 8,
-            G_RX_CACHE_DEPTH    => 4,
-            G_TX_CACHE_DEPTH    => 4,
-            G_ACTIVE_TS_BITS    => 63
+            G_TX_FRAME_SLOT_CNT         => 8,
+            G_RX_FRAME_SLOT_CNT         => 8,
+            G_RX_CACHE_DEPTH            => 4,
+            G_TX_CACHE_DEPTH            => 4,
+            G_ACTIVE_TS_BITS            => 63
         )
         port map(
             -- Clock and Asynchronous reset
-            clk_sys             => clk_sys,
-            clk_can             => clk_can,
-            rst_n               => rst_n,
+            clk_sys                     => clk_sys,
+            clk_can                     => clk_can,
+            rst_n                       => rst_n,
 
             -- DFT support
-            scan_mode           => '0',
+            scan_mode                   => '0',
 
             -- Memory interface (slave)
-            mbs_write_data      => mbs_write_data,
-            mbs_read_data       => mbs_read_data,
-            mbs_adress          => mbs_adress,
-            mbs_scs             => mbs_scs,
-            mbs_srd             => mbs_srd,
-            mbs_swr             => mbs_swr,
-            mbs_sbe             => mbs_sbe,
+            mbs_write_data              => mbs_write_data,
+            mbs_read_data               => mbs_read_data,
+            mbs_adress                  => mbs_adress,
+            mbs_scs                     => mbs_scs,
+            mbs_srd                     => mbs_srd,
+            mbs_swr                     => mbs_swr,
+            mbs_sbe                     => mbs_sbe,
 
             -- Memory interface (master)
-            mbm_read_data       => mbm_read_data,
-            mbm_write_data      => mbm_write_data,
-            mbm_adress          => mbm_adress,
-            mbm_scs             => mbm_scs,
-            mbm_srd             => mbm_srd,
-            mbm_swr             => mbm_swr,
-            mbm_sbe             => mbm_sbe,
-            mbm_wait_request    => mbm_wait_request,
-            mbm_read_data_valid => mbm_read_data_valid,
+            mbm_read_data               => mbm_read_data,
+            mbm_write_data              => mbm_write_data,
+            mbm_adress                  => mbm_adress,
+            mbm_scs                     => mbm_scs,
+            mbm_srd                     => mbm_srd,
+            mbm_swr                     => mbm_swr,
+            mbm_sbe                     => mbm_sbe,
+            mbm_wait_request            => mbm_wait_request,
+            mbm_read_data_valid         => mbm_read_data_valid,
+            mbm_response                => mbm_response,
+            mbm_write_response_valid    => mbm_write_response_valid,
 
             -- Interrupt
-            int                 => open,
+            int                         => open,
 
             -- CAN Bus Interface
-            can_tx              => test_node_can_tx,
-            can_rx              => test_node_can_rx,
+            can_tx                      => test_node_can_tx,
+            can_rx                      => test_node_can_rx,
 
             -- Timestamp for time based transmission / reception
-            timestamp           => (others => '0')
+            timestamp                   => (others => '0')
         );
 
     else generate

@@ -91,18 +91,20 @@ package mem_bus_slave_agent_pkg is
     );
     port (
         -- Clock
-        clk                 : in    std_logic;
+        clk                         : in    std_logic;
 
         -- Memory interface (master)
-        write_data          : in  std_logic_vector(31 downto 0);
-        read_data           : out std_logic_vector(31 downto 0);
-        adress              : in  std_logic_vector(31 downto 0);
-        scs                 : in  std_logic;
-        srd                 : in  std_logic;
-        swr                 : in  std_logic;
-        sbe                 : in  std_logic_vector(3 downto 0);
-        wait_request        : out std_logic;
-        read_data_valid     : out std_logic
+        write_data                  : in  std_logic_vector(31 downto 0);
+        read_data                   : out std_logic_vector(31 downto 0);
+        adress                      : in  std_logic_vector(31 downto 0);
+        scs                         : in  std_logic;
+        srd                         : in  std_logic;
+        swr                         : in  std_logic;
+        sbe                         : in  std_logic_vector(3 downto 0);
+        wait_request                : out std_logic;
+        read_data_valid             : out std_logic;
+        mbm_response                : out std_logic_vector(1 downto 0) := "00";
+        mbm_write_response_valid    : out std_logic := '1'
     );
     end component;
 

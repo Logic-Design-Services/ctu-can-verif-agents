@@ -294,6 +294,8 @@ package feature_test_agent_pkg is
         mbm_sbe                     : out std_logic_vector(3 downto 0);
         mbm_wait_request            : in  std_logic;
         mbm_read_data_valid         : in  std_logic;
+        mbm_response                : in  std_logic_vector(1 downto 0);
+        mbm_write_response_valid    : in  std_logic;
 
         -- CAN bus from/to DUT
         dut_can_tx                  : in  std_logic;

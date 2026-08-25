@@ -91,18 +91,20 @@ entity mem_bus_slave_agent is
     );
     port (
         -- Clock
-        clk                 : in    std_logic;
+        clk                         : in    std_logic;
 
         -- Memory interface (master)
-        write_data          : in  std_logic_vector(31 downto 0);
-        read_data           : out std_logic_vector(31 downto 0) := (others => 'X');
-        adress              : in  std_logic_vector(31 downto 0);
-        scs                 : in  std_logic;
-        srd                 : in  std_logic;
-        swr                 : in  std_logic;
-        sbe                 : in  std_logic_vector(3 downto 0);
-        wait_request        : out std_logic := '0';
-        read_data_valid     : out std_logic := '0'
+        write_data                  : in  std_logic_vector(31 downto 0);
+        read_data                   : out std_logic_vector(31 downto 0) := (others => 'X');
+        adress                      : in  std_logic_vector(31 downto 0);
+        scs                         : in  std_logic;
+        srd                         : in  std_logic;
+        swr                         : in  std_logic;
+        sbe                         : in  std_logic_vector(3 downto 0);
+        wait_request                : out std_logic := '0';
+        read_data_valid             : out std_logic := '0';
+        mbm_response                : out std_logic_vector(1 downto 0) := "00";
+        mbm_write_response_valid    : out std_logic := '1'
     );
 end entity;
 
