@@ -243,9 +243,10 @@ package body mem_bus_slave_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_slave_agent_info_m(id, "Starting");
-        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_START);
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_START, com_data);
         mem_bus_slave_agent_debug_m(id, "Started");
     end procedure;
 
@@ -253,9 +254,10 @@ package body mem_bus_slave_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_slave_agent_info_m(id, "Starting");
-        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_STOP);
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_STOP, com_data);
         mem_bus_slave_agent_debug_m(id, "Started");
     end procedure;
 
@@ -264,10 +266,11 @@ package body mem_bus_slave_agent_pkg is
         constant    id          : in    natural;
                     mem_id      : in    integer
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_slave_agent_info_m(id, "Setting Memory model ID to: " & integer'image(mem_id));
-        com_channel_data.set_param(mem_id);
-        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID);
+        set_param(com_data, mem_id);
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID, com_data);
         mem_bus_slave_agent_debug_m(id, "Memory model ID set");
     end procedure;
 
@@ -276,10 +279,11 @@ package body mem_bus_slave_agent_pkg is
         constant    id          : in    natural;
                     cycles      : in    integer
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_slave_agent_info_m(id, "Setting " & integer'image(cycles) & " Wait Request cycles");
-        com_channel_data.set_param(cycles);
-        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES);
+        set_param(com_data, cycles);
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES, com_data);
         mem_bus_slave_agent_debug_m(id, "Wait Request cycles added");
     end procedure;
 
@@ -288,10 +292,11 @@ package body mem_bus_slave_agent_pkg is
         constant    id          : in    natural;
                     cycles      : in    integer
     )is
+        variable com_data : t_com_data;
     begin
         mem_bus_slave_agent_info_m(id, "Setting " & integer'image(cycles) & " Read Data Valid cycles");
-        com_channel_data.set_param(cycles);
-        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES);
+        set_param(com_data, cycles);
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES, com_data);
         mem_bus_slave_agent_debug_m(id, "Read Data Valid cycles added");
     end procedure;
 

@@ -158,16 +158,15 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token           : natural;
         variable cmd            : integer;
         variable reply_code     : integer;
+        variable com_data       : t_com_data;
         variable transaction    : t_mem_bus_transfer;
         variable tmp            : std_logic_vector(255 downto 0);
-        variable tmp_int        : integer;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
@@ -179,8 +178,8 @@ begin
         -- For non-blocking writes only post to FIFO, don't wait!
         when MEM_BUS_MASTER_AGNT_CMD_WRITE_NON_BLOCKING =>
             transaction.write := true;
-            transaction.address := com_channel_data.get_param;
-            tmp := com_channel_data.get_param;
+            transaction.address := get_param(com_data);
+            tmp := get_param(com_data);
             transaction.byte_enable := tmp(3 DOWNTO 0);
             transaction.write_data := tmp(35 DOWNTO 4);
 
@@ -192,8 +191,8 @@ begin
         -- previous non-blocking transactions were pushed!
         when MEM_BUS_MASTER_AGNT_CMD_WRITE_BLOCKING =>
             transaction.write := true;
-            transaction.address := com_channel_data.get_param;
-            tmp := com_channel_data.get_param;
+            transaction.address := get_param(com_data);
+            tmp := get_param(com_data);
             transaction.byte_enable := tmp(3 DOWNTO 0);
             transaction.write_data := tmp(35 DOWNTO 4);
 
@@ -207,9 +206,8 @@ begin
         -- Reads are always blocking
         when MEM_BUS_MASTER_AGNT_CMD_READ =>
             transaction.write := false;
-            tmp_int := com_channel_data.get_param;
-            transaction.address := com_channel_data.get_param;
-            tmp := com_channel_data.get_param;
+            transaction.address := get_param(com_data);
+            tmp := get_param(com_data);
             transaction.byte_enable := tmp(3 DOWNTO 0);
 
             mem_bus_transfer_fifo(fifo_wp) <= transaction;
@@ -219,7 +217,7 @@ begin
 
             wait until (fifo_wp = fifo_rp);
             --info_m("Read data when pushing response: " & to_hstring(read_data_i));
-            com_channel_data.set_param(read_data_i);
+            set_param(com_data, read_data_i);
 
         when MEM_BUS_MASTER_AGNT_CMD_X_MODE_START =>
             is_x_mode <= true;
@@ -228,13 +226,13 @@ begin
             is_x_mode <= false;
 
         when MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_SETUP =>
-            x_mode_setup <= com_channel_data.get_param;
+            x_mode_setup <= get_param(com_data);
 
         when MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_HOLD =>
-            x_mode_hold <= com_channel_data.get_param;
+            x_mode_hold <= get_param(com_data);
 
         when MEM_BUS_MASTER_AGNT_CMD_SET_OUTPUT_DELAY =>
-            data_out_delay <= com_channel_data.get_param;
+            data_out_delay <= get_param(com_data);
 
         when MEM_BUS_MASTER_AGNT_CMD_WAIT_DONE =>
             if (fifo_wp /= fifo_rp) then
@@ -252,7 +250,7 @@ begin
             reply_code := C_REPLY_CODE_ERR;
         end case;
 
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
     ---------------------------------------------------------------------------
@@ -302,7 +300,6 @@ begin
                     );
             end if;
         end procedure;
-
 
 
         procedure drive_access(

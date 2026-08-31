@@ -436,9 +436,10 @@ package body mem_bus_master_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Starting");
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_START);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_START, com_data);
         mem_bus_master_agent_debug_m(id, "Started");
     end procedure;
 
@@ -447,9 +448,10 @@ package body mem_bus_master_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Stopping");
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_STOP);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_STOP, com_data);
         mem_bus_master_agent_debug_m(id, "Stopped");
     end procedure;
 
@@ -461,15 +463,16 @@ package body mem_bus_master_agent_pkg is
                     write_data  : in    std_logic_vector(31 downto 0);
                     byte_enable : in    std_logic_vector(3 downto 0)
     )  is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_debug_m(id, "Posting non-blocking write, Address: 0x" &
                to_hstring(std_logic_vector(to_unsigned(address, 16))) &
                 " " & to_hstring(write_data));
 
         -- Pack the transaction to parameter vector
-        com_channel_data.set_param(address);
-        com_channel_data.set_param(write_data & byte_enable);
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WRITE_NON_BLOCKING);
+        set_param(com_data, address);
+        set_param(com_data, write_data & byte_enable);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WRITE_NON_BLOCKING, com_data);
 
         mem_bus_master_agent_debug_m(id, "Mem bus agent non-blocking write posted");
     end procedure;
@@ -482,14 +485,15 @@ package body mem_bus_master_agent_pkg is
                     write_data  : in    std_logic_vector(31 downto 0);
                     byte_enable : in    std_logic_vector(3 downto 0)
     )  is
+        variable com_data : t_com_data;
     begin
         --mem_bus_master_agent_debug_m(id, "Blocking write, Address: 0x" &
         --        to_hstring(std_logic_vector(to_unsigned(address, 16))) &
         --        " " & to_hstring(write_data));
 
-        com_channel_data.set_param(address);
-        com_channel_data.set_param(write_data & byte_enable);
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WRITE_BLOCKING);
+        set_param(com_data, address);
+        set_param(com_data, write_data & byte_enable);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WRITE_BLOCKING, com_data);
 
         --mem_bus_master_agent_debug_m(id, "Blocking write succesfull");
     end procedure;
@@ -502,16 +506,17 @@ package body mem_bus_master_agent_pkg is
         variable    read_data   : inout std_logic_vector(31 downto 0);
                     byte_enable : in    std_logic_vector(3 downto 0)
     ) is
+        variable com_data : t_com_data;
         variable tmp : std_logic_vector(255 downto 0);
     begin
         --mem_bus_master_agent_info_m(id, "Read, Address: 0x" &
         --       to_hstring(std_logic_vector(to_unsigned(address, 16))));
 
-        com_channel_data.set_param(address);
-        com_channel_data.set_param(byte_enable);
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_READ);
+        set_param(com_data, address);
+        set_param(com_data, byte_enable);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_READ, com_data);
 
-        tmp := com_channel_data.get_param;
+        tmp := get_param(com_data);
         read_data := tmp(31 downto 0);
         wait for 0 ns;
         --mem_bus_master_agent_info_m(id, "Read done, read data: 0x" & to_hstring(read_data));
@@ -522,9 +527,10 @@ package body mem_bus_master_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Enabling X mode");
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_X_MODE_START);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_X_MODE_START, com_data);
         mem_bus_master_agent_debug_m(id, "X mode enabled");
     end procedure;
 
@@ -533,9 +539,10 @@ package body mem_bus_master_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Disabling X mode");
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_X_MODE_STOP);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_X_MODE_STOP, com_data);
         mem_bus_master_agent_debug_m(id, "X mode disabled");
     end procedure;
 
@@ -545,10 +552,11 @@ package body mem_bus_master_agent_pkg is
         constant    id          : in    natural;
                     setup       : in    time
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Setting X mode setup to: " & time'image(setup));
-        com_channel_data.set_param(setup);
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_SETUP);
+        set_param(com_data, setup);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_SETUP, com_data);
         mem_bus_master_agent_debug_m(id, "X mode setup configured");
     end procedure;
 
@@ -558,10 +566,11 @@ package body mem_bus_master_agent_pkg is
         constant    id          : in    natural;
                     hold        : in    time
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Setting X mode hold to: " & time'image(hold));
-        com_channel_data.set_param(hold);
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_HOLD);
+        set_param(com_data, hold);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_X_MODE_HOLD, com_data);
         mem_bus_master_agent_debug_m(id, "X mode hold configured");
     end procedure;
 
@@ -571,10 +580,11 @@ package body mem_bus_master_agent_pkg is
         constant    id          : in    natural;
                     out_delay   : in    time
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Setting data out output delay " & time'image(out_delay));
-        com_channel_data.set_param(out_delay);
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_OUTPUT_DELAY);
+        set_param(com_data, out_delay);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_SET_OUTPUT_DELAY, com_data);
         mem_bus_master_agent_debug_m(id, "data out output delay set");
     end procedure;
 
@@ -583,9 +593,10 @@ package body mem_bus_master_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_info_m(id, "Waiting till all accesses are executed");
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WAIT_DONE);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_WAIT_DONE, com_data);
         mem_bus_master_agent_info_m(id, "All accesses are executed!");
     end procedure;
 
@@ -672,9 +683,10 @@ package body mem_bus_master_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_debug_m(id, "Enabling transaction reporting");
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_ENABLE_TRANS_REPORT, com_data);
         mem_bus_master_agent_debug_m(id, "Transaction reporting enabled");
     end procedure;
 
@@ -683,9 +695,10 @@ package body mem_bus_master_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         mem_bus_master_agent_debug_m(id, "Disabling transaction reporting");
-        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_DISABLE_TRANS_REPORT);
+        send(channel, id, MEM_BUS_MASTER_AGNT_CMD_DISABLE_TRANS_REPORT, com_data);
         mem_bus_master_agent_debug_m(id, "Transaction reporting disabled");
     end procedure;
 

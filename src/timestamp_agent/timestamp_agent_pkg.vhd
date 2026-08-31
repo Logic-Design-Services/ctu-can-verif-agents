@@ -235,9 +235,10 @@ package body timestamp_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         timestamp_agent_info_m(id, "Starting");
-        send(channel, id, TIMESTAMP_AGENT_CMD_START);
+        send(channel, id, TIMESTAMP_AGENT_CMD_START, com_data);
         timestamp_agent_debug_m(id, "Started");
     end procedure;
 
@@ -246,9 +247,10 @@ package body timestamp_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         timestamp_agent_info_m(id, "Stopping");
-        send(channel, id, TIMESTAMP_AGENT_CMD_STOP);
+        send(channel, id, TIMESTAMP_AGENT_CMD_STOP, com_data);
         timestamp_agent_debug_m(id, "Stopped");
     end procedure;
 
@@ -258,10 +260,11 @@ package body timestamp_agent_pkg is
         constant    id          : in    natural;
         constant    step        : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         timestamp_agent_info_m(id, "Setting step");
-        com_channel_data.set_param(step);
-        send(channel, id, TIMESTAMP_AGENT_CMD_STEP_SET);
+        set_param(com_data, step);
+        send(channel, id, TIMESTAMP_AGENT_CMD_STEP_SET, com_data);
         timestamp_agent_debug_m(id, "Step set");
     end procedure;
 
@@ -271,10 +274,11 @@ package body timestamp_agent_pkg is
         constant    id          : in    natural;
         constant    prescaler   : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         timestamp_agent_info_m(id, "Setting Prescaler");
-        com_channel_data.set_param(prescaler);
-        send(channel, id, TIMESTAMP_AGENT_CMD_PRESCALER_SET);
+        set_param(com_data, prescaler);
+        send(channel, id, TIMESTAMP_AGENT_CMD_PRESCALER_SET, com_data);
         timestamp_agent_debug_m(id, "Prescaler set");
     end procedure;
 
@@ -284,10 +288,11 @@ package body timestamp_agent_pkg is
         constant    id          : in    natural;
         constant    timestamp   : in    std_logic_vector(63 downto 0)
     ) is
+        variable com_data : t_com_data;
     begin
         timestamp_agent_info_m(id, "Presetting timestamp");
-        com_channel_data.set_param(timestamp);
-        send(channel, id, TIMESTAMP_AGENT_CMD_TIMESTAMP_PRESET);
+        set_param(com_data, timestamp);
+        send(channel, id, TIMESTAMP_AGENT_CMD_TIMESTAMP_PRESET, com_data);
         timestamp_agent_debug_m(id, "Timestamp preset");
     end procedure;
 
@@ -296,11 +301,12 @@ package body timestamp_agent_pkg is
         constant    id          : in    natural;
         variable    timestamp   : out   std_logic_vector(63 downto 0)
     ) is
-        variable tmp : std_logic_vector(127 downto 0);
+        variable com_data : t_com_data;
+        variable tmp : std_logic_vector(255 downto 0);
     begin
         timestamp_agent_info_m(id, "Reading timestamp");
-        send(channel, id, TIMESTAMP_AGENT_CMD_GET_TIMESTAMP);
-        tmp := com_channel_data.get_param;
+        send(channel, id, TIMESTAMP_AGENT_CMD_GET_TIMESTAMP, com_data);
+        tmp := get_param(com_data);
         timestamp := tmp(63 downto 0);
         timestamp_agent_debug_m(id, "Timestamp read");
     end procedure;

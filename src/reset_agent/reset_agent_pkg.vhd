@@ -209,9 +209,10 @@ package body reset_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         reset_agent_info_m(id, "Asserting reset");
-        send(channel, id, RST_AGNT_CMD_ASSERT);
+        send(channel, id, RST_AGNT_CMD_ASSERT, com_data);
         reset_agent_debug_m(id, "Asserted reset");
     end procedure;
 
@@ -220,9 +221,10 @@ package body reset_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         reset_agent_info_m(id, "De-Asserting reset");
-        send(channel, id, RST_AGNT_CMD_DEASSERT);
+        send(channel, id, RST_AGNT_CMD_DEASSERT, com_data);
         reset_agent_debug_m(id, "De-Asserted reset");
     end procedure;
 
@@ -232,10 +234,11 @@ package body reset_agent_pkg is
         constant    id          : in    natural;
         constant    polarity    : in    std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         reset_agent_info_m(id, "Setting reset polarity to: " & std_logic'image(polarity));
-        com_channel_data.set_param(polarity);
-        send(channel, id, RST_AGNT_CMD_POLARITY_SET);
+        set_param(com_data, polarity);
+        send(channel, id, RST_AGNT_CMD_POLARITY_SET, com_data);
         reset_agent_debug_m(id, "Polarity set");
     end procedure;
 
@@ -244,10 +247,11 @@ package body reset_agent_pkg is
         constant    id          : in    natural;
         variable    polarity    : out   std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         reset_agent_info_m(id, "Getting reset polarity");
-        send(channel, id, RST_AGNT_CMD_POLARITY_GET);
-        polarity := com_channel_data.get_param;
+        send(channel, id, RST_AGNT_CMD_POLARITY_GET, com_data);
+        polarity := get_param(com_data);
         reset_agent_debug_m(id, "Polarity got");
     end procedure;
 

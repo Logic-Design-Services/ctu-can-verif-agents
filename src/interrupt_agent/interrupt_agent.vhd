@@ -105,21 +105,21 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token : natural;
         variable cmd : integer;
         variable reply_code : integer;
+        variable com_data : t_com_data;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
         when INTERRUPT_AGNT_CMD_POLARITY_SET =>
-            interrupt_polarity <= com_channel_data.get_param;
+            interrupt_polarity <= get_param(com_data);
 
         when INTERRUPT_AGNT_CMD_POLARITY_GET =>
-            com_channel_data.set_param(interrupt_polarity);
+            set_param(com_data, interrupt_polarity);
 
         when INTERRUPT_AGNT_CMD_CHECK_ASSERTED =>
             check_m(int = interrupt_polarity, INTERRUPT_AGENT_TAG &" ** Interrupt asserted **");
@@ -132,7 +132,7 @@ begin
             reply_code := C_REPLY_CODE_ERR;
 
         end case;
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
 end architecture;

@@ -97,10 +97,16 @@ package tb_communication_pkg is
     constant COM_PKG_TAG                        : string := "Communication PKG: ";
 
     -----------------------------------------------------------------------
-    -- Communcation channel
-    -- Channel signals that there is message hanging in the channel data
+    -- Communication channel primitive.
     --
-    -- Communication principle is similar to Vunits COM library!
+    -- A single shared broadcast wake-up signal, that means "mailbox state
+    -- changed, go re-check it".
+    --
+    -- Any number of masters/agents may pulse it concurrently (wired-OR,
+    -- safe thanks to std_logic resolution with 'Z' idle); every waiter
+    -- re-evaluates its own condition against com_mailbox on every edge,
+    -- so a "merged" edge from overlapping concurrent pulses only costs
+    -- latency, never correctness.
     -----------------------------------------------------------------------
     subtype t_com_channel is std_logic;
 
@@ -108,49 +114,68 @@ package tb_communication_pkg is
     constant C_COM_CHANNEL_INACTIVE             : t_com_channel := 'Z';
 
     signal default_channel                      : t_com_channel := C_COM_CHANNEL_INACTIVE;
-    shared variable com_channel_data            : t_com_channel_data;
+
+    shared variable com_mailbox                 : t_com_mailbox;
 
     -- Reply codes
     constant C_REPLY_CODE_OK                    : natural := 0;
     constant C_REPLY_CODE_ERR                   : natural := 1;
 
     -----------------------------------------------------------------------
-    -- Sends request on a channel to an agent
+    -- Sends request "msg_code" to agent "dest", carrying "data" as
+    -- request payload. Blocks until the target agent replies; on return,
+    -- "data" holds the reply payload (overwritten in place).
     --
-    -- @param channel   Channel on which to send the request
+    -- Safe to call from any number of concurrent master processes,
+    -- targeting the same or different destinations. Requests to the
+    -- same destination are served strictly in arrival order.
+    --
+    -- @param channel   Pass default_channel
     -- @param dest      Target agent
     -- @param msg_code  Message code to send
+    -- @param data      Request payload in, reply payload out
     -----------------------------------------------------------------------
     procedure send(
         signal   channel    : inout t_com_channel;
         constant dest       : in    integer;
-        constant msg_code   : in    integer
+        constant msg_code   : in    integer;
+        variable data       : inout t_com_data
     );
 
 
     -----------------------------------------------------------------------
-    -- Start receiving (use by agent). Exits when message is sent on
-    -- the channel to agent "dest".
+    -- Start receiving (used by agent). Blocks until a request for "dest"
+    -- is available, then pops the oldest one.
     --
-    -- @param channel   Channel on which to send the request
-    -- @param dest      Agents destination (unique per agent)
+    -- @param channel   Pass default_channel
+    -- @param dest      Agent's destination (unique per agent)
+    -- @param token     Returned handle - must be passed to receive_finish
+    -- @param msg_code  Returned message code of the popped request
+    -- @param data      Returned request payload
     -----------------------------------------------------------------------
     procedure receive_start(
         signal   channel     : inout  t_com_channel;
-        constant dest        : in     integer
+        constant dest        : in     integer;
+        variable token       : out    natural;
+        variable msg_code    : out    integer;
+        variable data        : out    t_com_data
     );
 
 
     -----------------------------------------------------------------------
-    -- Finishes receiving (use by agent). Sets reply code which is then
-    -- checked by send.
+    -- Finishes receiving (used by agent). Posts reply code/payload for
+    -- "token" and wakes waiting masters (they check their own token).
     --
-    -- @param channel       Channel on which to send the request
-    -- @param reply_code    Reply code to set.
+    -- @param channel       Pass default_channel
+    -- @param token         Handle obtained from receive_start
+    -- @param reply_code    Reply code to set
+    -- @param data          Reply payload
     -----------------------------------------------------------------------
     procedure receive_finish(
         signal   channel     : inout  t_com_channel;
-        constant reply_code  : in     natural
+        constant token       : in     natural;
+        constant reply_code  : in     natural;
+        variable data        : in     t_com_data
     );
 
 end package;

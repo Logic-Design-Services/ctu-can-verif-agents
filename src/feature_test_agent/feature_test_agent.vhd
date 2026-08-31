@@ -393,20 +393,20 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token       : natural;
         variable cmd        : integer;
         variable reply_code : integer;
+        variable com_data   : t_com_data;
         variable tmp        : integer;
         variable tmp_logic  : std_logic;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
         when FEATURE_TEST_AGNT_FORCE_BUS =>
-            force_bus_level_value <= com_channel_data.get_param;
+            force_bus_level_value <= get_param(com_data);
             force_bus_level_i <= true;
 
         when FEATURE_TEST_AGNT_RELEASE_BUS =>
@@ -414,8 +414,8 @@ begin
             flip_bus_level_i <= false;
 
         when FEATURE_TEST_AGNT_FORCE_CAN_RX =>
-            tmp := com_channel_data.get_param;
-            force_can_rx_value <= com_channel_data.get_param;
+            tmp := get_param(com_data);
+            force_can_rx_value <= get_param(com_data);
             if (tmp = 0) then
                 force_can_rx_dut <= true;
             else
@@ -427,21 +427,21 @@ begin
             force_can_rx_test_node <= false;
 
         when FEATURE_TEST_AGNT_SET_TRV_DELAY =>
-            tmp := com_channel_data.get_param;
+            tmp := get_param(com_data);
             if (tmp = 0) then
-                can_tx_delay_dut <= com_channel_data.get_param;
+                can_tx_delay_dut <= get_param(com_data);
             else
-                can_tx_delay_test_node <= com_channel_data.get_param;
+                can_tx_delay_test_node <= get_param(com_data);
             end if;
 
         when FEATURE_TEST_AGNT_CHECK_BUS_LEVEL =>
-            tmp_logic := com_channel_data.get_param;
+            tmp_logic := get_param(com_data);
             check_m(tmp_logic = bus_level, FEATURE_TEST_AGENT_TAG &
                     "Bus level value shoul be:" & std_logic'image(tmp_logic));
 
         when FEATURE_TEST_AGNT_CHECK_CAN_TX =>
-            tmp := com_channel_data.get_param;
-            tmp_logic := com_channel_data.get_param;
+            tmp := get_param(com_data);
+            tmp_logic := get_param(com_data);
             if (tmp = 0) then
                 check_m(tmp_logic = dut_can_tx, "DUT CAN TX");
             else
@@ -449,19 +449,19 @@ begin
             end if;
 
         when FEATURE_TEST_AGNT_GET_CAN_TX =>
-            tmp := com_channel_data.get_param;
+            tmp := get_param(com_data);
             if (tmp = 0) then
-                com_channel_data.set_param(dut_can_tx);
+                set_param(com_data, dut_can_tx);
             else
-                com_channel_data.set_param(test_node_can_tx);
+                set_param(com_data, test_node_can_tx);
             end if;
 
         when FEATURE_TEST_AGNT_GET_CAN_RX =>
-            tmp := com_channel_data.get_param;
+            tmp := get_param(com_data);
             if (tmp = 0) then
-                com_channel_data.set_param(dut_can_rx);
+                set_param(com_data, dut_can_rx);
             else
-                com_channel_data.set_param(test_node_can_rx);
+                set_param(com_data, test_node_can_rx);
             end if;
 
         when FEATURE_TEST_AGNT_FLIP_BUS =>
@@ -472,7 +472,7 @@ begin
             reply_code := C_REPLY_CODE_ERR;
 
         end case;
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
     ---------------------------------------------------------------------------

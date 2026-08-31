@@ -368,8 +368,10 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token           : natural;
         variable cmd            : integer;
         variable reply_code     : integer;
+        variable com_data       : t_com_data;
         variable size           : integer;
         variable data_ok        : boolean;
         -- TODO: Max length set to the same as in communication channel.
@@ -377,32 +379,30 @@ begin
         variable tmp_data       : std_logic_vector(255 downto 0);
         variable tmp_int        : integer;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
         when MEM_MODEL_CMD_PUT_DATA =>
-            size := com_channel_data.get_param_2;
+            size := get_param_2(com_data);
             mem.put(
-                com_channel_data.get_param,
-                com_channel_data.get_param(size - 1 downto 0)
+                get_param(com_data),
+                get_param(com_data)(size - 1 downto 0)
             );
 
         when MEM_MODEL_CMD_GET_DATA =>
-            size := com_channel_data.get_param_2;
+            size := get_param_2(com_data);
             mem.get(
-                com_channel_data.get_param,
+                get_param(com_data),
                 data_ok,
                 tmp_data(size - 1 downto 0)
             );
-            com_channel_data.set_param(tmp_data);
-            com_channel_data.set_param(data_ok);
+            set_param(com_data, tmp_data);
+            set_param(com_data, data_ok);
 
         when MEM_MODEL_CMD_SET_NON_INIT_MODE =>
-            tmp_int := com_channel_data.get_param;
+            tmp_int := get_param(com_data);
             mem.set_init_mode(t_mem_model_init_mode'val(tmp_int));
 
         when MEM_MODEL_CMD_DUMP =>
@@ -413,7 +413,7 @@ begin
             reply_code := C_REPLY_CODE_ERR;
         end case;
 
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
 

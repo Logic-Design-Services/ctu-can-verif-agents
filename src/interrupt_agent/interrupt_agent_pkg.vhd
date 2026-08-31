@@ -207,10 +207,11 @@ package body interrupt_agent_pkg is
         constant    id          : in    natural;
         constant    polarity    : in    std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         interrupt_agent_info_m(id,  "Setting polarity");
-        com_channel_data.set_param(polarity);
-        send(channel, id, INTERRUPT_AGNT_CMD_POLARITY_SET);
+        set_param(com_data, polarity);
+        send(channel, id, INTERRUPT_AGNT_CMD_POLARITY_SET, com_data);
         interrupt_agent_debug_m(id, "Polarity set");
     end procedure;
 
@@ -220,10 +221,11 @@ package body interrupt_agent_pkg is
         constant    id          : in    natural;
         variable    polarity    : out   std_logic
     )is
+        variable com_data : t_com_data;
     begin
         interrupt_agent_info_m(id,  "Getting polarity");
-        send(channel, id, INTERRUPT_AGNT_CMD_POLARITY_GET);
-        polarity := com_channel_data.get_param;
+        send(channel, id, INTERRUPT_AGNT_CMD_POLARITY_GET, com_data);
+        polarity := get_param(com_data);
         interrupt_agent_debug_m(id, "Polarity got");
     end procedure;
 
@@ -232,9 +234,10 @@ package body interrupt_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     )is
+        variable com_data : t_com_data;
     begin
         interrupt_agent_info_m(id,  "Checking asserted");
-        send(channel, id, INTERRUPT_AGNT_CMD_CHECK_ASSERTED);
+        send(channel, id, INTERRUPT_AGNT_CMD_CHECK_ASSERTED, com_data);
         interrupt_agent_debug_m(id, "Asserted checked");
     end procedure;
 
@@ -243,9 +246,10 @@ package body interrupt_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     )is
+        variable com_data : t_com_data;
     begin
         interrupt_agent_info_m(id,  "Checking not asserted");
-        send(channel, id, INTERRUPT_AGNT_CMD_CHECK_NOT_ASSERTED);
+        send(channel, id, INTERRUPT_AGNT_CMD_CHECK_NOT_ASSERTED, com_data);
         interrupt_agent_debug_m(id, "Not asserted checked");
     end procedure;
 

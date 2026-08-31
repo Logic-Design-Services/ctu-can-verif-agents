@@ -105,36 +105,36 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
-        variable cmd        : integer;
-        variable reply_code : integer;
-        variable timeout    : time;
-        variable data       : std_logic;
+        variable token       : natural;
+        variable cmd         : integer;
+        variable reply_code  : integer;
+        variable timeout     : time;
+        variable data        : std_logic;
+        variable com_data    : t_com_data;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
         when DIO_AGENT_CMD_DRIVE_VALUE =>
-            dio <= com_channel_data.get_param;
+            dio <= get_param(com_data);
 
         when DIO_AGENT_CMD_RELEASE_VALUE =>
             dio <= 'Z';
 
         when DIO_AGENT_CMD_SENSE_VALUE =>
-            com_channel_data.set_param(dio);
+            set_param(com_data, dio);
 
         when DIO_AGENT_CMD_CHECK_VALUE =>
-            data := com_channel_data.get_param;
+            data := get_param(com_data);
             check_m(dio = data, DIO_AGENT_TAG & "(" & integer'image(G_COM_ID) & "): " &
                           "Value mismatch. " & "Expected: " & std_logic'image(data) &
                                               " Observed: " & std_logic'image(dio));
 
         when DIO_AGENT_CMD_WAIT_UNTIL_VALUE =>
-            timeout := com_channel_data.get_param;
-            data := com_channel_data.get_param;
+            timeout := get_param(com_data);
+            data := get_param(com_data);
             if (timeout > 0 ns) then
                 wait until dio = data for timeout;
             else
@@ -142,7 +142,7 @@ begin
             end if;
 
         when DIO_AGENT_CMD_WAIT_UNTIL_RISING_EDGE =>
-            timeout := com_channel_data.get_param;
+            timeout := get_param(com_data);
             if (timeout > 0 ns) then
                 wait until rising_edge(dio) for timeout;
             else
@@ -162,7 +162,7 @@ begin
 
         end case;
 
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
 end architecture;

@@ -107,13 +107,13 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token : natural;
         variable cmd : integer;
         variable reply_code : integer;
+        variable com_data : t_com_data;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
@@ -126,7 +126,7 @@ begin
             reset_active <= false;
 
         when RST_AGNT_CMD_POLARITY_SET =>
-            reset_polarity <= com_channel_data.get_param;
+            reset_polarity <= get_param(com_data);
             wait for 0 ns;
             if (reset_active) then
                 reset <= reset_polarity;
@@ -135,14 +135,14 @@ begin
             end if;
 
         when RST_AGNT_CMD_POLARITY_GET =>
-            com_channel_data.set_param(reset_polarity);
+            set_param(com_data, reset_polarity);
 
         when others =>
             info_m("Invalid message type: " & integer'image(cmd));
             reply_code := C_REPLY_CODE_ERR;
 
         end case;
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
 end architecture;

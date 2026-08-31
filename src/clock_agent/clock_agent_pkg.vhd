@@ -278,9 +278,10 @@ package body clock_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Starting clock generator agent!");
-        send(channel, id, CLOCK_AGNT_CMD_START);
+        send(channel, id, CLOCK_AGNT_CMD_START, com_data);
         clock_agent_debug_m(id, "Clock generator agent started!");
     end procedure;
 
@@ -289,9 +290,10 @@ package body clock_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Stopping clock generator agent!");
-        send(channel, id, CLOCK_AGNT_CMD_STOP);
+        send(channel, id, CLOCK_AGNT_CMD_STOP, com_data);
         clock_agent_debug_m(id, "Clock generator agent stopped");
     end procedure;
 
@@ -301,10 +303,11 @@ package body clock_agent_pkg is
         constant    id          : in    natural;
         constant    period      : in    time
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Setting clock agent period to: " & time'image(period));
-        com_channel_data.set_param(period);
-        send(channel, id, CLOCK_AGNT_CMD_PERIOD_SET);
+        set_param(com_data, period);
+        send(channel, id, CLOCK_AGNT_CMD_PERIOD_SET, com_data);
         clock_agent_debug_m(id, "Clock generator period set");
     end procedure;
 
@@ -314,10 +317,11 @@ package body clock_agent_pkg is
         constant    id          : in    natural;
         variable    period      : out   time
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Getting clock agent period");
-        send(channel, id, CLOCK_AGNT_CMD_PERIOD_GET);
-        period := com_channel_data.get_param;
+        send(channel, id, CLOCK_AGNT_CMD_PERIOD_GET, com_data);
+        period := get_param(com_data);
         clock_agent_debug_m(id, "Clock generator period got");
     end procedure;
 
@@ -327,10 +331,11 @@ package body clock_agent_pkg is
         constant    id          : in    natural;
         constant    jitter      : in    time
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Setting clock agent jitter to: " & time'image(jitter));
-        com_channel_data.set_param(jitter);
-        send(channel, id, CLOCK_AGNT_CMD_JITTER_SET);
+        set_param(com_data, jitter);
+        send(channel, id, CLOCK_AGNT_CMD_JITTER_SET, com_data);
         clock_agent_debug_m(id, "Clock generator period set");
     end procedure;
 
@@ -340,10 +345,11 @@ package body clock_agent_pkg is
         constant    id          : in    natural;
         variable    jitter      : out   time
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Getting clock agent jitter");
-        send(channel, id, CLOCK_AGNT_CMD_JITTER_GET);
-        jitter := com_channel_data.get_param;
+        send(channel, id, CLOCK_AGNT_CMD_JITTER_GET, com_data);
+        jitter := get_param(com_data);
         clock_agent_debug_m(id, "Clock generator jitter got");
     end procedure;
 
@@ -353,10 +359,11 @@ package body clock_agent_pkg is
         constant    id          : in    natural;
         constant    duty        : in    integer range 0 to 100
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Setting clock agent duty cycle to: " & integer'image(duty));
-        com_channel_data.set_param(duty);
-        send(channel, id, CLOCK_AGNT_CMD_DUTY_SET);
+        set_param(com_data, duty);
+        send(channel, id, CLOCK_AGNT_CMD_DUTY_SET, com_data);
         clock_agent_debug_m(id, "Clock generator period set");
     end procedure;
 
@@ -366,10 +373,11 @@ package body clock_agent_pkg is
         constant    id          : in    natural;
         variable    duty        : out   integer range 0 to 100
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_info_m(id, "Getting clock agent duty cycle");
-        send(channel, id, CLOCK_AGNT_CMD_DUTY_GET);
-        duty := com_channel_data.get_param;
+        send(channel, id, CLOCK_AGNT_CMD_DUTY_GET, com_data);
+        duty := get_param(com_data);
         clock_agent_debug_m(id, "Clock generator duty cycle got");
     end procedure;
 
@@ -378,9 +386,10 @@ package body clock_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         clock_agent_debug_m(id, "Waiting one clock cycle");
-        send(channel, id, CLOCK_AGNT_CMD_WAIT_CYCLE);
+        send(channel, id, CLOCK_AGNT_CMD_WAIT_CYCLE, com_data);
         clock_agent_debug_m(id, "Waited one clock cycle");
     end procedure;
 

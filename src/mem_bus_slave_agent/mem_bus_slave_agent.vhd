@@ -217,14 +217,14 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token           : natural;
         variable cmd            : integer;
         variable reply_code     : integer;
+        variable com_data       : t_com_data;
         variable transfer       : t_mem_bus_transfer;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
@@ -235,13 +235,13 @@ begin
             agent_enabled <= false;
 
         when MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID =>
-            mem_id <= com_channel_data.get_param;
+            mem_id <= get_param(com_data);
 
         when MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES =>
-            put_to_fifo(com_channel_data.get_param, wrq_fifo, wrq_wp, wrq_rp);
+            put_to_fifo(get_param(com_data), wrq_fifo, wrq_wp, wrq_rp);
 
         when MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES =>
-            put_to_fifo(com_channel_data.get_param, rdw_fifo, rdw_wp, rdw_rp);
+            put_to_fifo(get_param(com_data), rdw_fifo, rdw_wp, rdw_rp);
 
         when others =>
             info_m("Invalid message type: " & integer'image(cmd));
@@ -249,7 +249,7 @@ begin
 
         end case;
 
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
 

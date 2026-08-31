@@ -266,10 +266,11 @@ package body dio_agent_pkg is
         constant    id          : in    natural;
         constant    value       : in    std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         dio_agent_info_m(id,  "Driving value: " & std_logic'image(value));
-        com_channel_data.set_param(value);
-        send(channel, id, DIO_AGENT_CMD_DRIVE_VALUE);
+        set_param(com_data, value);
+        send(channel, id, DIO_AGENT_CMD_DRIVE_VALUE, com_data);
         dio_agent_debug_m(id, "Value driven");
     end procedure;
 
@@ -277,9 +278,10 @@ package body dio_agent_pkg is
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         dio_agent_info_m(id,  "Releasing driver");
-        send(channel, id, DIO_AGENT_CMD_RELEASE_VALUE);
+        send(channel, id, DIO_AGENT_CMD_RELEASE_VALUE, com_data);
         dio_agent_debug_m(id, "Driver released");
     end procedure;
 
@@ -288,10 +290,11 @@ package body dio_agent_pkg is
         constant    id          : in    natural;
         variable    value       : out   std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         dio_agent_info_m(id,  "Sensing value");
-        send(channel, id, DIO_AGENT_CMD_SENSE_VALUE);
-        value := com_channel_data.get_param;
+        send(channel, id, DIO_AGENT_CMD_SENSE_VALUE, com_data);
+        value := get_param(com_data);
         dio_agent_debug_m(id, "Value sensed: " & std_logic'image(value));
     end procedure;
 
@@ -300,10 +303,11 @@ package body dio_agent_pkg is
         constant    id          : in    natural;
         constant    value       : in    std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         dio_agent_info_m(id,  "Checking value: " & std_logic'image(value));
-        com_channel_data.set_param(value);
-        send(channel, id, DIO_AGENT_CMD_CHECK_VALUE);
+        set_param(com_data, value);
+        send(channel, id, DIO_AGENT_CMD_CHECK_VALUE, com_data);
         dio_agent_debug_m(id, "Value checked");
     end procedure;
 
@@ -313,6 +317,7 @@ package body dio_agent_pkg is
         constant    value       : in    std_logic;
         constant    timeout     : in    time := 0 ns
     ) is
+        variable com_data : t_com_data;
     begin
         if (timeout > 0 ns) then
             dio_agent_info_m(id, "Waiting until value: " & std_logic'image(value));
@@ -320,9 +325,9 @@ package body dio_agent_pkg is
             dio_agent_info_m(id, "Waiting until value: " & std_logic'image(value) &
                                  "for " & time'image(timeout));
         end if;
-        com_channel_data.set_param(value);
-        com_channel_data.set_param(timeout);
-        send(channel, id, DIO_AGENT_CMD_WAIT_UNTIL_VALUE);
+        set_param(com_data, value);
+        set_param(com_data, timeout);
+        send(channel, id, DIO_AGENT_CMD_WAIT_UNTIL_VALUE, com_data);
         dio_agent_debug_m(id, "Waiting finished");
     end procedure;
 
@@ -331,6 +336,7 @@ package body dio_agent_pkg is
         constant    id          : in    natural;
         constant    timeout     : in    time := 0 ns
     ) is
+        variable com_data : t_com_data;
     begin
         if (timeout > 0 ns) then
             dio_agent_info_m(id, "Waiting until rising edge");
@@ -338,8 +344,8 @@ package body dio_agent_pkg is
             dio_agent_info_m(id, "Waiting until rising edge " &
                                  "for " & time'image(timeout));
         end if;
-        com_channel_data.set_param(timeout);
-        send(channel, id, DIO_AGENT_CMD_WAIT_UNTIL_RISING_EDGE);
+        set_param(com_data, timeout);
+        send(channel, id, DIO_AGENT_CMD_WAIT_UNTIL_RISING_EDGE, com_data);
         dio_agent_debug_m(id, "Waiting finished");
     end procedure;
 
@@ -348,6 +354,7 @@ package body dio_agent_pkg is
         constant    id          : in    natural;
         constant    timeout     : in    time := 0 ns
     ) is
+        variable com_data : t_com_data;
     begin
         if (timeout > 0 ns) then
             dio_agent_info_m(id, "Waiting until falling edge");
@@ -355,8 +362,8 @@ package body dio_agent_pkg is
             dio_agent_info_m(id, "Waiting until falling edge " &
                                  "for " & time'image(timeout));
         end if;
-        com_channel_data.set_param(timeout);
-        send(channel, id, DIO_AGENT_CMD_WAIT_UNTIL_FALLING_EDGE);
+        set_param(com_data, timeout);
+        send(channel, id, DIO_AGENT_CMD_WAIT_UNTIL_FALLING_EDGE, com_data);
         dio_agent_debug_m(id, "Waiting finished");
     end procedure;
 

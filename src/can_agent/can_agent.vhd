@@ -235,8 +235,10 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token           : natural;
         variable cmd            : integer;
         variable reply_code     : integer;
+        variable com_data       : t_com_data;
         variable push_item      : t_can_driver_entry;
         variable push_mon_item  : t_can_monitor_entry;
         variable tmp            : boolean := false;
@@ -257,10 +259,8 @@ begin
         end procedure;
 
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
@@ -277,17 +277,17 @@ begin
             driver_wp <= driver_rp;
 
         when CAN_AGNT_CMD_DRIVER_GET_PROGRESS =>
-            com_channel_data.set_param(driving_in_progress);
+            set_param(com_data, driving_in_progress);
 
         when CAN_AGNT_CMD_DRIVER_GET_DRIVEN_VAL =>
-            com_channel_data.set_param(can_rx);
+            set_param(com_data, can_rx);
 
         when CAN_AGNT_CMD_DRIVER_PUSH_ITEM =>
-            push_item.value := com_channel_data.get_param;
-            push_item.drive_time := com_channel_data.get_param;
-            push_item.print_msg := com_channel_data.get_param;
+            push_item.value := get_param(com_data);
+            push_item.drive_time := get_param(com_data);
+            push_item.print_msg := get_param(com_data);
             if (push_item.print_msg) then
-                push_item.msg := com_channel_data.get_param;
+                push_item.msg := get_param(com_data);
             else
                 push_item.msg := (OTHERS => ' ');
             end if;
@@ -302,7 +302,7 @@ begin
             end if;
 
         when CAN_AGNT_CMD_DRIVER_SET_WAIT_TIMEOUT =>
-            driver_wait_timeout <= com_channel_data.get_param;
+            driver_wait_timeout <= get_param(com_data);
 
         when CAN_AGNT_CMD_DRIVER_WAIT_FINISH =>
             wait for 0 ns;
@@ -316,11 +316,11 @@ begin
                 tmp := true;
             end if;
 
-            push_item.value := com_channel_data.get_param;
-            push_item.drive_time := com_channel_data.get_param;
-            push_item.print_msg := com_channel_data.get_param;
+            push_item.value := get_param(com_data);
+            push_item.drive_time := get_param(com_data);
+            push_item.print_msg := get_param(com_data);
             if (push_item.print_msg) then
-                push_item.msg := com_channel_data.get_param;
+                push_item.msg := get_param(com_data);
             else
                 push_item.msg := (OTHERS => ' ');
             end if;
@@ -369,7 +369,7 @@ begin
             end if;
 
         when CAN_AGNT_CMD_SET_WAIT_FOR_MONITOR =>
-            driver_wait_for_monitor <= com_channel_data.get_param;
+            driver_wait_for_monitor <= get_param(com_data);
 
         when CAN_AGNT_CMD_MONITOR_START =>
             monitor_ena <= true;
@@ -384,26 +384,26 @@ begin
             monitor_wp <= monitor_rp;
 
         when CAN_AGNT_CMD_MONITOR_GET_STATE =>
-            com_channel_data.set_param(t_can_monitor_state'pos(monitor_state));
+            set_param(com_data, t_can_monitor_state'pos(monitor_state));
 
         when CAN_AGNT_CMD_MONITOR_GET_MONITORED_VAL =>
-            com_channel_data.set_param(monitored_item.value);
+            set_param(com_data, monitored_item.value);
 
         when CAN_AGNT_CMD_MONITOR_PUSH_ITEM =>
-            push_mon_item.value := com_channel_data.get_param;
-            push_mon_item.monitor_time := com_channel_data.get_param;
-            push_mon_item.print_msg := com_channel_data.get_param;
+            push_mon_item.value := get_param(com_data);
+            push_mon_item.monitor_time := get_param(com_data);
+            push_mon_item.print_msg := get_param(com_data);
             if (push_mon_item.print_msg) then
-                push_mon_item.msg := com_channel_data.get_param;
+                push_mon_item.msg := get_param(com_data);
             else
                 push_mon_item.msg := (OTHERS => ' ');
             end if;
-            push_mon_item.sample_rate := com_channel_data.get_param_2;
+            push_mon_item.sample_rate := get_param_2(com_data);
 
             monitor_fifo_push;
 
         when CAN_AGNT_CMD_MONITOR_SET_WAIT_TIMEOUT =>
-            monitor_wait_timeout <= com_channel_data.get_param;
+            monitor_wait_timeout <= get_param(com_data);
 
         when CAN_AGNT_CMD_MONITOR_WAIT_FINISH =>
             wait for 0 ns;
@@ -415,15 +415,15 @@ begin
                 tmp := true;
             end if;
 
-            push_mon_item.value := com_channel_data.get_param;
-            push_mon_item.monitor_time := com_channel_data.get_param;
-            push_mon_item.print_msg := com_channel_data.get_param;
+            push_mon_item.value := get_param(com_data);
+            push_mon_item.monitor_time := get_param(com_data);
+            push_mon_item.print_msg := get_param(com_data);
             if (push_mon_item.print_msg) then
-                push_mon_item.msg := com_channel_data.get_param;
+                push_mon_item.msg := get_param(com_data);
             else
                 push_mon_item.msg := (OTHERS => ' ');
             end if;
-            push_mon_item.sample_rate := com_channel_data.get_param_2;
+            push_mon_item.sample_rate := get_param_2(com_data);
 
             if (monitor_wp /= monitor_rp) then
                 warning_m(CAN_AGENT_TAG &
@@ -469,17 +469,17 @@ begin
             end if;
 
         when CAN_AGNT_CMD_MONITOR_SET_TRIGGER =>
-            tmp_int := com_channel_data.get_param;
+            tmp_int := get_param(com_data);
             monitor_trigger <= t_can_monitor_trigger'val(tmp_int);
 
         when CAN_AGNT_CMD_MONITOR_GET_TRIGGER =>
-            com_channel_data.set_param(t_can_monitor_trigger'pos(monitor_trigger));
+            set_param(com_data, t_can_monitor_trigger'pos(monitor_trigger));
 
         when CAN_AGNT_CMD_MONITOR_CHECK_RESULT =>
             check_m(mon_mismatch_ctr = 0, CAN_AGENT_TAG & "Mismatches in monitor!");
 
         when CAN_AGNT_CMD_MONITOR_SET_INPUT_DELAY =>
-            mon_input_delay <= com_channel_data.get_param;
+            mon_input_delay <= get_param(com_data);
 
         when CAN_AGNT_CMD_TX_RX_FEEDBACK_ENABLE =>
             tx_to_rx_feedback_enable <= true;
@@ -494,7 +494,7 @@ begin
             reply_code := C_REPLY_CODE_ERR;
         end case;
 
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
     ---------------------------------------------------------------------------

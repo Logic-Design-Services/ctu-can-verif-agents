@@ -81,74 +81,153 @@ context ctu_can_agents.ieee_context;
 package tb_types_pkg is
 
     -----------------------------------------------------------------------
-    -- Communication channel data
-    --
-    -- Shared data structure used as buffer for passing data over
-    -- communication channel. It is filled by sender always before issuing
-    -- event on communication channel. Since VHDL should hold mutex over
-    -- shared variable, it should be safe way to pass data between
-    -- processes!
+    -- Max number of requests that can be simultaneously in flight
+    -- (queued + being serviced) across the whole TB. Bump this if
+    -- simulation reports "Mailbox full".
     -----------------------------------------------------------------------
-    type t_com_channel_data is protected
+    constant C_COM_MAILBOX_DEPTH : natural := 32;
 
-        procedure set_dest_and_msg_code(
-            dest        : in natural;
-            msg_code    : in integer
+    -----------------------------------------------------------------------
+    -- Communication channel request / reply payload.
+    --
+    -- Each caller owns its own instance and passes it into
+    -- send/receive_start/receive_finish.
+    -----------------------------------------------------------------------
+    type t_com_data is record
+        par_logic_vect     : std_logic_vector(255 downto 0);
+        par_logic_vect_2   : std_logic_vector(255 downto 0);
+        par_logic_vect_3   : std_logic_vector(255 downto 0);
+        par_logic          : std_logic;
+        par_logic_2        : std_logic;
+        par_logic_3        : std_logic;
+        par_time           : time;
+        par_time_2         : time;
+        par_time_3         : time;
+        par_int            : integer;
+        par_int_2          : integer;
+        par_int_3          : integer;
+        par_bool           : boolean;
+        par_bool_2         : boolean;
+        par_bool_3         : boolean;
+        par_string         : string(1 to 100);
+        par_string_2       : string(1 to 100);
+        par_string_3       : string(1 to 100);
+    end record;
+
+    constant C_COM_DATA_INIT : t_com_data := (
+        par_logic_vect   => (others => '0'),
+        par_logic_vect_2 => (others => '0'),
+        par_logic_vect_3 => (others => '0'),
+        par_logic        => 'U',
+        par_logic_2      => 'U',
+        par_logic_3      => 'U',
+        par_time         => 0 ns,
+        par_time_2       => 0 ns,
+        par_time_3       => 0 ns,
+        par_int          => 0,
+        par_int_2        => 0,
+        par_int_3        => 0,
+        par_bool         => false,
+        par_bool_2       => false,
+        par_bool_3       => false,
+        par_string       => (others => ' '),
+        par_string_2     => (others => ' '),
+        par_string_3     => (others => ' ')
+    );
+
+    procedure set_param(variable data : inout t_com_data; param : in std_logic_vector);
+    procedure set_param_2(variable data : inout t_com_data; param : in std_logic_vector);
+    procedure set_param_3(variable data : inout t_com_data; param : in std_logic_vector);
+
+    procedure set_param(variable data : inout t_com_data; param : in std_logic);
+    procedure set_param_2(variable data : inout t_com_data; param : in std_logic);
+    procedure set_param_3(variable data : inout t_com_data; param : in std_logic);
+
+    procedure set_param(variable data : inout t_com_data; param : in time);
+    procedure set_param_2(variable data : inout t_com_data; param : in time);
+    procedure set_param_3(variable data : inout t_com_data; param : in time);
+
+    procedure set_param(variable data : inout t_com_data; param : in integer);
+    procedure set_param_2(variable data : inout t_com_data; param : in integer);
+    procedure set_param_3(variable data : inout t_com_data; param : in integer);
+
+    procedure set_param(variable data : inout t_com_data; param : in boolean);
+    procedure set_param_2(variable data : inout t_com_data; param : in boolean);
+    procedure set_param_3(variable data : inout t_com_data; param : in boolean);
+
+    procedure set_param(variable data : inout t_com_data; param : in string);
+    procedure set_param_2(variable data : inout t_com_data; param : in string);
+    procedure set_param_3(variable data : inout t_com_data; param : in string);
+
+    function get_param(data : t_com_data)   return std_logic;
+    function get_param_2(data : t_com_data) return std_logic;
+    function get_param_3(data : t_com_data) return std_logic;
+
+    function get_param(data : t_com_data)   return std_logic_vector;
+    function get_param_2(data : t_com_data) return std_logic_vector;
+    function get_param_3(data : t_com_data) return std_logic_vector;
+
+    function get_param(data : t_com_data)   return time;
+    function get_param_2(data : t_com_data) return time;
+    function get_param_3(data : t_com_data) return time;
+
+    function get_param(data : t_com_data)   return integer;
+    function get_param_2(data : t_com_data) return integer;
+    function get_param_3(data : t_com_data) return integer;
+
+    function get_param(data : t_com_data)   return boolean;
+    function get_param_2(data : t_com_data) return boolean;
+    function get_param_3(data : t_com_data) return boolean;
+
+    function get_param(data : t_com_data)   return string;
+    function get_param_2(data : t_com_data) return string;
+    function get_param_3(data : t_com_data) return string;
+
+    -----------------------------------------------------------------------
+    -- Communication mailbox
+    --
+    -- Bounded FIFO of pending requests. Any number of master processes
+    -- may push (routed by "dest"); each destination agent pops only the
+    -- oldest entry addressed to it, so requests to a given agent are
+    -- served strictly in arrival order while requests to different
+    -- agents don't block each other.
+    -----------------------------------------------------------------------
+    type t_com_slot_state is (
+        SLOT_FREE,
+        SLOT_PENDING,
+        SLOT_IN_PROGRESS,
+        SLOT_REPLIED
+    );
+
+    type t_com_mailbox is protected
+
+        impure function push(
+            constant dest     : natural;
+            constant msg_code : integer;
+            constant data     : t_com_data
+        ) return natural;
+
+        procedure try_pop(
+            constant dest : in  natural;
+            found         : out boolean;
+            token         : out natural;
+            msg_code      : out integer;
+            variable data : out t_com_data
         );
 
-        impure function get_dest return integer;
-        impure function get_msg_code return integer;
+        procedure post_reply(
+            constant token      : in natural;
+            constant reply_code : in natural;
+            constant data       : in t_com_data
+        );
 
-        procedure set_reply_code(reply_code  : in natural);
-        impure function get_reply_code return natural;
+        impure function reply_ready(token : natural) return boolean;
 
-        procedure set_param(param : in  std_logic_vector);
-        procedure set_param_2(param : in  std_logic_vector);
-        procedure set_param_3(param : in  std_logic_vector);
-
-        procedure set_param(param  : in  std_logic);
-        procedure set_param_2(param : in  std_logic);
-        procedure set_param_3(param : in  std_logic);
-
-        procedure set_param(param : in  time);
-        procedure set_param_2(param : in  time);
-        procedure set_param_3(param : in  time);
-
-        procedure set_param(param : in  integer);
-        procedure set_param_2(param : in  integer);
-        procedure set_param_3(param : in  integer);
-
-        procedure set_param(param : in  boolean);
-        procedure set_param_2(param : in  boolean);
-        procedure set_param_3(param : in  boolean);
-
-        procedure set_param(param : in  string);
-        procedure set_param_2(param : in  string);
-        procedure set_param_3(param : in  string);
-
-        impure function get_param   return std_logic;
-        impure function get_param_2 return std_logic;
-        impure function get_param_3 return std_logic;
-
-        impure function get_param   return std_logic_vector;
-        impure function get_param_2 return std_logic_vector;
-        impure function get_param_3 return std_logic_vector;
-
-        impure function get_param   return time;
-        impure function get_param_2 return time;
-        impure function get_param_3 return time;
-
-        impure function get_param   return integer;
-        impure function get_param_2 return integer;
-        impure function get_param_3 return integer;
-
-        impure function get_param   return boolean;
-        impure function get_param_2 return boolean;
-        impure function get_param_3 return boolean;
-
-        impure function get_param   return string;
-        impure function get_param_2 return string;
-        impure function get_param_3 return string;
+        procedure take_reply(
+            token       : in  natural;
+            reply_code  : out natural;
+            variable data : out t_com_data
+        );
 
     end protected;
 
@@ -179,317 +258,384 @@ end package;
 package body tb_types_pkg is
 
     -----------------------------------------------------------------------
-    -- Communication channel data
+    -- t_com_data get_param / set_param
     -----------------------------------------------------------------------
-    type t_com_channel_data is protected body
+    procedure set_param(
+        variable    data    : inout t_com_data;
+                    param   : in std_logic
+    ) is
+    begin
+        data.par_logic := param;
+    end procedure;
 
-        variable dest_i             : natural;
-        variable msg_code_i         : integer;
+    procedure set_param_2(
+        variable    data    : inout t_com_data;
+                    param   : in    std_logic
+    ) is
+    begin
+        data.par_logic_2 := param;
+    end procedure;
 
-        variable reply_code_i       : integer;
+    procedure set_param_3(
+        variable    data    : inout t_com_data;
+                    param   : in std_logic
+    ) is
+    begin
+        data.par_logic_3 := param;
+    end procedure;
 
-        variable par_logic_vect     : std_logic_vector(255 downto 0);
-        variable par_logic_vect_2   : std_logic_vector(255 downto 0);
-        variable par_logic_vect_3   : std_logic_vector(255 downto 0);
+    procedure set_param(
+        variable    data    : inout t_com_data;
+                    param   : in std_logic_vector
+    ) is
+    begin
+        assert (param'length <= data.par_logic_vect'length);
+        data.par_logic_vect := (others => '0');
+        data.par_logic_vect(param'length - 1 downto 0) := param;
+    end procedure;
 
-        variable par_logic          : std_logic;
-        variable par_logic_2        : std_logic;
-        variable par_logic_3        : std_logic;
+    procedure set_param_2(
+        variable    data    : inout t_com_data;
+                    param   : in    std_logic_vector
+    ) is
+    begin
+        assert (param'length <= data.par_logic_vect_2'length);
+        data.par_logic_vect_2 := (others => '0');
+        data.par_logic_vect_2(param'length - 1 downto 0) := param;
+    end procedure;
 
-        variable par_time           : time;
-        variable par_time_2         : time;
-        variable par_time_3         : time;
+    procedure set_param_3(
+        variable    data    : inout t_com_data;
+                    param   : in    std_logic_vector
+    ) is
+    begin
+        assert (param'length <= data.par_logic_vect_3'length);
+        data.par_logic_vect_3 := (others => '0');
+        data.par_logic_vect_3(param'length - 1 downto 0) := param;
+    end procedure;
 
-        variable par_int            : integer;
-        variable par_int_2          : integer;
-        variable par_int_3          : integer;
+    procedure set_param(
+        variable    data    : inout t_com_data;
+                    param   : in    time
+    ) is
+    begin
+        data.par_time := param;
+    end procedure;
 
-        variable par_bool           : boolean;
-        variable par_bool_2         : boolean;
-        variable par_bool_3         : boolean;
+    procedure set_param_2(
+        variable    data    : inout t_com_data;
+                    param   : in    time
+    ) is
+    begin
+        data.par_time_2 := param;
+    end procedure;
 
-        variable par_string         : string(1 to 100);
-        variable par_string_2       : string(1 to 100);
-        variable par_string_3       : string(1 to 100);
+    procedure set_param_3(
+        variable    data    : inout t_com_data;
+                    param   : in    time
+    ) is
+    begin
+        data.par_time_3 := param;
+    end procedure;
 
-        procedure set_dest_and_msg_code(
-            dest        : in natural;
-            msg_code    : in integer
-        ) is
+    procedure set_param(
+        variable    data    : inout t_com_data;
+                    param   : in    integer
+    ) is
+    begin
+        data.par_int := param;
+    end procedure;
+
+    procedure set_param_2(
+        variable    data    : inout t_com_data;
+                    param   : in    integer
+    ) is
+    begin
+        data.par_int_2 := param;
+    end procedure;
+
+    procedure set_param_3(
+        variable    data    : inout t_com_data;
+                    param   : in    integer
+    ) is
+    begin
+        data.par_int_3 := param;
+    end procedure;
+
+    procedure set_param(
+        variable    data    : inout t_com_data;
+                    param   : in boolean
+    ) is
+    begin
+        data.par_bool := param;
+    end procedure;
+
+    procedure set_param_2(
+        variable    data    : inout t_com_data;
+                    param   : in    boolean
+    ) is
+    begin
+        data.par_bool_2 := param;
+    end procedure;
+
+    procedure set_param_3(
+        variable    data    : inout t_com_data;
+                    param   : in    boolean
+    ) is
+    begin
+        data.par_bool_3 := param;
+    end procedure;
+
+    procedure set_param(
+        variable    data    : inout t_com_data;
+                    param   : in    string
+    ) is
+    begin
+        assert (param'length <= data.par_string'length);
+        data.par_string := param;
+    end procedure;
+
+    procedure set_param_2(
+        variable    data    : inout t_com_data;
+                    param   : in    string
+    ) is
+    begin
+        assert (param'length <= data.par_string_2'length);
+        data.par_string_2 := param;
+    end procedure;
+
+    procedure set_param_3(
+        variable    data    : inout t_com_data;
+                    param   : in    string
+    ) is
+    begin
+        assert (param'length <= data.par_string_3'length);
+        data.par_string_3 := param;
+    end procedure;
+
+
+    function get_param(
+        data : t_com_data
+    ) return std_logic is
+    begin
+        return data.par_logic;
+    end function;
+
+    function get_param_2(
+        data : t_com_data
+    ) return std_logic is
+    begin
+        return data.par_logic_2;
+    end function;
+
+    function get_param_3(
+        data : t_com_data
+    ) return std_logic is
+    begin
+        return data.par_logic_3;
+    end function;
+
+    function get_param(
+        data : t_com_data
+    ) return std_logic_vector is
+    begin
+        return data.par_logic_vect;
+    end function;
+
+    function get_param_2(
+        data : t_com_data
+    ) return std_logic_vector is
+    begin
+        return data.par_logic_vect_2;
+    end function;
+
+    function get_param_3(
+        data : t_com_data
+    ) return std_logic_vector is
+    begin
+        return data.par_logic_vect_3;
+    end function;
+
+    function get_param(
+        data : t_com_data
+    ) return time is
+    begin
+        return data.par_time;
+    end function;
+
+    function get_param_2(
+        data : t_com_data
+    ) return time is
+    begin
+        return data.par_time_2;
+    end function;
+
+    function get_param_3(
+        data : t_com_data
+    ) return time is
+    begin
+        return data.par_time_3;
+    end function;
+
+    function get_param(
+        data : t_com_data
+    ) return integer is
+    begin
+        return data.par_int;
+    end function;
+
+    function get_param_2(
+        data : t_com_data
+    ) return integer is
+    begin
+        return data.par_int_2;
+    end function;
+
+    function get_param_3(
+        data : t_com_data
+    ) return integer is
+    begin
+        return data.par_int_3;
+    end function;
+
+    function get_param(
+        data : t_com_data
+    ) return string is
+    begin
+        return data.par_string;
+    end function;
+
+    function get_param_2(
+        data : t_com_data
+    ) return string is
+    begin
+        return data.par_string_2;
+    end function;
+
+    function get_param_3(
+        data : t_com_data
+    ) return string is
+    begin
+        return data.par_string_3;
+    end function;
+
+    function get_param(
+        data : t_com_data
+    ) return boolean is
+    begin
+        return data.par_bool;
+    end function;
+
+    function get_param_2(
+        data : t_com_data
+    ) return boolean is
+    begin
+        return data.par_bool_2;
+    end function;
+
+    function get_param_3(
+        data : t_com_data
+    ) return boolean is
+    begin
+        return data.par_bool_3;
+    end function;
+
+    -----------------------------------------------------------------------
+    -- Communication mailbox
+    -----------------------------------------------------------------------
+    type t_com_mailbox is protected body
+
+        type t_slot is record
+            state      : t_com_slot_state;
+            seq        : natural;
+            dest       : natural;
+            msg_code   : integer;
+            reply_code : natural;
+            data       : t_com_data;
+        end record;
+
+        type t_slot_array is array (0 to C_COM_MAILBOX_DEPTH - 1) of t_slot;
+
+        variable slots    : t_slot_array := (others => (SLOT_FREE, 0, 0, 0, 0, C_COM_DATA_INIT));
+        variable next_seq : natural := 0;
+
+        impure function push(
+            constant dest     : natural;
+            constant msg_code : integer;
+            constant data     : t_com_data
+        ) return natural is
         begin
-            dest_i := dest;
-            msg_code_i := msg_code;
+            for i in slots'range loop
+                if slots(i).state = SLOT_FREE then
+                    slots(i) := (SLOT_PENDING, next_seq, dest, msg_code, 0, data);
+                    next_seq := next_seq + 1;
+                    return i;
+                end if;
+            end loop;
+            assert false
+                report "Communication mailbox full - increase C_COM_MAILBOX_DEPTH"
+                severity error;
+            return 0;
+        end function;
+
+        procedure try_pop(
+            constant dest       : in  natural;
+                     found      : out boolean;
+                     token      : out natural;
+                     msg_code   : out integer;
+            variable data       : out t_com_data
+        ) is
+            variable best     : integer := -1;
+            variable best_seq : natural;
+        begin
+            for i in slots'range loop
+                if slots(i).state = SLOT_PENDING and slots(i).dest = dest then
+                    if best = -1 or slots(i).seq < best_seq then
+                        best     := i;
+                        best_seq := slots(i).seq;
+                    end if;
+                end if;
+            end loop;
+
+            found := (best /= -1);
+            if found then
+                slots(best).state := SLOT_IN_PROGRESS;
+                token    := best;
+                msg_code := slots(best).msg_code;
+                data     := slots(best).data;
+            else
+                token    := 0;
+                msg_code := 0;
+                data     := C_COM_DATA_INIT;
+            end if;
         end procedure;
 
-
-        procedure set_reply_code(
-            reply_code  : in natural
+        procedure post_reply(
+            constant token      : in natural;
+            constant reply_code : in natural;
+            constant data       : in t_com_data
         ) is
         begin
-            reply_code_i := reply_code;
+            slots(token).state      := SLOT_REPLIED;
+            slots(token).reply_code := reply_code;
+            slots(token).data       := data;
         end procedure;
 
-
-        impure function get_reply_code return natural is
+        impure function reply_ready(token : natural) return boolean is
         begin
-            return reply_code_i;
+            return slots(token).state = SLOT_REPLIED;
         end function;
 
-
-        impure function get_dest return integer is
-        begin
-            return dest_i;
-        end function;
-
-
-        impure function get_msg_code return integer is
-        begin
-            return msg_code_i;
-        end function;
-
-        procedure set_param(
-            param       : in  std_logic
+        procedure take_reply(
+            token       : in  natural;
+            reply_code  : out natural;
+            variable data : out t_com_data
         ) is
         begin
-            par_logic := param;
+            reply_code := slots(token).reply_code;
+            data       := slots(token).data;
+            slots(token).state := SLOT_FREE;
         end procedure;
-
-        procedure set_param_2(
-            param       : in  std_logic
-        ) is
-        begin
-            par_logic_2 := param;
-        end procedure;
-
-        procedure set_param_3(
-            param       : in  std_logic
-        ) is
-        begin
-            par_logic_3 := param;
-        end procedure;
-
-        procedure set_param(
-            param       : in  std_logic_vector
-        ) is
-        begin
-            assert (param'length <= par_logic_vect'length);
-            par_logic_vect := (others => '0');
-            par_logic_vect(param'length - 1 downto 0) := param;
-        end procedure;
-
-        procedure set_param_2(
-            param       : in  std_logic_vector
-        ) is
-        begin
-            assert (param'length <= par_logic_vect_2'length);
-            par_logic_vect_2 := (others => '0');
-            par_logic_vect_2(param'length - 1 downto 0) := param;
-        end procedure;
-
-        procedure set_param_3(
-            param       : in  std_logic_vector
-        ) is
-        begin
-            assert (param'length <= par_logic_vect_3'length);
-            par_logic_vect_3 := (others => '0');
-            par_logic_vect_3(param'length - 1 downto 0) := param;
-        end procedure;
-
-        procedure set_param(
-            param       : in  time
-        ) is
-        begin
-            par_time := param;
-        end procedure;
-
-        procedure set_param_2(
-            param       : in  time
-        ) is
-        begin
-            par_time_2 := param;
-        end procedure;
-
-        procedure set_param_3(
-            param       : in  time
-        ) is
-        begin
-            par_time_3 := param;
-        end procedure;
-
-        procedure set_param(
-            param       : in  integer
-        ) is
-        begin
-            par_int := param;
-        end procedure;
-
-        procedure set_param_2(
-            param       : in  integer
-        ) is
-        begin
-            par_int_2 := param;
-        end procedure;
-
-        procedure set_param_3(
-            param       : in  integer
-        ) is
-        begin
-            par_int_3 := param;
-        end procedure;
-
-        procedure set_param(
-            param       : in  boolean
-        ) is
-        begin
-            par_bool := param;
-        end procedure;
-
-        procedure set_param_2(
-            param       : in  boolean
-        ) is
-        begin
-            par_bool_2 := param;
-        end procedure;
-
-        procedure set_param_3(
-            param       : in  boolean
-        ) is
-        begin
-            par_bool_3 := param;
-        end procedure;
-
-        procedure set_param(
-            param : in  string
-        ) is
-        begin
-            assert (param'length <= par_string'length);
-            par_string := param;
-        end procedure;
-
-        procedure set_param_2(
-            param : in  string
-        ) is
-        begin
-            assert (param'length <= par_string_2'length);
-            par_string_2 := param;
-        end procedure;
-
-        procedure set_param_3(
-            param : in  string
-        ) is
-        begin
-            assert (param'length <= par_string_3'length);
-            par_string_3 := param;
-        end procedure;
-
-
-        impure function get_param return std_logic
-        is
-        begin
-            return par_logic;
-        end function;
-
-        impure function get_param_2 return std_logic
-        is
-        begin
-            return par_logic_2;
-        end function;
-
-        impure function get_param_3 return std_logic
-        is
-        begin
-            return par_logic_3;
-        end function;
-
-        impure function get_param return std_logic_vector
-        is
-        begin
-            return par_logic_vect;
-        end function;
-
-        impure function get_param_2 return std_logic_vector
-        is
-        begin
-            return par_logic_vect_2;
-        end function;
-
-        impure function get_param_3 return std_logic_vector
-        is
-        begin
-            return par_logic_vect_3;
-        end function;
-
-        impure function get_param return time
-        is
-        begin
-            return par_time;
-        end function;
-
-        impure function get_param_2 return time
-        is
-        begin
-            return par_time_2;
-        end function;
-
-        impure function get_param_3 return time
-        is
-        begin
-            return par_time_3;
-        end function;
-
-        impure function get_param return integer
-        is
-        begin
-            return par_int;
-        end function;
-
-        impure function get_param_2 return integer
-        is
-        begin
-            return par_int_2;
-        end function;
-
-        impure function get_param_3 return integer
-        is
-        begin
-            return par_int_3;
-        end function;
-
-        impure function get_param return string
-        is
-        begin
-            return par_string;
-        end function;
-
-        impure function get_param_2 return string
-        is
-        begin
-            return par_string_2;
-        end function;
-
-        impure function get_param_3 return string
-        is
-        begin
-            return par_string_3;
-        end function;
-
-        impure function get_param return boolean
-        is
-        begin
-            return par_bool;
-        end function;
-
-        impure function get_param_2 return boolean
-        is
-        begin
-            return par_bool_2;
-        end function;
-
-        impure function get_param_3 return boolean
-        is
-        begin
-            return par_bool_3;
-        end function;
 
     end protected body;
 

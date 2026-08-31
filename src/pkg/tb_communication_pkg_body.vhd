@@ -85,71 +85,72 @@ use ctu_can_agents.tb_types_pkg.all;
 
 package body tb_communication_pkg is
 
-    procedure notify(
-        signal channel      : inout t_com_channel
+    -- Wired-OR pulse: safe with many concurrent drivers (masters pushing
+    -- requests, agents posting replies) since each only briefly drives
+    -- '1' before releasing back to 'Z'. Waiters key off the edge (wait
+    -- on channel / wait ... until), never off the value, and re-check
+    -- com_mailbox's actual state on every wake - so a "merged" edge from
+    -- overlapping concurrent pulses only costs latency, never a missed
+    -- event. Mirrors Vunit COM's notify_net/"net" signal.
+    procedure pulse(
+        signal channel : inout t_com_channel
     ) is
     begin
-        if channel /= C_COM_CHANNEL_ACTIVE then
-            channel <= C_COM_CHANNEL_ACTIVE;
-            wait until channel = C_COM_CHANNEL_ACTIVE;
-            channel <= C_COM_CHANNEL_INACTIVE;
-            wait until channel = C_COM_CHANNEL_INACTIVE;
-        else
-            error_m(COM_PKG_TAG & "Attempting to notify over active channel!");
-        end if;
+        channel <= C_COM_CHANNEL_ACTIVE;
+        wait for 0 ns;
+        channel <= C_COM_CHANNEL_INACTIVE;
     end procedure;
 
 
     procedure send(
         signal   channel    : inout t_com_channel;
         constant dest       : in    integer;
-        constant msg_code   : in    integer
+        constant msg_code   : in    integer;
+        variable data       : inout t_com_data
     ) is
+        variable token      : natural;
+        variable reply_code : natural;
     begin
-        com_channel_data.set_dest_and_msg_code(dest, msg_code);
-        wait for 0 ns;
+        token := com_mailbox.push(dest, msg_code, data);
+        pulse(channel);
 
-        -- Send over the channel
-        notify(channel);
+        if not com_mailbox.reply_ready(token) then
+            wait on channel until com_mailbox.reply_ready(token);
+        end if;
+        com_mailbox.take_reply(token, reply_code, data);
 
-        -- Wait for response back. Agents should satisfy that only one agent
-        -- will process sent message (thanks to dest), and therefore we
-        -- are guaranteed to get ACK only from one agent back.
-        wait until channel = C_COM_CHANNEL_ACTIVE;
-
-        -- Check reply code
-        if com_channel_data.get_reply_code /= C_REPLY_CODE_OK then
+        if reply_code /= C_REPLY_CODE_OK then
             error_m(COM_PKG_TAG & "Reply code error from " & integer'image(dest));
         end if;
-
-        wait until channel = C_COM_CHANNEL_INACTIVE;
-
     end procedure;
 
 
     procedure receive_start(
         signal   channel     : inout  t_com_channel;
-        constant dest        : in     integer
+        constant dest        : in     integer;
+        variable token       : out    natural;
+        variable msg_code    : out    integer;
+        variable data        : out    t_com_data
     ) is
+        variable found : boolean;
     begin
-        -- Poll till there is request on the channel
-        while true loop
-            wait until channel = C_COM_CHANNEL_ACTIVE;
-            if (com_channel_data.get_dest = dest) then
-                exit;
-            end if;
+        loop
+            com_mailbox.try_pop(dest, found, token, msg_code, data);
+            exit when found;
+            wait on channel;
         end loop;
     end procedure;
 
 
     procedure receive_finish(
         signal   channel     : inout  t_com_channel;
-        constant reply_code  : in     natural
+        constant token       : in     natural;
+        constant reply_code  : in     natural;
+        variable data        : in     t_com_data
     ) is
     begin
-        com_channel_data.set_reply_code(reply_code);
-        wait for 0 ns;
-        notify(channel);
+        com_mailbox.post_reply(token, reply_code, data);
+        pulse(channel);
     end procedure;
 
 end package body;

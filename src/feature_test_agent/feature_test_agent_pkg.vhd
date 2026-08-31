@@ -327,11 +327,12 @@ package body feature_test_agent_pkg is
                  id                     : in    natural;
                  value                  : in    std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG &
              "Forcing bus level to: " & std_logic'image(value));
-        com_channel_data.set_param(value);
-        send(channel, id, FEATURE_TEST_AGNT_FORCE_BUS);
+        set_param(com_data, value);
+        send(channel, id, FEATURE_TEST_AGNT_FORCE_BUS, com_data);
         debug_m("Bus level forced");
     end procedure;
 
@@ -339,10 +340,11 @@ package body feature_test_agent_pkg is
         signal   channel            : inout t_com_channel;
                  id                 : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG &
              "Flipping bus level value");
-        send(channel, id, FEATURE_TEST_AGNT_FLIP_BUS);
+        send(channel, id, FEATURE_TEST_AGNT_FLIP_BUS, com_data);
         debug_m("Bus level flipped");
     end procedure;
 
@@ -350,9 +352,10 @@ package body feature_test_agent_pkg is
         signal   channel            : inout t_com_channel;
                  id                 : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG & "Releasing bus level");
-        send(channel, id, FEATURE_TEST_AGNT_RELEASE_BUS);
+        send(channel, id, FEATURE_TEST_AGNT_RELEASE_BUS, com_data);
         debug_m("Bus level released");
     end procedure;
 
@@ -362,10 +365,11 @@ package body feature_test_agent_pkg is
         constant value              : in    std_logic;
         constant msg                : in    string
     ) is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG & msg);
-        com_channel_data.set_param(value);
-        send(channel, id, FEATURE_TEST_AGNT_CHECK_BUS_LEVEL);
+        set_param(com_data, value);
+        send(channel, id, FEATURE_TEST_AGNT_CHECK_BUS_LEVEL, com_data);
         debug_m("Bus level checked");
     end procedure;
 
@@ -375,18 +379,19 @@ package body feature_test_agent_pkg is
         constant value              : in    std_logic;
         constant node               : in    t_feature_node
     ) is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG &
              "Forcing CAN RX of: " & t_feature_node'image(node) &
              " to: " & std_logic'image(value));
 
-        com_channel_data.set_param(value);
+        set_param(com_data, value);
         if (node = DUT_NODE) then
-            com_channel_data.set_param(0);
+            set_param(com_data, 0);
         else
-            com_channel_data.set_param(1);
+            set_param(com_data, 1);
         end if;
-        send(channel, id, FEATURE_TEST_AGNT_FORCE_CAN_RX);
+        send(channel, id, FEATURE_TEST_AGNT_FORCE_CAN_RX, com_data);
         debug_m("CAN RX forced");
     end procedure;
 
@@ -394,9 +399,10 @@ package body feature_test_agent_pkg is
         signal   channel            : inout t_com_channel;
                  id                 : in    natural
     ) is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG & "Releasing CAN RX");
-        send(channel, id, FEATURE_TEST_AGNT_RELEASE_CAN_RX);
+        send(channel, id, FEATURE_TEST_AGNT_RELEASE_CAN_RX, com_data);
         debug_m("CAN RX released");
     end procedure;
 
@@ -407,15 +413,16 @@ package body feature_test_agent_pkg is
         constant node               : in    t_feature_node;
         constant msg                : in    string
     ) is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG & msg);
         if (node = DUT_NODE) then
-            com_channel_data.set_param(0);
+            set_param(com_data, 0);
         else
-            com_channel_data.set_param(1);
+            set_param(com_data, 1);
         end if;
-        com_channel_data.set_param(value);
-        send(channel, id, FEATURE_TEST_AGNT_CHECK_CAN_TX);
+        set_param(com_data, value);
+        send(channel, id, FEATURE_TEST_AGNT_CHECK_CAN_TX, com_data);
         debug_m("CAN TX Checked");
     end procedure;
 
@@ -425,15 +432,16 @@ package body feature_test_agent_pkg is
         constant node               : in    t_feature_node;
         variable value              : out   std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         if (node = DUT_NODE) then
-            com_channel_data.set_param(0);
+            set_param(com_data, 0);
         else
-            com_channel_data.set_param(1);
+            set_param(com_data, 1);
         end if;
-        com_channel_data.set_param(value);
-        send(channel, id, FEATURE_TEST_AGNT_GET_CAN_TX);
-        value := com_channel_data.get_param;
+        set_param(com_data, value);
+        send(channel, id, FEATURE_TEST_AGNT_GET_CAN_TX, com_data);
+        value := get_param(com_data);
     end procedure;
 
     procedure feature_test_agent_get_can_rx(
@@ -442,14 +450,15 @@ package body feature_test_agent_pkg is
         constant node               : in    t_feature_node;
         variable value              : out   std_logic
     ) is
+        variable com_data : t_com_data;
     begin
         if (node = DUT_NODE) then
-            com_channel_data.set_param(0);
+            set_param(com_data, 0);
         else
-            com_channel_data.set_param(1);
+            set_param(com_data, 1);
         end if;
-        send(channel, id, FEATURE_TEST_AGNT_GET_CAN_RX);
-        value := com_channel_data.get_param;
+        send(channel, id, FEATURE_TEST_AGNT_GET_CAN_RX, com_data);
+        value := get_param(com_data);
     end procedure;
 
     procedure feature_test_agent_set_transceiver_delay(
@@ -458,15 +467,16 @@ package body feature_test_agent_pkg is
         constant tx_del             : in    time;
         constant node               : in    t_feature_node
     )is
+        variable com_data : t_com_data;
     begin
         info_m(FEATURE_TEST_AGENT_TAG & " Setting transceiver delay");
-        com_channel_data.set_param(tx_del);
+        set_param(com_data, tx_del);
         if (node = DUT_NODE) then
-            com_channel_data.set_param(0);
+            set_param(com_data, 0);
         else
-            com_channel_data.set_param(1);
+            set_param(com_data, 1);
         end if;
-        send(channel, id, FEATURE_TEST_AGNT_SET_TRV_DELAY);
+        send(channel, id, FEATURE_TEST_AGNT_SET_TRV_DELAY, com_data);
         debug_m(FEATURE_TEST_AGENT_TAG & " Transceiver delay set");
     end procedure;
 

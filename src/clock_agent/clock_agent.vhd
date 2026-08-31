@@ -150,14 +150,14 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token : natural;
         variable cmd : integer;
         variable reply_code : integer;
+        variable com_data : t_com_data;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
         reply_code := C_REPLY_CODE_OK;
-        cmd := com_channel_data.get_msg_code;
 
         case cmd is
         when CLOCK_AGNT_CMD_START =>
@@ -167,24 +167,24 @@ begin
             enabled <= false;
 
         when CLOCK_AGNT_CMD_PERIOD_SET =>
-            period <= com_channel_data.get_param;
+            period <= get_param(com_data);
             recalc_parameters(period, duty, t_low, t_high);
 
         when CLOCK_AGNT_CMD_PERIOD_GET =>
-            com_channel_data.set_param(period);
+            set_param(com_data, period);
 
         when CLOCK_AGNT_CMD_JITTER_SET =>
-            jitter <= com_channel_data.get_param;
+            jitter <= get_param(com_data);
 
         when CLOCK_AGNT_CMD_JITTER_GET =>
-            com_channel_data.set_param(jitter);
+            set_param(com_data, jitter);
 
         when CLOCK_AGNT_CMD_DUTY_SET =>
-            duty <= com_channel_data.get_param;
+            duty <= get_param(com_data);
             recalc_parameters(period, duty, t_low, t_high);
 
         when CLOCK_AGNT_CMD_DUTY_GET =>
-            com_channel_data.set_param(duty);
+            set_param(com_data, duty);
 
         when CLOCK_AGNT_CMD_WAIT_CYCLE =>
             wait until rising_edge(clock_in) for 1 us;
@@ -193,7 +193,7 @@ begin
             reply_code := C_REPLY_CODE_ERR;
         end case;
 
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
 

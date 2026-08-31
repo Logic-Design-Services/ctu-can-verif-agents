@@ -123,15 +123,15 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
+        variable token : natural;
         variable cmd : integer;
         variable reply_code : integer;
+        variable com_data : t_com_data;
         variable tmp : std_logic_vector(255 downto 0);
         variable tmp_int : integer;
     begin
-        receive_start(default_channel, G_COM_ID);
+        receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
-        -- Command is sent as message type
-        cmd := com_channel_data.get_msg_code;
         reply_code := C_REPLY_CODE_OK;
 
         case cmd is
@@ -142,14 +142,14 @@ begin
             running <= false;
 
         when TIMESTAMP_AGENT_CMD_STEP_SET =>
-            tmp_int := com_channel_data.get_param;
+            tmp_int := get_param(com_data);
             step <= to_unsigned(tmp_int, 64);
 
         when TIMESTAMP_AGENT_CMD_PRESCALER_SET =>
-            prescaler <= com_channel_data.get_param;
+            prescaler <= get_param(com_data);
 
         when TIMESTAMP_AGENT_CMD_TIMESTAMP_PRESET =>
-            tmp := com_channel_data.get_param;
+            tmp := get_param(com_data);
             timestamp_preset_val <= tmp(63 downto 0);
             wait for 0 ns;
             timestamp_preset <= '1';
@@ -158,14 +158,14 @@ begin
             wait for 0 ns;
 
         when TIMESTAMP_AGENT_CMD_GET_TIMESTAMP =>
-            com_channel_data.set_param(std_logic_vector(timestamp_i));
+            set_param(com_data, std_logic_vector(timestamp_i));
 
         when others =>
             info_m("Invalid message type: " & integer'image(cmd));
             reply_code := C_REPLY_CODE_ERR;
 
         end case;
-        receive_finish(default_channel, reply_code);
+        receive_finish(default_channel, token, reply_code, com_data);
     end process;
 
     ---------------------------------------------------------------------------
