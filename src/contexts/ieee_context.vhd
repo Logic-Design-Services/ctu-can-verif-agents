@@ -77,13 +77,13 @@
 
 context ieee_context is
 
-    Library ieee;
+    library ieee;
     use ieee.std_logic_1164.all;
     use ieee.numeric_std.ALL;
     use ieee.math_real.ALL;
     use ieee.std_logic_textio.all;
 
     -- Should be available in VHDL 2008 by default !!
-    use STD.textio.all;
+    use std.textio.all;
 
 end context;
