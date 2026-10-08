@@ -93,7 +93,7 @@ entity dio_agent is
         G_COM_ID                :       natural
     );
     port (
-        dio                     : inout std_logic
+        dio                     : inout std_logic := 'Z'
     );
 end entity;
 
