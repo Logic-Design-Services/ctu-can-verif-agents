@@ -84,7 +84,6 @@ use ctu_can_agents.test_controller_agent_pkg.all;
 use ctu_can_agents.timestamp_agent_pkg.all;
 use ctu_can_agents.mem_bus_master_agent_pkg.all;
 use ctu_can_agents.mem_bus_slave_agent_pkg.all;
-use ctu_can_agents.interrupt_agent_pkg.all;
 use ctu_can_agents.clock_agent_pkg.all;
 use ctu_can_agents.reset_agent_pkg.all;
 use ctu_can_agents.can_agent_pkg.all;
