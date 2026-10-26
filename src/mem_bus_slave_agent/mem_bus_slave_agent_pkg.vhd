@@ -104,7 +104,7 @@ package mem_bus_slave_agent_pkg is
         wait_request                : out std_logic;
         read_data_valid             : out std_logic;
         mbm_response                : out std_logic_vector(1 downto 0) := "00";
-        mbm_write_response_valid    : out std_logic := '1'
+        mbm_write_response_valid    : out std_logic := '0'
     );
     end component;
 
@@ -179,7 +179,7 @@ package mem_bus_slave_agent_pkg is
     --
     -- @param channel   Channel on which to send the request
     ---------------------------------------------------------------------------
-    procedure mem_bus_slave_agent_add_read_data_valid_cycles(
+    procedure mem_bus_slave_agent_add_data_valid_cycles(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     cycles      : in    integer
@@ -197,7 +197,7 @@ package mem_bus_slave_agent_pkg is
     constant MEM_BUS_SLAVE_AGNT_CMD_STOP                        : integer := 1;
     constant MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID                  : integer := 2;
     constant MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES     : integer := 3;
-    constant MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES  : integer := 4;
+    constant MEM_BUS_SLAVE_AGNT_CMD_ADD_DATA_VALID_CYCLES       : integer := 4;
 
     -- Tag for messages
     constant MEM_BUS_SLAVE_AGENT_TAG : string := "Memory Bus Slave Agent: ";
@@ -287,17 +287,17 @@ package body mem_bus_slave_agent_pkg is
         mem_bus_slave_agent_debug_m(id, "Wait Request cycles added");
     end procedure;
 
-    procedure mem_bus_slave_agent_add_read_data_valid_cycles(
+    procedure mem_bus_slave_agent_add_data_valid_cycles(
         signal      channel     : inout t_com_channel;
         constant    id          : in    natural;
                     cycles      : in    integer
     )is
         variable com_data : t_com_data;
     begin
-        mem_bus_slave_agent_info_m(id, "Setting " & integer'image(cycles) & " Read Data Valid cycles");
+        mem_bus_slave_agent_info_m(id, "Setting " & integer'image(cycles) & " Data Valid cycles");
         set_param(com_data, cycles);
-        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES, com_data);
-        mem_bus_slave_agent_debug_m(id, "Read Data Valid cycles added");
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_DATA_VALID_CYCLES, com_data);
+        mem_bus_slave_agent_debug_m(id, "Data Valid cycles added");
     end procedure;
 
 end package body;

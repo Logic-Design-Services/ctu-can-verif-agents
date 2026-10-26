@@ -104,7 +104,7 @@ entity mem_bus_slave_agent is
         wait_request                : out std_logic := '0';
         read_data_valid             : out std_logic := '0';
         mbm_response                : out std_logic_vector(1 downto 0) := "00";
-        mbm_write_response_valid    : out std_logic := '1'
+        mbm_write_response_valid    : out std_logic := '0'
     );
 end entity;
 
@@ -113,20 +113,20 @@ architecture tb of mem_bus_slave_agent is
     signal agent_enabled            : boolean := false;
     signal mem_id                   : integer := 0;
 
-    type t_transfer_fifo is
+    type t_wait_cycles_fifo is
         array (0 to G_WAIT_CYCLES_FIFO_DEPTH - 1) of integer;
 
-    signal wrq_fifo             : t_transfer_fifo;
+    signal wrq_fifo             : t_wait_cycles_fifo;
     signal wrq_wp               : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
     signal wrq_rp               : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
 
-    signal rdw_fifo             : t_transfer_fifo;
-    signal rdw_wp               : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
-    signal rdw_rp               : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
+    signal dw_fifo              : t_wait_cycles_fifo;
+    signal dw_wp                : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
+    signal dw_rp                : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
 
     procedure put_to_fifo(
                cycles          : in    integer;
-        signal fifo            : out   t_transfer_fifo;
+        signal fifo            : out   t_wait_cycles_fifo;
         signal wp              : inout integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1;
         signal rp              : in    integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1
     ) is
@@ -143,7 +143,7 @@ architecture tb of mem_bus_slave_agent is
 
     procedure pop_from_fifo(
                cycles          : out   integer;
-        signal fifo            : in    t_transfer_fifo;
+        signal fifo            : in    t_wait_cycles_fifo;
         signal wp              : in    integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1;
         signal rp              : inout integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1
     ) is
@@ -158,6 +158,14 @@ architecture tb of mem_bus_slave_agent is
         wait for 0 ns;
     end procedure;
 
+    function fifo_empty(
+        signal wp              : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1;
+        signal rp              : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1
+    ) return boolean is
+    begin
+        return (wp = rp);
+    end function;
+
 begin
 
     --------------------------------------------------------------------------
@@ -166,6 +174,8 @@ begin
     p_slave_response : process
         variable tmp_rdata      : std_logic_vector(31 downto 0);
         variable initialized    : boolean;
+        variable wait_cycles    : integer;
+        variable resp_cycles    : integer;
     begin
         if (not agent_enabled) then
             wait until agent_enabled;
@@ -176,10 +186,20 @@ begin
         wait_request <= '0';
         read_data_valid <= '0';
         read_data <= (others => 'X');
+        mbm_write_response_valid <= '0';
 
-        -- TODO: Implement controlled and randomized stall insertion to the
-        --       on wait_request and readdatavalid !
         if (scs = '1') then
+
+            if (not fifo_empty(wrq_wp, wrq_rp)) then
+                pop_from_fifo(wait_cycles, wrq_fifo, wrq_wp, wrq_rp);
+                wait_request <= '1';
+                for i in 1 to wait_cycles loop
+                    wait until rising_edge(clk);
+                    wait for 1 ps;
+                end loop;
+                wait_request <= '0';
+            end if;
+
             if (swr = '1') then
                 wait for 1 ps;
                 mem_model_put_data(
@@ -188,6 +208,19 @@ begin
                     to_integer(unsigned(adress)),
                     write_data
                 );
+
+                if (not fifo_empty(dw_wp, dw_rp)) then
+                    pop_from_fifo(resp_cycles, dw_fifo, dw_wp, dw_rp);
+                else
+                    resp_cycles := 1;
+                end if;
+
+                for i in 1 to resp_cycles loop
+                    wait until rising_edge(clk);
+                    wait for 1 ps;
+                end loop;
+                mbm_write_response_valid <= '1';
+
             elsif (srd = '1') then
                 mem_model_get_data(
                     default_channel,
@@ -203,8 +236,17 @@ begin
                         "Read undefined data (0x" & to_hstring(tmp_rdata) & ") from address: 0x" &
                         to_hstring(adress));
                 end if;
-                wait until rising_edge(clk);
-                wait for 1 ps;
+
+                if (not fifo_empty(dw_wp, dw_rp)) then
+                    pop_from_fifo(resp_cycles, dw_fifo, dw_wp, dw_rp);
+                else
+                    resp_cycles := 1;
+                end if;
+
+                for i in 1 to resp_cycles loop
+                    wait until rising_edge(clk);
+                    wait for 1 ps;
+                end loop;
                 read_data <= tmp_rdata;
                 read_data_valid <= '1';
             end if;
@@ -240,8 +282,8 @@ begin
         when MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES =>
             put_to_fifo(get_param(com_data), wrq_fifo, wrq_wp, wrq_rp);
 
-        when MEM_BUS_SLAVE_AGNT_CMD_ADD_READ_DATA_VALID_CYCLES =>
-            put_to_fifo(get_param(com_data), rdw_fifo, rdw_wp, rdw_rp);
+        when MEM_BUS_SLAVE_AGNT_CMD_ADD_DATA_VALID_CYCLES =>
+            put_to_fifo(get_param(com_data), dw_fifo, dw_wp, dw_rp);
 
         when others =>
             info_m("Invalid message type: " & integer'image(cmd));
