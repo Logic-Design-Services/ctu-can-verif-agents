@@ -185,6 +185,19 @@ package mem_bus_slave_agent_pkg is
                     cycles      : in    integer
     );
 
+    ---------------------------------------------------------------------------
+    -- Adds a response ("mbm_response") value to be returned on the
+    -- next completed transfer (read or write). If none is queued, the agent
+    -- returns C_RESP_OK.
+    --
+    -- @param channel   Channel on which to send the request
+    ---------------------------------------------------------------------------
+    procedure mem_bus_slave_agent_add_response(
+        signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
+                    response    : in    std_logic_vector(1 downto 0)
+    );
+
 
     ---------------------------------------------------------------------------
     ---------------------------------------------------------------------------
@@ -198,9 +211,13 @@ package mem_bus_slave_agent_pkg is
     constant MEM_BUS_SLAVE_AGNT_CMD_SET_MEM_ID                  : integer := 2;
     constant MEM_BUS_SLAVE_AGNT_CMD_ADD_WAIT_REQUEST_CYCLES     : integer := 3;
     constant MEM_BUS_SLAVE_AGNT_CMD_ADD_DATA_VALID_CYCLES       : integer := 4;
+    constant MEM_BUS_SLAVE_AGNT_CMD_ADD_RESPONSE                : integer := 5;
 
     -- Tag for messages
     constant MEM_BUS_SLAVE_AGENT_TAG : string := "Memory Bus Slave Agent: ";
+
+    constant C_RESP_OK  : std_logic_vector(1 downto 0) := "00";
+    constant C_RESP_ERR : std_logic_vector(1 downto 0) := "10";
 
 end package;
 
@@ -298,6 +315,19 @@ package body mem_bus_slave_agent_pkg is
         set_param(com_data, cycles);
         send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_DATA_VALID_CYCLES, com_data);
         mem_bus_slave_agent_debug_m(id, "Data Valid cycles added");
+    end procedure;
+
+    procedure mem_bus_slave_agent_add_response(
+        signal      channel     : inout t_com_channel;
+        constant    id          : in    natural;
+                    response    : in    std_logic_vector(1 downto 0)
+    ) is
+        variable com_data : t_com_data;
+    begin
+        mem_bus_slave_agent_info_m(id, "Setting response: " & to_hstring(response));
+        set_param(com_data, response);
+        send(channel, id, MEM_BUS_SLAVE_AGNT_CMD_ADD_RESPONSE, com_data);
+        mem_bus_slave_agent_debug_m(id, "Response added");
     end procedure;
 
 end package body;

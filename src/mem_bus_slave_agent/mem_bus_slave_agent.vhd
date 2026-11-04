@@ -124,6 +124,13 @@ architecture tb of mem_bus_slave_agent is
     signal dw_wp                : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
     signal dw_rp                : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
 
+    type t_response_fifo is
+        array (0 to G_WAIT_CYCLES_FIFO_DEPTH - 1) of std_logic_vector(1 downto 0);
+
+    signal resp_fifo            : t_response_fifo;
+    signal resp_wp              : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
+    signal resp_rp              : integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1 := 0;
+
     procedure put_to_fifo(
                cycles          : in    integer;
         signal fifo            : out   t_wait_cycles_fifo;
@@ -166,6 +173,40 @@ architecture tb of mem_bus_slave_agent is
         return (wp = rp);
     end function;
 
+    procedure put_to_fifo(
+               response        : in    std_logic_vector(1 downto 0);
+        signal fifo            : out   t_response_fifo;
+        signal wp              : inout integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1;
+        signal rp              : in    integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1
+    ) is
+    begin
+        if (wp mod G_WAIT_CYCLES_FIFO_DEPTH = (rp - 1) mod G_WAIT_CYCLES_FIFO_DEPTH) then
+            report MEM_BUS_SLAVE_AGENT_TAG & "(" & natural'image(G_COM_ID) & "): " &
+                   "FIFO overflow !" severity failure;
+        end if;
+
+        fifo(wp) <= response;
+        wp <= (wp + 1) mod G_WAIT_CYCLES_FIFO_DEPTH;
+        wait for 0 ns;
+    end procedure;
+
+    procedure pop_from_fifo(
+               response        : out   std_logic_vector(1 downto 0);
+        signal fifo            : in    t_response_fifo;
+        signal wp              : in    integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1;
+        signal rp              : inout integer range 0 to G_WAIT_CYCLES_FIFO_DEPTH - 1
+    ) is
+    begin
+        if (wp = rp) then
+            report MEM_BUS_SLAVE_AGENT_TAG & "(" & natural'image(G_COM_ID) & "): " &
+                   "FIFO underflow !" severity failure;
+        end if;
+
+        response := fifo(rp);
+        rp <= (rp + 1) mod G_WAIT_CYCLES_FIFO_DEPTH;
+        wait for 0 ns;
+    end procedure;
+
 begin
 
     --------------------------------------------------------------------------
@@ -176,6 +217,7 @@ begin
         variable initialized    : boolean;
         variable wait_cycles    : integer;
         variable resp_cycles    : integer;
+        variable resp_value     : std_logic_vector(1 downto 0);
     begin
         if (not agent_enabled) then
             wait until agent_enabled;
@@ -187,6 +229,7 @@ begin
         read_data_valid <= '0';
         read_data <= (others => 'X');
         mbm_write_response_valid <= '0';
+        mbm_response <= C_RESP_OK;
 
         if (scs = '1') then
 
@@ -219,6 +262,14 @@ begin
                     wait until rising_edge(clk);
                     wait for 1 ps;
                 end loop;
+
+                if (not fifo_empty(resp_wp, resp_rp)) then
+                    pop_from_fifo(resp_value, resp_fifo, resp_wp, resp_rp);
+                else
+                    resp_value := C_RESP_OK;
+                end if;
+
+                mbm_response <= resp_value;
                 mbm_write_response_valid <= '1';
 
             elsif (srd = '1') then
@@ -247,6 +298,14 @@ begin
                     wait until rising_edge(clk);
                     wait for 1 ps;
                 end loop;
+
+                if (not fifo_empty(resp_wp, resp_rp)) then
+                    pop_from_fifo(resp_value, resp_fifo, resp_wp, resp_rp);
+                else
+                    resp_value := C_RESP_OK;
+                end if;
+
+                mbm_response <= resp_value;
                 read_data <= tmp_rdata;
                 read_data_valid <= '1';
             end if;
@@ -259,11 +318,12 @@ begin
     -- Comunication receiver process
     ---------------------------------------------------------------------------
     p_receiver : process
-        variable token           : natural;
+        variable token          : natural;
         variable cmd            : integer;
         variable reply_code     : integer;
         variable com_data       : t_com_data;
         variable transfer       : t_mem_bus_transfer;
+        variable aux            : std_logic_vector(255 downto 0);
     begin
         receive_start(default_channel, G_COM_ID, token, cmd, com_data);
 
@@ -284,6 +344,10 @@ begin
 
         when MEM_BUS_SLAVE_AGNT_CMD_ADD_DATA_VALID_CYCLES =>
             put_to_fifo(get_param(com_data), dw_fifo, dw_wp, dw_rp);
+
+        when MEM_BUS_SLAVE_AGNT_CMD_ADD_RESPONSE =>
+            aux := get_param(com_data);
+            put_to_fifo(aux(1 downto 0), resp_fifo, resp_wp, resp_rp);
 
         when others =>
             info_m("Invalid message type: " & integer'image(cmd));
