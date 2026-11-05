@@ -130,18 +130,22 @@ package body tb_report_pkg is
     end procedure;
 
     procedure warning_m(
-                 msg         : in string
+                 msg         : in string;
+                 line_num    : in natural := 0;
+                 file_name   : in string  := ""
     ) is
     begin
-        warning(msg);
+        warning(msg, line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure error_m(
-                 msg         : in string
+                 msg         : in string;
+                 line_num    : in natural := 0;
+                 file_name   : in string  := ""
     ) is
     begin
         ctu_vip_test_result.set(false);
-        error(msg);
+        error(msg, line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure debug_m(
@@ -153,57 +157,70 @@ package body tb_report_pkg is
 
     procedure check_m(
                  cond        : in boolean;
-                 msg         : in string
+                 msg         : in string;
+                 line_num    : in natural := 0;
+                 file_name   : in string  := ""
     ) is
     begin
         if (not cond) then
             ctu_vip_test_result.set(false);
         end if;
-        check(cond, msg);
+        check(cond, msg, line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure check_val_m(
         observed    : in integer;
         expected    : in integer;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         check_m(expected = observed, msg &
                 LF & "Observed: " & integer'image(observed) &
-                LF & "Expected: " & integer'image(expected));
+                LF & "Expected: " & integer'image(expected),
+                line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure check_val_m(
         observed    : in std_logic;
         expected    : in std_logic;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         check_m(expected = observed, msg &
                 LF & "Observed: " & to_string(observed) &
-                LF & "Expected: " & to_string(expected));
+                LF & "Expected: " & to_string(expected),
+                line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure check_val_m(
         observed    : in std_logic_vector;
         expected    : in std_logic_vector;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         check_m(expected = observed, msg &
                 LF & "Observed: 0x" & to_hstring(observed) &
-                LF & "Expected: 0x" & to_hstring(expected));
+                LF & "Expected: 0x" & to_hstring(expected),
+                line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure check_false_m(
                  cond        : in boolean;
-                 msg         : in string
+                 msg         : in string;
+                 line_num    : in natural := 0;
+                 file_name   : in string  := ""
     ) is
     begin
         if (cond) then
             ctu_vip_test_result.set(false);
         end if;
-        check_false(cond, msg);
+        check_false(cond, msg, line_num => line_num, file_name => file_name);
     end procedure;
 
 end package body;

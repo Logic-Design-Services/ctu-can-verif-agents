@@ -90,6 +90,18 @@ package body tb_report_pkg is
         verbosity <= value;
     end procedure;
 
+    function add_location(
+        msg : string;
+        line_num : natural;
+        file_name : string
+    ) return string is
+    begin
+        if (file_name = "") then
+            return msg;
+        end if;
+        return msg & LF & "At " & file_name & ":" & integer'image(line_num);
+    end function;
+
     procedure info_m(
         msg         : in string
     ) is
@@ -102,19 +114,23 @@ package body tb_report_pkg is
     end procedure;
 
     procedure warning_m(
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         if (global_verbosity = verbosity_debug or
             global_verbosity = verbosity_info or
             global_verbosity = verbosity_warning)
         then
-            report "WARNING: " & msg severity warning;
+            report "WARNING: " & add_location(msg, line_num, file_name) severity warning;
         end if;
     end procedure;
 
     procedure error_m(
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         if ((global_verbosity = verbosity_debug or
@@ -123,7 +139,7 @@ package body tb_report_pkg is
             global_verbosity = verbosity_error))
         then
             ctu_vip_test_result.set(false);
-            report "ERROR: " & msg severity error;
+            report "ERROR: " & add_location(msg, line_num, file_name) severity error;
         end if;
     end procedure;
 
@@ -138,66 +154,79 @@ package body tb_report_pkg is
 
     procedure check_m(
         cond        : in boolean;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         if (cond) then
             if (global_verbosity = verbosity_debug or
                 global_verbosity = verbosity_info) then
-                report "PASS: " & msg;
+                report "PASS: " & add_location(msg, line_num, file_name);
             end if;
         else
             ctu_vip_test_result.set(false);
-            report "FAIL: " & msg severity error;
+            report "FAIL: " & add_location(msg, line_num, file_name) severity error;
         end if;
     end procedure;
 
     procedure check_val_m(
         observed    : in integer;
         expected    : in integer;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         check_m(expected = observed, msg &
                 LF & "Observed: " & integer'image(observed) &
-                LF & "Expected: " & integer'image(expected));
+                LF & "Expected: " & integer'image(expected),
+                line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure check_val_m(
         observed    : in std_logic;
         expected    : in std_logic;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         check_m(expected = observed, msg &
                 LF & "Observed: " & to_string(observed) &
-                LF & "Expected: " & to_string(expected));
+                LF & "Expected: " & to_string(expected),
+                line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure check_val_m(
         observed    : in std_logic_vector;
         expected    : in std_logic_vector;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         check_m(expected = observed, msg &
                 LF & "Observed: 0x" & to_hstring(observed) &
-                LF & "Expected: 0x" & to_hstring(expected));
+                LF & "Expected: 0x" & to_hstring(expected),
+                line_num => line_num, file_name => file_name);
     end procedure;
 
     procedure check_false_m(
         cond        : in boolean;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     ) is
     begin
         if (not cond) then
             if (global_verbosity = verbosity_debug or
                 global_verbosity = verbosity_info) then
-                report "PASS: " & msg;
+                report "PASS: " & add_location(msg, line_num, file_name);
             end if;
         else
             ctu_vip_test_result.set(false);
-            report "FAIL: " & msg severity error;
+            report "FAIL: " & add_location(msg, line_num, file_name) severity error;
         end if;
     end procedure;
 

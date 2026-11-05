@@ -103,39 +103,53 @@ package tb_report_pkg is
     );
 
     procedure warning_m(
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     );
 
     procedure error_m(
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     );
 
     procedure check_m(
         cond        : in boolean;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     );
 
     procedure check_val_m(
         observed    : in integer;
         expected    : in integer;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     );
 
     procedure check_val_m(
         observed    : in std_logic;
         expected    : in std_logic;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     );
 
     procedure check_val_m(
         observed    : in std_logic_vector;
         expected    : in std_logic_vector;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     );
 
     procedure check_false_m(
         cond        : in boolean;
-        msg         : in string
+        msg         : in string;
+        line_num    : in natural := 0;
+        file_name   : in string  := ""
     );
 
 end package;
