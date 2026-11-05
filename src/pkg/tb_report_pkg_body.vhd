@@ -152,6 +152,39 @@ package body tb_report_pkg is
         end if;
     end procedure;
 
+    procedure check_val_m(
+        observed    : in integer;
+        expected    : in integer;
+        msg         : in string
+    ) is
+    begin
+        check_m(expected = observed, msg &
+                LF & "Observed: " & integer'image(observed) &
+                LF & "Expected: " & integer'image(expected));
+    end procedure;
+
+    procedure check_val_m(
+        observed    : in std_logic;
+        expected    : in std_logic;
+        msg         : in string
+    ) is
+    begin
+        check_m(expected = observed, msg &
+                LF & "Observed: " & to_string(observed) &
+                LF & "Expected: " & to_string(expected));
+    end procedure;
+
+    procedure check_val_m(
+        observed    : in std_logic_vector;
+        expected    : in std_logic_vector;
+        msg         : in string
+    ) is
+    begin
+        check_m(expected = observed, msg &
+                LF & "Observed: 0x" & to_hstring(observed) &
+                LF & "Expected: 0x" & to_hstring(expected));
+    end procedure;
+
     procedure check_false_m(
         cond        : in boolean;
         msg         : in string

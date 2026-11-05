@@ -128,9 +128,7 @@ begin
 
         when DIO_AGENT_CMD_CHECK_VALUE =>
             data := get_param(com_data);
-            check_m(dio = data, DIO_AGENT_TAG & "(" & integer'image(G_COM_ID) & "): " &
-                          "Value mismatch. " & "Expected: " & std_logic'image(data) &
-                                              " Observed: " & std_logic'image(dio));
+            check_val_m(dio, data, DIO_AGENT_TAG & "(" & integer'image(G_COM_ID) & "): Value");
 
         when DIO_AGENT_CMD_WAIT_UNTIL_VALUE =>
             timeout := get_param(com_data);

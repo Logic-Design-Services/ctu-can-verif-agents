@@ -122,6 +122,24 @@ package tb_report_pkg is
                  msg         : in string
     );
 
+    procedure check_val_m(
+        observed    : in integer;
+        expected    : in integer;
+        msg         : in string
+    );
+
+    procedure check_val_m(
+        observed    : in std_logic;
+        expected    : in std_logic;
+        msg         : in string
+    );
+
+    procedure check_val_m(
+        observed    : in std_logic_vector;
+        expected    : in std_logic_vector;
+        msg         : in string
+    );
+
     procedure check_false_m(
                  cond        : in boolean;
                  msg         : in string

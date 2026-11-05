@@ -436,16 +436,15 @@ begin
 
         when FEATURE_TEST_AGNT_CHECK_BUS_LEVEL =>
             tmp_logic := get_param(com_data);
-            check_m(tmp_logic = bus_level, FEATURE_TEST_AGENT_TAG &
-                    "Bus level value shoul be:" & std_logic'image(tmp_logic));
+            check_val_m(bus_level, tmp_logic, FEATURE_TEST_AGENT_TAG & "Bus level value");
 
         when FEATURE_TEST_AGNT_CHECK_CAN_TX =>
             tmp := get_param(com_data);
             tmp_logic := get_param(com_data);
             if (tmp = 0) then
-                check_m(tmp_logic = dut_can_tx, "DUT CAN TX");
+                check_val_m(dut_can_tx, tmp_logic, "DUT CAN TX");
             else
-                check_m(tmp_logic = test_node_can_tx, "Test node CAN TX");
+                check_val_m(test_node_can_tx, tmp_logic, "Test node CAN TX");
             end if;
 
         when FEATURE_TEST_AGNT_GET_CAN_TX =>

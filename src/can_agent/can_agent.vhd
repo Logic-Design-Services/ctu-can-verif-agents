@@ -476,7 +476,7 @@ begin
             set_param(com_data, t_can_monitor_trigger'pos(monitor_trigger));
 
         when CAN_AGNT_CMD_MONITOR_CHECK_RESULT =>
-            check_m(mon_mismatch_ctr = 0, CAN_AGENT_TAG & "Mismatches in monitor!");
+            check_val_m(mon_mismatch_ctr, 0, CAN_AGENT_TAG & "Mismatches in monitor");
 
         when CAN_AGNT_CMD_MONITOR_SET_INPUT_DELAY =>
             mon_input_delay <= get_param(com_data);
